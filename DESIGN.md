@@ -1,5 +1,105 @@
 # Unified Stateless LLM Harness State Format
 
+## Draft 0.2 Direction: Actors, Events, Scopes
+
+The active implementation now uses a richer semantic model than the original flat `messages` draft below.
+
+The newer model came from the format discussion around Responses API vs Chat API:
+
+* provider-managed continuation such as `previous_response_id` is not canonical state
+* the harness should own the full editable state, especially for ZDR, branching, redaction, and deterministic budgeting
+* OpenAI Responses, Anthropic Messages, Gemini contents, and Bedrock Converse are compiled projections
+* tool calls are structured actor-to-actor communication, not a special transcript role
+* branch exploration, agent delegation, compaction, and `context.pop` are tree-shaped
+
+Canonical v0.2 shape:
+
+```json
+{
+  "version": "strap.state.v0.2",
+  "actors": {
+    "user": {
+      "kind": "human",
+      "self": {"public": "The user driving the work."},
+      "peers": {
+        "assistant": {"contract": "Collaborate directly."}
+      }
+    },
+    "assistant": {
+      "kind": "agent",
+      "self": {
+        "public": "A pragmatic software agent.",
+        "private": "Compile provider calls from canonical state."
+      },
+      "peers": {
+        "user": {"contract": "Solve the task end-to-end when feasible."},
+        "harness": {"contract": "Use tool calls as structured actor communication."}
+      }
+    }
+  },
+  "root": {
+    "type": "scope",
+    "label": "root",
+    "status": "open",
+    "participants": ["user", "assistant", "harness"],
+    "children": [
+      {
+        "type": "event",
+        "from": "user",
+        "to": ["assistant"],
+        "kind": "message",
+        "text": "Summarize this repo."
+      }
+    ]
+  }
+}
+```
+
+Event nodes represent normal communication:
+
+```json
+{
+  "type": "event",
+  "from": "assistant",
+  "to": ["harness"],
+  "kind": "tool_request",
+  "text": "I need to inspect files.",
+  "calls": [
+    {"tool": "glob_files", "input": {"pattern": "**/*.js"}}
+  ]
+}
+```
+
+Scope nodes represent branchable or compactable regions:
+
+```json
+{
+  "type": "scope",
+  "label": "explore parser rewrite",
+  "status": "collapsed",
+  "participants": ["assistant", "harness"],
+  "summary": "Parser rewrite is feasible but needs a tokenizer cleanup first.",
+  "children": [],
+  "hidden": {
+    "children": ["full elided subtree lives here"]
+  }
+}
+```
+
+Actors carry prompt-like state as self and peer relation data:
+
+* `self.public`: what this actor publicly is
+* `self.private`: private operating state for this actor
+* `peers[other].public`: known public facts about the peer
+* `peers[other].inferred`: remembered/inferred peer context
+* `peers[other].contract`: interaction contract on this actor-to-peer edge
+
+The older flat `system.current` plus `messages` design remains useful as a lowest-common-denominator projection and import format, but v0.2 is the source shape for fork/fold/context-pop semantics.
+
+---
+
+# Draft 0.1 Flat Format
+
 Version: draft 0.1
 
 ## Goal
@@ -701,4 +801,3 @@ The core idea is:
 **canonical state is semantic and human-operable; provider payloads are disposable projections.**
 
 If you want, I can turn this into a stricter JSON Schema next.
-

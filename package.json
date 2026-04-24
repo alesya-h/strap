@@ -1,0 +1,22 @@
+{
+  "name": "strap",
+  "version": "0.1.0",
+  "description": "Unix-ish modular agentic harness primitives",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "strap-agent": "./bin/strap-agent.js",
+    "strap-llm": "./bin/strap-llm.js",
+    "strap-mcp": "./bin/strap-mcp.js",
+    "strap-run-calls": "./bin/strap-run-calls.js",
+    "strap-state": "./bin/strap-state.js"
+  },
+  "scripts": {
+    "check": "node --check bin/strap-agent.js && node --check bin/strap-llm.js && node --check bin/strap-mcp.js && node --check bin/strap-run-calls.js && node --check bin/strap-state.js && node --check src/*.js && node --check mcp-servers/*.js",
+    "smoke": "node bin/strap-state.js init /tmp/strap-smoke.json && node bin/strap-state.js add-user /tmp/strap-smoke.json 'hello' && node bin/strap-llm.js compile-openai /tmp/strap-smoke.json --model test-model > /tmp/strap-openai.json && node bin/strap-agent.js fork /tmp/strap-smoke.json /tmp/strap-child.json --prompt 'inspect docs' && node bin/strap-agent.js fold /tmp/strap-smoke.json --child /tmp/strap-child.json --summary 'child result' > /tmp/strap-folded.json",
+    "test": "npm run check && npm run smoke"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
