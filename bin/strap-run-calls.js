@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 import { toolMap } from "../src/registry.js";
-import { flattenVisible, normalizeState, readState, writeState } from "../src/state.js";
+import { flattenVisible, normalizeState } from "../src/state.js";
+import { readJsonInput, takeOption, writeJson } from "../src/cli-io.js";
 
-const [statePath, group = "all"] = process.argv.slice(2);
-if (!statePath) {
-  console.error("Usage: strap-run-calls <state.json> [tool-group]");
-  process.exit(2);
-}
+const args = process.argv.slice(2);
+const group = takeOption(args, "--tools", args[0] || "all");
 
-const state = normalizeState(await readState(statePath));
+const state = normalizeState(await readJsonInput(takeOption(args, "--file", "-")));
 const tools = toolMap(group);
 let executed = 0;
 
@@ -33,5 +31,5 @@ for (const event of flattenVisible(state.root)) {
   }
 }
 
-await writeState(statePath, state);
 console.error(`executed ${executed} call(s)`);
+writeJson(state);

@@ -12,10 +12,37 @@
 
 ```bash
 npm test
-node bin/strap-state.js init state.json
-node bin/strap-state.js add-user state.json "Inspect this repo"
-node bin/strap-llm.js compile-openai state.json --tools all
+node bin/strap-state.js init \
+| node bin/strap-state.js add-user "Inspect this repo" \
+| tee state.json \
+| node bin/strap-llm.js compile-openai --tools all
 node bin/strap-mcp.js fs
+```
+
+The main harness CLIs are immutable JSON filters: state comes in on stdin and the next state goes out on stdout. Persisting is explicit with `tee`, shell redirection, or Nushell `save`.
+
+```bash
+node bin/strap-state.js init \
+| node bin/strap-state.js add-user "List files in the current directory" \
+| node bin/strap-llm.js complete-openai --tools all \
+| node bin/strap-run-calls.js --tools all \
+| tee session.json \
+| node bin/strap-state.js display-last-message
+```
+
+## Nushell
+
+`nu/strap.nu` wraps the Node filters as native structured pipeline commands:
+
+```nu
+use nu/strap.nu *
+
+init
+| add-user "List files in the current directory"
+| complete-openai --tools all
+| process-tools --tools all
+| tee { save -f session.json }
+| display-last-message
 ```
 
 ## MCP Servers

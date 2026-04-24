@@ -1,39 +1,31 @@
 #!/usr/bin/env node
-import { appendEvent, normalizeState, readState, writeState } from "../src/state.js";
+import { appendEvent, normalizeState } from "../src/state.js";
+import { readJsonInput, takeOption, writeJson } from "../src/cli-io.js";
+import fs from "node:fs/promises";
 
-const [command, parentPath, childPathOrFlag, ...rest] = process.argv.slice(2);
-
-function option(name, fallback = "") {
-  const index = rest.indexOf(name);
-  return index === -1 ? fallback : rest[index + 1] || fallback;
-}
+const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap-agent fork <parent.json> <child.json> --prompt <text> | strap-agent fold <parent.json> --child <child.json> --summary <text>");
+  console.error("Usage: strap-agent fork --prompt <text> < parent.json > child.json | strap-agent fold --child child.json --summary <text> < parent.json > parent-next.json");
   process.exit(2);
 }
 
-if (!command || !parentPath) usage();
+if (!command) usage();
 
 if (command === "fork") {
-  const childPath = childPathOrFlag;
-  const prompt = option("--prompt", rest.join(" "));
-  if (!childPath) usage();
-  const child = normalizeState(await readState(parentPath));
-  child.parent = { state_path: parentPath, fork_prompt: prompt, created_at: new Date().toISOString() };
+  const prompt = takeOption(args, "--prompt", args.join(" "));
+  const child = normalizeState(await readJsonInput(takeOption(args, "--file", "-")));
+  child.parent = { fork_prompt: prompt, created_at: new Date().toISOString() };
   appendEvent(child, { from: "harness", to: ["assistant"], kind: "fork", text: prompt });
-  await writeState(childPath, child);
+  writeJson(child);
 } else if (command === "fold") {
-  const childIndex = [childPathOrFlag, ...rest].indexOf("--child");
-  const all = [childPathOrFlag, ...rest];
-  const childPath = childIndex === -1 ? "" : all[childIndex + 1];
-  const summaryIndex = all.indexOf("--summary");
-  const summary = summaryIndex === -1 ? "" : all[summaryIndex + 1];
+  const childPath = takeOption(args, "--child", "");
+  const summary = takeOption(args, "--summary", "");
   if (!childPath || !summary) usage();
-  const parent = normalizeState(await readState(parentPath));
-  const child = normalizeState(await readState(childPath));
+  const parent = normalizeState(await readJsonInput(takeOption(args, "--file", "-")));
+  const child = normalizeState(JSON.parse(await fs.readFile(childPath, "utf8")));
   appendEvent(parent, { from: "harness", to: ["assistant", "user"], kind: "agent_fold", text: summary, hidden: { child_state: child } });
-  await writeState(parentPath, parent);
+  writeJson(parent);
 } else {
   usage();
 }

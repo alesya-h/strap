@@ -156,3 +156,43 @@ export function compileOpenAIResponses(state, { model = "gpt-5.1", actor = "assi
     })),
   };
 }
+
+export function extractOpenAIResponseEvent(response) {
+  const output = response.output || [];
+  const text = response.output_text || output
+    .flatMap((item) => item.content || [])
+    .filter((part) => part.type === "output_text" || part.type === "text")
+    .map((part) => part.text || "")
+    .join("\n");
+  const calls = output
+    .filter((item) => item.type === "function_call")
+    .map((item) => ({
+      id: item.call_id || item.id,
+      tool: item.name,
+      input: parseJsonObject(item.arguments),
+      provider: { type: item.type, id: item.id, call_id: item.call_id },
+    }));
+  return {
+    from: "assistant",
+    to: calls.length ? ["harness"] : ["user"],
+    kind: calls.length ? "tool_request" : "message",
+    text,
+    calls: calls.length ? calls : undefined,
+    provider: {
+      name: "openai.responses",
+      id: response.id,
+      model: response.model,
+      usage: response.usage,
+    },
+  };
+}
+
+function parseJsonObject(value) {
+  if (!value) return {};
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return { raw: String(value) };
+  }
+}

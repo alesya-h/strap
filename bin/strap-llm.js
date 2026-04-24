@@ -1,31 +1,28 @@
 #!/usr/bin/env node
-import { compileChatMessages, compileOpenAIResponses, normalizeState, readState } from "../src/state.js";
+import { appendEvent, compileChatMessages, compileOpenAIResponses, extractOpenAIResponseEvent, normalizeState } from "../src/state.js";
 import { getTools } from "../src/registry.js";
+import { readJsonInput, takeOption, writeJson } from "../src/cli-io.js";
+import fs from "node:fs/promises";
 
-const [command, statePath, ...args] = process.argv.slice(2);
-
-function getArg(name, fallback = undefined) {
-  const index = args.indexOf(name);
-  return index === -1 ? fallback : args[index + 1];
-}
+const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap-llm <compile-openai|compile-chat|call-openai> <state.json> [--model model] [--tools all|fs|process|web|agent]");
+  console.error("Usage: strap-llm <compile-openai|compile-chat|complete-openai|call-openai> [--model model] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json");
   process.exit(2);
 }
 
-if (!command || !statePath) usage();
+if (!command) usage();
 
-const state = normalizeState(await readState(statePath));
-const model = getArg("--model", "gpt-5.1");
-const toolGroup = getArg("--tools", "all");
-const tools = getTools(toolGroup);
+const model = takeOption(args, "--model", "gpt-5.1");
+const toolGroup = takeOption(args, "--tools", "all");
+const tools = await loadTools(toolGroup);
+const state = normalizeState(await readJsonInput(takeOption(args, "--file", "-")));
 
 if (command === "compile-openai") {
-  console.log(JSON.stringify(compileOpenAIResponses(state, { model, tools }), null, 2));
+  writeJson(compileOpenAIResponses(state, { model, tools }));
 } else if (command === "compile-chat") {
-  console.log(JSON.stringify({ model, messages: compileChatMessages(state), tools: tools.map((tool) => ({ type: "function", function: { name: tool.name, description: tool.description, parameters: tool.inputSchema } })) }, null, 2));
-} else if (command === "call-openai") {
+  writeJson({ model, messages: compileChatMessages(state), tools: tools.map((tool) => ({ type: "function", function: { name: tool.name, description: tool.description, parameters: tool.inputSchema } })) });
+} else if (command === "complete-openai" || command === "call-openai") {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("OPENAI_API_KEY is required");
   const body = compileOpenAIResponses(state, { model, tools });
@@ -36,7 +33,23 @@ if (command === "compile-openai") {
   });
   const text = await response.text();
   if (!response.ok) throw new Error(text);
-  console.log(text);
+  const providerResponse = JSON.parse(text);
+  if (command === "call-openai") writeJson(providerResponse);
+  else {
+    appendEvent(state, extractOpenAIResponseEvent(providerResponse));
+    writeJson(state);
+  }
 } else {
   usage();
+}
+
+async function loadTools(spec) {
+  if (!spec || ["all", "fs", "process", "web", "agent", "scripts"].includes(spec)) return getTools(spec || "all");
+  const parsed = JSON.parse(await fs.readFile(spec, "utf8"));
+  const tools = Array.isArray(parsed) ? parsed : parsed.tools || [];
+  return tools.map((tool) => ({
+    name: tool.name || tool.function?.name,
+    description: tool.description || tool.function?.description || "",
+    inputSchema: tool.inputSchema || tool.input_schema || tool.parameters || tool.function?.parameters || { type: "object", properties: {} },
+  }));
 }
