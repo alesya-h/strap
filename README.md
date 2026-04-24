@@ -5,6 +5,7 @@
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - Node CLIs for state editing, provider request compilation, agent fork/fold, and pending tool execution.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
+- Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
 - A reference analysis note in `docs/reference-tool-ux.md`.
 
 ## Quick Start
@@ -26,7 +27,32 @@ node mcp-servers/fs.js
 node mcp-servers/process.js
 node mcp-servers/web.js
 node mcp-servers/agent.js
+node mcp-servers/scripts.js
 ```
+
+## Script Tools
+
+Executable files in `tools/` become model-callable tools. A script receives JSON input on stdin and writes stdout as the tool result.
+
+Add a sidecar JSON file, either `tools/name.json` or `tools/name.sh.json`, to define model-facing metadata:
+
+```json
+{
+  "name": "say_hello",
+  "description": "Say hello to a person.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": {"type": "string", "description": "Person to greet"}
+    },
+    "required": ["name"],
+    "additionalProperties": false
+  },
+  "readOnly": true
+}
+```
+
+This keeps the `ai-say` idea of shell-authored tools, but avoids `{{arg}}` string interpolation by passing structured JSON through stdin.
 
 ## Canonical State
 

@@ -1,6 +1,7 @@
 import { agentTools } from "./agent-tools.js";
 import { fsTools } from "./fs-tools.js";
 import { processTools } from "./process-tools.js";
+import { scriptTools } from "./script-tools.js";
 import { webTools } from "./web-tools.js";
 
 export function getTools(group = "all") {
@@ -9,6 +10,7 @@ export function getTools(group = "all") {
     process: processTools(),
     web: webTools(),
     agent: agentTools(),
+    scripts: scriptTools(),
   };
   if (group === "all") return Object.values(groups).flat();
   if (!groups[group]) throw new Error(`Unknown tool group: ${group}`);

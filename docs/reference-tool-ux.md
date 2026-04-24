@@ -2,6 +2,8 @@
 
 I reviewed Claude Code, Codex, OpenCode, pi-mono, and forgecode for model-facing tool UX.
 
+I also reviewed `../ai-say`, an earlier Clojure/bash harness in this workspace.
+
 ## Converged Patterns
 
 The useful common shape is a declarative tool contract:
@@ -35,6 +37,29 @@ Deferred for later:
 - Tool-search/deferred exposure once the tool count is high enough to justify it.
 - Persistent process sessions and stdin continuation.
 - LSP, browser automation, and external service toolsets.
+
+## ai-say Predecessor Notes
+
+`ai-say` stored sessions as editable EDN files with `:config` and `:history`. Tools lived in `:config :tools` and had this shape:
+
+```clojure
+{:name "tool_name"
+ :description "..."
+ :command "shell command with {{arg}} placeholders"
+ :parameters {:type "object" :properties {}}}
+```
+
+The useful idea is that a tool can be authored outside the harness as a small shell unit, then exposed to the model through a normal function schema.
+
+For `strap`, the safer version is:
+
+- executable scripts live in `tools/` or directories listed in `STRAP_SCRIPT_TOOLS`
+- sidecar JSON supplies `name`, `description`, `inputSchema`, and annotations
+- input is JSON on stdin, not string interpolation into a shell command
+- output is stdout plus metadata
+- scripts are exposed through the `scripts` tool group and `mcp-servers/scripts.js`
+
+This preserves the unix-ish extensibility while making quoting, injection, and schema drift easier to reason about.
 
 ## Format Implications
 

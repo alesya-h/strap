@@ -13,7 +13,7 @@
   },
   "scripts": {
     "check": "node --check bin/strap-agent.js && node --check bin/strap-llm.js && node --check bin/strap-mcp.js && node --check bin/strap-run-calls.js && node --check bin/strap-state.js && node --check src/*.js && node --check mcp-servers/*.js",
-    "smoke": "node bin/strap-state.js init /tmp/strap-smoke.json && node bin/strap-state.js add-user /tmp/strap-smoke.json 'hello' && node bin/strap-llm.js compile-openai /tmp/strap-smoke.json --model test-model > /tmp/strap-openai.json && node bin/strap-agent.js fork /tmp/strap-smoke.json /tmp/strap-child.json --prompt 'inspect docs' && node bin/strap-agent.js fold /tmp/strap-smoke.json --child /tmp/strap-child.json --summary 'child result' > /tmp/strap-folded.json",
+    "smoke": "node bin/strap-state.js init /tmp/strap-smoke.json && node bin/strap-state.js add-user /tmp/strap-smoke.json 'hello' && node bin/strap-llm.js compile-openai /tmp/strap-smoke.json --model test-model > /tmp/strap-openai.json && node bin/strap-agent.js fork /tmp/strap-smoke.json /tmp/strap-child.json --prompt 'inspect docs' && node bin/strap-agent.js fold /tmp/strap-smoke.json --child /tmp/strap-child.json --summary 'child result' > /tmp/strap-folded.json && node -e 'import(\"./src/registry.js\").then(async ({toolMap})=>{ const tool=toolMap(\"scripts\").get(\"json_echo\"); if(!tool) throw new Error(\"missing json_echo\"); const result=await tool.execute({value:\"ok\"}); if(!result.content[0].text.includes(\"ok\")) throw new Error(result.content[0].text); })'",
     "test": "npm run check && npm run smoke"
   },
   "engines": {
