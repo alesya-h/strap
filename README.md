@@ -85,6 +85,16 @@ node bin/strap-state.js init \
 
 See `docs/providers.md`.
 
+For gpt-5.5 over ChatGPT subscription credentials from the local gptel fork:
+
+```bash
+node bin/strap-state.js init \
+| node bin/strap-state.js add-user "Analyze this repo" \
+| node bin/strap-loop.js --provider providers.example/chatgpt-gptel.json --tools all --max-turns 6 \
+| tee session.json \
+| node bin/strap-state.js display-last-message
+```
+
 ## Script Tools
 
 Executable files in `tools/` become model-callable tools. A script receives JSON input on stdin and writes stdout as the tool result.

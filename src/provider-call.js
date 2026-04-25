@@ -1,4 +1,4 @@
-import { appendEvent, compileChatMessages, compileOpenAIResponses, extractOpenAIResponseEvent, normalizeState, renderActorFrame } from "./state.js";
+import { appendEvent, compileChatMessages, compileOpenAIResponses, eventToText, extractOpenAIResponseEvent, flattenVisible, normalizeState, renderActorFrame } from "./state.js";
 import { authHeaders, refreshProviderAuth } from "./provider-config.js";
 
 export function compileProviderRequest(state, config, tools = []) {
@@ -60,16 +60,59 @@ function compileChatRequest(state, config, tools) {
 }
 
 function compileChatgptCodexRequest(state, config, tools) {
-  const messages = compileChatMessages(state).filter((message) => message.role !== "system");
   return {
     model: config.model,
-    input: messages.map((message) => ({ role: message.role === "assistant" ? "assistant" : "user", content: message.content || "" })),
+    input: compileResponsesInput(state),
     instructions: renderActorFrame(state, "assistant"),
     store: false,
     stream: true,
     ...(tools.length ? { tools: tools.map((tool) => ({ type: "function", name: tool.name, description: tool.description, parameters: tool.inputSchema })) } : {}),
     ...(config.parameters || {}),
   };
+}
+
+function compileResponsesInput(state) {
+  const input = [];
+  for (const event of flattenVisible(state.root)) {
+    if (event.from === "assistant" && event.calls?.length) {
+      if (event.text) input.push({ role: "assistant", content: event.text });
+      for (const call of event.calls) {
+        input.push({
+          type: "function_call",
+          id: call.provider?.id || call.id,
+          call_id: call.provider?.call_id || call.id,
+          name: call.tool,
+          arguments: JSON.stringify(call.input || {}),
+        });
+        if (call.ok !== undefined) {
+          input.push({
+            type: "function_call_output",
+            call_id: call.provider?.call_id || call.id,
+            output: stringifyToolCallResult(call),
+          });
+        }
+      }
+      continue;
+    }
+    const text = event.text || eventToText(event);
+    if (!text) continue;
+    input.push({
+      role: event.from === "assistant" ? "assistant" : "user",
+      content: text,
+    });
+  }
+  return input;
+}
+
+function stringifyToolCallResult(call) {
+  if (!call.ok) return JSON.stringify({ ok: false, error: call.error || "Tool call failed" });
+  const output = call.output;
+  if (typeof output === "string") return output;
+  const textParts = output?.content
+    ?.filter((part) => part.type === "text" && typeof part.text === "string")
+    ?.map((part) => part.text);
+  if (textParts?.length) return textParts.join("\n");
+  return JSON.stringify(output ?? null);
 }
 
 function compileAnthropicRequest(state, config, tools) {

@@ -87,7 +87,7 @@ The local gptel fork uses a different working path for ChatGPT subscription acce
 {
   "provider": "chatgpt",
   "api": "responses",
-  "model": "gpt-5.1-codex",
+  "model": "gpt-5.5",
   "base_url": "https://chatgpt.com/backend-api/codex/responses",
   "auth": {
     "type": "gptel_chatgpt",
@@ -104,6 +104,18 @@ The local gptel fork uses a different working path for ChatGPT subscription acce
 ```
 
 This reads gptel's Emacs-lisp plist token cache, refreshes through `https://auth.openai.com/oauth/token`, and calls `chatgpt.com/backend-api/codex/responses`. This is the currently tested subscription/OAuth route.
+
+For an end-to-end agent loop with native tool calls/results:
+
+```bash
+node bin/strap-state.js init \
+| node bin/strap-state.js add-user "Analyze this repo" \
+| node bin/strap-loop.js --provider providers.example/chatgpt-gptel.json --tools all --max-turns 6 \
+| tee session.json \
+| node bin/strap-state.js display-last-message
+```
+
+`strap-loop` repeatedly calls the model, executes pending tool calls, and feeds results back as provider-native `function_call_output` items. If the tool budget is exhausted, it asks for a final no-tools answer using gathered context.
 
 ## Commands
 
