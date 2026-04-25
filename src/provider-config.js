@@ -43,13 +43,54 @@ export async function authHeaders(config) {
     if (codex.fedramp) headers["X-OpenAI-Fedramp"] = "true";
     return headers;
   }
+  if (auth.type === "gptel_chatgpt") {
+    const token = await loadGptelChatgptAuth(auth);
+    headers.Authorization = `Bearer ${token.accessToken}`;
+    headers.originator ||= auth.originator || "gptel";
+    if (token.accountId) headers["ChatGPT-Account-Id"] = token.accountId;
+    return headers;
+  }
   throw new Error(`Unknown auth type: ${auth.type}`);
 }
 
 export async function refreshProviderAuth(config) {
-  if (config.auth?.type !== "codex_chatgpt") return false;
-  await loadCodexChatgptAuth({ ...config.auth, force_refresh: true });
+  if (config.auth?.type === "codex_chatgpt") await loadCodexChatgptAuth({ ...config.auth, force_refresh: true });
+  else if (config.auth?.type === "gptel_chatgpt") await loadGptelChatgptAuth({ ...config.auth, force_refresh: true });
+  else return false;
   return true;
+}
+
+async function loadGptelChatgptAuth(auth) {
+  const tokenFile = expandHome(auth.token_file || path.join(os.homedir(), ".emacs.d/.cache/gptel/chatgpt-token"));
+  let token = parseEmacsPlist(await fs.readFile(tokenFile, "utf8"));
+  if (auth.force_refresh || Number(token.expires_at || 0) <= Date.now() / 1000 + (auth.refresh_margin_seconds ?? 30)) {
+    if (auth.refresh === false) throw new Error("gptel ChatGPT token is expired/near expiry and refresh=false");
+    token = await refreshGptelToken(tokenFile, token, auth.refresh_url);
+  }
+  if (!token.access_token) throw new Error("gptel token file is missing :access_token");
+  return { accessToken: token.access_token, accountId: token.account_id || extractAccountIdFromJwt(token.id_token || token.access_token) };
+}
+
+async function refreshGptelToken(tokenFile, token, refreshUrl = "https://auth.openai.com/oauth/token") {
+  if (!token.refresh_token) throw new Error("gptel token file is missing :refresh_token");
+  const form = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: token.refresh_token,
+    client_id: "app_EMoamEEZ73f0CkXaXp7hrann",
+  });
+  const response = await fetch(refreshUrl, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: form.toString(),
+  });
+  const text = await response.text();
+  if (!response.ok) throw new Error(`gptel ChatGPT token refresh failed: ${response.status}: ${text}`);
+  const next = { ...token, ...snakeKeys(JSON.parse(text)) };
+  if (!next.refresh_token) next.refresh_token = token.refresh_token;
+  next.account_id = next.account_id || extractAccountIdFromJwt(next.id_token || next.access_token) || token.account_id;
+  next.expires_at = Math.floor(Date.now() / 1000) + Number(next.expires_in || 3600) - 30;
+  await fs.writeFile(tokenFile, emacsPlist(next), { mode: 0o600 });
+  return next;
 }
 
 async function resolveSecret(auth, fallbackEnv) {
@@ -126,6 +167,43 @@ function decodeJwt(jwt) {
   }
 }
 
+function extractAccountIdFromJwt(jwt) {
+  const claims = decodeJwt(jwt) || {};
+  const auth = claims["https://api.openai.com/auth"] || {};
+  return auth.chatgpt_account_id || claims.organizations?.[0]?.id;
+}
+
+function parseEmacsPlist(text) {
+  const result = {};
+  const re = /:([A-Za-z0-9_-]+)\s+("(?:[^"\\]|\\.)*"|-?\d+(?:\.\d+)?|t|nil)/g;
+  let match;
+  while ((match = re.exec(text))) {
+    const key = match[1].replaceAll("-", "_");
+    const raw = match[2];
+    if (raw.startsWith('"')) result[key] = raw.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+    else if (raw === "t") result[key] = true;
+    else if (raw === "nil") result[key] = undefined;
+    else result[key] = Number(raw);
+  }
+  return result;
+}
+
+function emacsPlist(obj) {
+  const keys = ["access_token", "refresh_token", "id_token", "expires_in", "account_id", "expires_at"];
+  const parts = [];
+  for (const key of keys) {
+    if (obj[key] === undefined || obj[key] === null) continue;
+    parts.push(`:${key.replaceAll("_", "-")}`);
+    if (typeof obj[key] === "number") parts.push(String(obj[key]));
+    else parts.push(`"${String(obj[key]).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`);
+  }
+  return `(${parts.join(" ")})\n`;
+}
+
+function snakeKeys(obj) {
+  return Object.fromEntries(Object.entries(obj || {}).map(([key, value]) => [key.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`), value]));
+}
+
 function defaultApi(provider) {
   if (provider === "anthropic") return "messages";
   if (provider === "openrouter") return "chat";
@@ -133,6 +211,7 @@ function defaultApi(provider) {
 }
 
 function defaultBaseUrl(provider, api) {
+  if (provider === "chatgpt") return "https://chatgpt.com/backend-api/codex/responses";
   if (provider === "anthropic") return "https://api.anthropic.com/v1/messages";
   if (provider === "openrouter") return "https://openrouter.ai/api/v1/chat/completions";
   if (provider === "openai" && api === "chat") return "https://api.openai.com/v1/chat/completions";
@@ -140,6 +219,7 @@ function defaultBaseUrl(provider, api) {
 }
 
 function defaultAuth(provider) {
+  if (provider === "chatgpt") return { type: "gptel_chatgpt" };
   if (provider === "anthropic") return { type: "anthropic_api_key", env: "ANTHROPIC_API_KEY" };
   if (provider === "openrouter") return { type: "api_key", env: "OPENROUTER_API_KEY" };
   return { type: "api_key", env: "OPENAI_API_KEY" };

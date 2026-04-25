@@ -7,7 +7,7 @@
 - A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
-- Provider config files for OpenAI, OpenRouter, Anthropic, and Codex ChatGPT OAuth auth.
+- Provider config files for OpenAI, OpenRouter, Anthropic, Codex ChatGPT OAuth, and gptel ChatGPT OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
 
 ## Quick Start

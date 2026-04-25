@@ -3,6 +3,7 @@ import { authHeaders, refreshProviderAuth } from "./provider-config.js";
 
 export function compileProviderRequest(state, config, tools = []) {
   const normalized = normalizeState(state);
+  if (config.provider === "chatgpt") return compileChatgptCodexRequest(normalized, config, tools);
   if (config.provider === "anthropic") return compileAnthropicRequest(normalized, config, tools);
   if (config.api === "chat") return compileChatRequest(normalized, config, tools);
   return { ...compileOpenAIResponses(normalized, { model: config.model, tools }), ...(config.parameters || {}) };
@@ -11,9 +12,11 @@ export function compileProviderRequest(state, config, tools = []) {
 export async function callProvider(state, config, tools = []) {
   const body = compileProviderRequest(state, config, tools);
   const response = await doProviderFetch(config, body);
+  if (response.ok && config.stream) return await readResponsesStream(response, config);
   if (response.ok) return await response.json();
   if (response.status === 401 && await refreshProviderAuth(config)) {
     const retry = await doProviderFetch(config, body);
+    if (retry.ok && config.stream) return await readResponsesStream(retry, config);
     if (retry.ok) return await retry.json();
     throw new Error(await formatProviderError(retry));
   }
@@ -56,6 +59,19 @@ function compileChatRequest(state, config, tools) {
   };
 }
 
+function compileChatgptCodexRequest(state, config, tools) {
+  const messages = compileChatMessages(state).filter((message) => message.role !== "system");
+  return {
+    model: config.model,
+    input: messages.map((message) => ({ role: message.role === "assistant" ? "assistant" : "user", content: message.content || "" })),
+    instructions: renderActorFrame(state, "assistant"),
+    store: false,
+    stream: true,
+    ...(tools.length ? { tools: tools.map((tool) => ({ type: "function", name: tool.name, description: tool.description, parameters: tool.inputSchema })) } : {}),
+    ...(config.parameters || {}),
+  };
+}
+
 function compileAnthropicRequest(state, config, tools) {
   const messages = compileChatMessages(state).filter((message) => message.role !== "system");
   return {
@@ -72,6 +88,49 @@ function responseToEvent(response, config) {
   if (config.provider === "anthropic") return anthropicResponseToEvent(response);
   if (config.api === "chat") return chatResponseToEvent(response, config);
   return extractOpenAIResponseEvent(response);
+}
+
+async function readResponsesStream(response, config) {
+  const reader = response.body?.getReader();
+  if (!reader) return await response.json();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let outputText = "";
+  const output = [];
+  let completed;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const data = line.slice(5).trim();
+      if (!data || data === "[DONE]") continue;
+      let event;
+      try { event = JSON.parse(data); } catch { continue; }
+      if (event.type === "response.output_text.delta" && typeof event.delta === "string") outputText += event.delta;
+      if (event.type === "response.output_text.done" && typeof event.text === "string") outputText ||= event.text;
+      if (event.type === "response.content_part.done" && typeof event.part?.text === "string") outputText ||= event.part.text;
+      if (event.type === "response.output_item.done") {
+        const itemText = (event.item?.content || []).map((part) => part.text || "").join("\n");
+        if (itemText) outputText ||= itemText;
+        if (event.item?.type === "function_call") output.push(event.item);
+      }
+      if (event.type === "response.completed") completed = event.response || event;
+    }
+  }
+  if (completed) {
+    if (!completed.output_text && outputText) completed.output_text = outputText;
+    if ((!completed.output || completed.output.length === 0) && output.length) completed.output = output;
+    return completed;
+  }
+  return {
+    model: config.model,
+    output_text: outputText,
+    output: [{ type: "message", content: [{ type: "output_text", text: outputText }] }],
+  };
 }
 
 function chatResponseToEvent(response, config) {

@@ -32,6 +32,7 @@ Supported `provider` / `api` combinations now:
 
 - `openai` / `responses`
 - `openai` / `chat`
+- `chatgpt` / `responses` via ChatGPT Codex endpoint
 - `openrouter` / `chat`
 - `anthropic` / `messages`
 
@@ -77,6 +78,32 @@ Request headers include:
 - `Authorization: Bearer <access_token>`
 - `ChatGPT-Account-ID: <account_id>` when available
 - `X-OpenAI-Fedramp: true` when the token claims require it
+
+### OpenAI via gptel ChatGPT OAuth/subscription
+
+The local gptel fork uses a different working path for ChatGPT subscription access:
+
+```json
+{
+  "provider": "chatgpt",
+  "api": "responses",
+  "model": "gpt-5.1-codex",
+  "base_url": "https://chatgpt.com/backend-api/codex/responses",
+  "auth": {
+    "type": "gptel_chatgpt",
+    "token_file": "~/.emacs.d/.cache/gptel/chatgpt-token",
+    "refresh": true,
+    "originator": "gptel"
+  },
+  "stream": true,
+  "parameters": {
+    "store": false,
+    "stream": true
+  }
+}
+```
+
+This reads gptel's Emacs-lisp plist token cache, refreshes through `https://auth.openai.com/oauth/token`, and calls `chatgpt.com/backend-api/codex/responses`. This is the currently tested subscription/OAuth route.
 
 ## Commands
 
