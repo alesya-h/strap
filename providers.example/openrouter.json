@@ -1,0 +1,13 @@
+{
+  "name": "openrouter-anthropic-sonnet",
+  "provider": "openrouter",
+  "api": "chat",
+  "model": "anthropic/claude-sonnet-4.5",
+  "auth": {
+    "type": "api_key",
+    "env": "OPENROUTER_API_KEY"
+  },
+  "site_url": "https://example.invalid",
+  "app_name": "strap",
+  "parameters": {}
+}

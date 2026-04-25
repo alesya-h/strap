@@ -33,8 +33,16 @@ export def compile-openai [--model: string = "gpt-5.1", --tools: string = "all"]
   $in | to json | ^node (strap-bin strap-llm.js) compile-openai --model $model --tools $tools | from json
 }
 
+export def compile [--provider: path, --tools: string = "all"] {
+  $in | to json | ^node (strap-bin strap-llm.js) compile --provider $provider --tools $tools | from json
+}
+
 export def complete-openai [--model: string = "gpt-5.1", --tools: string = "all"] {
   $in | to json | ^node (strap-bin strap-llm.js) complete-openai --model $model --tools $tools | from json
+}
+
+export def complete [--provider: path, --tools: string = "all"] {
+  $in | to json | ^node (strap-bin strap-llm.js) complete --provider $provider --tools $tools | from json
 }
 
 export def process-tools [--tools: string = "all"] {

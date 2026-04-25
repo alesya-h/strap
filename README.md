@@ -4,8 +4,10 @@
 
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - Node CLIs for state editing, provider request compilation, agent fork/fold, and pending tool execution.
+- A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
+- Provider config files for OpenAI, OpenRouter, Anthropic, and Codex ChatGPT OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
 
 ## Quick Start
@@ -45,6 +47,20 @@ init
 | display-last-message
 ```
 
+## Self-Modifying Porcelain
+
+Porcelain modules in `porcelain/*.nu` are meant to be cheap for a model to write, rewrite, fork, and discard. The stable substrate lives in `nu/plumbing.nu` and the Node filter CLIs.
+
+```bash
+node bin/strap-porcelain.js list
+
+node bin/strap-state.js init \
+| node bin/strap-porcelain.js run basic ask "List files" \
+| node bin/strap-porcelain.js run basic scope "repo scan"
+```
+
+See `docs/self-modifying-porcelain.md` for the design.
+
 ## MCP Servers
 
 Each server speaks MCP over stdio:
@@ -56,6 +72,18 @@ node mcp-servers/web.js
 node mcp-servers/agent.js
 node mcp-servers/scripts.js
 ```
+
+## Providers
+
+Provider configs are JSON files containing provider, auth, endpoint, and model. Examples live in `providers.example/`.
+
+```bash
+node bin/strap-state.js init \
+| node bin/strap-state.js add-user "Say hi" \
+| node bin/strap-llm.js complete --provider providers.example/openai-api-key.json
+```
+
+See `docs/providers.md`.
 
 ## Script Tools
 

@@ -117,6 +117,29 @@ This maps Aiden’s persistent object into the v0.2 actor model:
 
 The model may help write the harness, but there should be no hidden `eval_and_persist` lane.
 
+## Porcelain Over Plumbing
+
+The current preferred self-extension model is more permissive than a plugin-review workflow.
+
+The harness should make it cheap for a model to create new **porcelain**: Nushell workflows that compose stable immutable **plumbing** operations. This lets a model optimize its own loops, add repo-specific helpers, create temporary DSLs, or benchmark competing strategies without changing the stable substrate.
+
+Plumbing properties:
+
+* small state transforms
+* immutable stdin/stdout behavior
+* stable enough for generated porcelain to depend on
+* implemented in `nu/plumbing.nu` and the Node filter CLIs
+
+Porcelain properties:
+
+* model-editable
+* discovered by path/name, not centrally registered
+* allowed to be temporary or branch-specific
+* runnable immediately through `strap-porcelain`
+* provenance can be recorded in state traces
+
+Safety is intentionally a surrounding layer: run porcelain in bubblewrap/overlay/tmpfs, and expose real effects through least-privilege jsmcp/MCP servers. The flexible core assumes porcelain can mutate; the OS/capability boundary decides what that mutation can actually affect.
+
 ---
 
 # Draft 0.1 Flat Format
