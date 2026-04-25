@@ -44,7 +44,7 @@ if (command === "compile") {
 
 async function loadTools(spec) {
   if (spec === "none") return [];
-  if (!spec || ["all", "fs", "process", "web", "agent", "scripts"].includes(spec)) return getTools(spec || "all");
+  if (!spec || ["all", "fs", "process", "web", "agent", "scripts", "jsmcp"].includes(spec)) return getTools(spec || "all");
   const parsed = JSON.parse(await fs.readFile(spec, "utf8"));
   const tools = Array.isArray(parsed) ? parsed : parsed.tools || [];
   return tools.map((tool) => ({

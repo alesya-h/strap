@@ -7,6 +7,7 @@
 - A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
+- jsmcp bridge tools for programmable access to configured MCP servers.
 - Provider config files for OpenAI, OpenRouter, Anthropic, Codex ChatGPT OAuth, and gptel ChatGPT OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
 
@@ -72,6 +73,26 @@ node mcp-servers/web.js
 node mcp-servers/agent.js
 node mcp-servers/scripts.js
 ```
+
+## jsmcp
+
+`strap` can call installed `jsmcp` through the `jsmcp` tool group. By default it runs `jsmcp client`, matching the OpenCode config in `~/.config/opencode/opencode.jsonc`.
+
+```bash
+node bin/strap-state.js init \
+| node bin/strap-porcelain.js run basic request-tool jsmcp_list_servers '{}' \
+| node bin/strap-run-calls.js --tools jsmcp
+```
+
+Available bridge tools:
+
+- `jsmcp_list_servers`
+- `jsmcp_list_tools`
+- `jsmcp_execute_code`
+- `jsmcp_fetch_logs`
+- `jsmcp_clear_logs`
+
+The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` does.
 
 ## Providers
 

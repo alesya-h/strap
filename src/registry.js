@@ -1,6 +1,7 @@
 import { agentTools } from "./agent-tools.js";
 import { fsTools } from "./fs-tools.js";
 import { processTools } from "./process-tools.js";
+import { jsmcpTools } from "./jsmcp-tools.js";
 import { scriptTools } from "./script-tools.js";
 import { webTools } from "./web-tools.js";
 
@@ -11,6 +12,7 @@ export function getTools(group = "all") {
     web: webTools(),
     agent: agentTools(),
     scripts: scriptTools(),
+    jsmcp: jsmcpTools(),
   };
   if (group === "all") return Object.values(groups).flat();
   if (!groups[group]) throw new Error(`Unknown tool group: ${group}`);
