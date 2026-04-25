@@ -96,6 +96,27 @@ Actors carry prompt-like state as self and peer relation data:
 
 The older flat `system.current` plus `messages` design remains useful as a lowest-common-denominator projection and import format, but v0.2 is the source shape for fork/fold/context-pop semantics.
 
+## Self-Extension Without Raw Eval
+
+An older predecessor, `aiden`, let the model emit Ruby code, manually review it, then `instance_eval` it against a persistent `$aiden` object. It could persist new methods by appending to `aiden_self.rb`.
+
+The modern equivalent should not be raw eval. In this harness, self-extension should mean:
+
+1. propose a new capability as files: script, sidecar schema, tests
+2. validate it in a sandbox or child scope
+3. install it only through an explicit approved operation
+4. expose it as a normal tool/MCP capability
+5. record provenance in canonical state
+
+This maps Aiden’s persistent object into the v0.2 actor model:
+
+* persistent methods become installed tool capabilities
+* captured eval output becomes structured tool results
+* `aiden_self.rb` becomes a versioned tool/capability directory
+* direct mutation becomes branch/fold plus explicit install
+
+The model may help write the harness, but there should be no hidden `eval_and_persist` lane.
+
 ---
 
 # Draft 0.1 Flat Format

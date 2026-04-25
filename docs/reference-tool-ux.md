@@ -3,6 +3,7 @@
 I reviewed Claude Code, Codex, OpenCode, pi-mono, and forgecode for model-facing tool UX.
 
 I also reviewed `../ai-say`, an earlier Clojure/bash harness in this workspace.
+I also reviewed `/home/alesya/p/aiden`, an older Ruby self-modifying harness; see `docs/aiden-notes.md`.
 
 ## Converged Patterns
 
