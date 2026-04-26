@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile="readonly"
+if [ "${1:-}" = "run" ]; then shift; fi
+if [ "${1:-}" = "--profile" ]; then profile="$2"; shift 2; fi
+if [ "$#" -eq 0 ]; then
+  echo "Usage: strap sandbox run [--profile readonly] -- command args..." >&2
+  exit 2
+fi
+if [ "${1:-}" = "--" ]; then shift; fi
+if ! command -v bwrap >/dev/null 2>&1; then
+  echo "bubblewrap (bwrap) is required for strap sandbox run" >&2
+  exit 127
+fi
+
+case "$profile" in
+  readonly)
+    exec bwrap \
+      --ro-bind / / \
+      --dev /dev \
+      --proc /proc \
+      --tmpfs /tmp \
+      --bind "$STRAP_WORKSPACE" "$STRAP_WORKSPACE" \
+      --chdir "$STRAP_WORKSPACE" \
+      "$@"
+    ;;
+  *)
+    echo "Unknown sandbox profile: $profile" >&2
+    exit 2
+    ;;
+esac

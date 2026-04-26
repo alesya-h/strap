@@ -1,0 +1,5 @@
+List and inspect static harness policy configs.
+
+Usage:
+  strap policy list
+  strap policy show readonly

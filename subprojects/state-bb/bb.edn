@@ -1,0 +1,2 @@
+{:paths ["src"]
+ :tasks {check (shell "bb -cp src -m strap.state --help")}}

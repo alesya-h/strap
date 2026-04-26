@@ -1,0 +1,5 @@
+Initialize or inspect the project-local strap work directory.
+
+Usage:
+  strap work init
+  strap work path

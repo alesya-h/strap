@@ -7,6 +7,8 @@ def strap-root [] {
 def default-db [] {
   if ($env.STRAP_ZK_DB? | is-not-empty) {
     $env.STRAP_ZK_DB
+  } else if ($env.STRAP_WORK? | is-not-empty) {
+    [$env.STRAP_WORK zettel zettel.sqlite] | path join
   } else {
     [($nu.default-config-dir) strap zettel.sqlite] | path join
   }
@@ -145,8 +147,15 @@ WHERE id = __ID__ AND deleted_at IS NULL;
   if (($rows | length) == 0) { null } else { $rows | first }
 }
 
+def state-last-text-event [state: record] {
+  let assistant = ($state.root.children? | default [] | where type == event and from == assistant and text != "")
+  if (($assistant | length) > 0) { return ($assistant | last) }
+  let events = ($state.root.children? | default [] | where type == event and text != "")
+  if (($events | length) == 0) { null } else { $events | last }
+}
+
 export def main [] {
-  print "strap zk: use init, create, update, get, search-text, search-vector, search-hybrid, related, link, reindex, or tool"
+  print "strap zk: use init, create, update, delete, list, tags, get, search-text, search-vector, search-hybrid, related, backlinks, link, reindex, remember-state, or tool"
 }
 
 export def "main init" [--db: string = "", --dimensions: int = 384] {
@@ -232,6 +241,46 @@ WHERE n.id = __ID__ AND n.deleted_at IS NULL;
   $rows | first | to json
 }
 
+export def "main list" [--db: string = "", --limit: int = 50, --tag: string = ""] {
+  let dbp = (db-path $db)
+  let tag_sql = (sql-string $tag)
+  let where = (if ($tag | is-empty) { "n.deleted_at IS NULL" } else { $"n.deleted_at IS NULL AND EXISTS \(SELECT 1 FROM tags t WHERE t.note_id = n.id AND t.tag = ($tag_sql)\)" })
+  sqlite-json $dbp (sql-template "
+SELECT n.id, n.title, n.created_at, n.updated_at, n.author_actor,
+       COALESCE((SELECT json_group_array(tag) FROM tags WHERE note_id = n.id), '[]') AS tags
+FROM notes n
+WHERE __WHERE__
+ORDER BY n.updated_at DESC
+LIMIT __LIMIT__;
+" { WHERE: $where, LIMIT: $limit }) | to json
+}
+
+export def "main delete" [id: string, --db: string = ""] {
+  let dbp = (db-path $db)
+  let id_sql = (sql-string $id)
+  let deleted_sql = (sql-string (now-str))
+  sqlite-exec $dbp (sql-template "
+BEGIN IMMEDIATE;
+UPDATE notes SET deleted_at = __DELETED__ WHERE id = __ID__;
+DELETE FROM notes_fts WHERE id = __ID__;
+DELETE FROM vec_chunks WHERE rowid IN (SELECT vec_rowid FROM chunk_vectors WHERE chunk_id IN (SELECT id FROM note_chunks WHERE note_id = __ID__));
+DELETE FROM chunk_vectors WHERE chunk_id IN (SELECT id FROM note_chunks WHERE note_id = __ID__);
+COMMIT;
+" { ID: $id_sql, DELETED: $deleted_sql }) | ignore
+  { ok: true, id: $id, deleted_at: (now-str) } | to json
+}
+
+export def "main tags" [--db: string = ""] {
+  let dbp = (db-path $db)
+  sqlite-json $dbp "
+SELECT tag, count(*) AS notes
+FROM tags
+WHERE note_id IN (SELECT id FROM notes WHERE deleted_at IS NULL)
+GROUP BY tag
+ORDER BY notes DESC, tag ASC;
+" | to json
+}
+
 export def "main search-text" [query: string, --db: string = "", --limit: int = 10] {
   let dbp = (db-path $db)
   let q = (fts-query $query)
@@ -290,6 +339,18 @@ export def "main related" [id: string, --db: string = "", --limit: int = 10] {
   main search-vector $"($row.title)\n\n($row.body)" --db $dbp --limit ($limit + 1) | from json | where note_id != $id | first $limit | to json
 }
 
+export def "main backlinks" [id: string, --db: string = ""] {
+  let dbp = (db-path $db)
+  let id_sql = (sql-string $id)
+  sqlite-json $dbp (sql-template "
+SELECT l.from_note, n.title AS from_title, l.to_note, l.type, l.created_at
+FROM links l
+JOIN notes n ON n.id = l.from_note
+WHERE l.to_note = __ID__ AND n.deleted_at IS NULL
+ORDER BY l.created_at DESC;
+" { ID: $id_sql }) | to json
+}
+
 export def "main link" [from_note: string, to_note: string, --type: string = "related", --db: string = ""] {
   let dbp = (db-path $db)
   let created = (now-str)
@@ -326,6 +387,15 @@ WHERE __WHERE__;
   { ok: true, reindexed: ($rows | length), db: $dbp } | to json
 }
 
+export def "main remember-state" [--db: string = "", --title: string = "", --tags: string = "session,summary", --author: string = "agent", --file: string = ""] {
+  let raw = (if not ($file | is-empty) { open $file --raw } else if (($in | describe) == "nothing") { ^cat } else { $in })
+  let state = (if (($raw | describe) | str starts-with "record") { $raw } else { $raw | into string | from json })
+  let event = (state-last-text-event $state)
+  if ($event == null) { error make { msg: "No text event found in state" } }
+  let titlev = (if ($title | is-empty) { ($event.text | lines | first | str substring 0..80) } else { $title })
+  main create --db $db --title $titlev --body $event.text --tags $tags --author $author
+}
+
 export def "main tool" [] {
   let input_kind = ($in | describe)
   let req = if ($input_kind | str starts-with "record") {
@@ -343,11 +413,15 @@ export def "main tool" [] {
     "init" => { main init --db $db --dimensions ($req.dimensions? | default 384) }
     "create" => { main create --db $db --title $req.title --body $req.body --tags (($req.tags? | default []) | to json --raw) --aliases (($req.aliases? | default []) | to json --raw) --author ($req.author? | default "agent") }
     "update" => { main update $req.id --db $db --title ($req.title? | default "") --body ($req.body? | default "") --tags (($req.tags? | default []) | to json --raw) --aliases (($req.aliases? | default []) | to json --raw) --author ($req.author? | default "agent") }
+    "delete" => { main delete $req.id --db $db }
+    "list" => { main list --db $db --limit ($req.limit? | default 50) --tag ($req.tag? | default "") }
+    "tags" => { main tags --db $db }
     "get" => { main get $req.id --db $db }
     "search_text" => { main search-text $req.query --db $db --limit ($req.limit? | default 10) }
     "search_vector" => { main search-vector $req.query --db $db --limit ($req.limit? | default 10) }
     "search_hybrid" => { main search-hybrid $req.query --db $db --limit ($req.limit? | default 10) }
     "related" => { main related $req.id --db $db --limit ($req.limit? | default 10) }
+    "backlinks" => { main backlinks $req.id --db $db }
     "link" => { main link $req.from_note $req.to_note --type ($req.type? | default "related") --db $db }
     "reindex" => { main reindex --db $db --id ($req.id? | default "") }
     _ => { error make { msg: $"Unknown zk action: ($action)" } }

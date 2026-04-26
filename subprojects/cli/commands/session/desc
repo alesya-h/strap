@@ -1,0 +1,11 @@
+Create and manage project-local strap sessions.
+
+Usage:
+  strap session new "repo analysis"
+  strap session ask "Analyze this repo"
+  strap session show
+  strap session save < state.json
+  strap session list
+  strap session path
+  strap session state
+  strap session trace

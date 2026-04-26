@@ -14,10 +14,19 @@ $strap agent fold --child /tmp/strap-child.json --summary 'child result' < /tmp/
 $strap porcelain list > /tmp/strap-porcelain-list.json
 $strap state init | $strap porcelain run basic ask 'hello from porcelain' > /tmp/strap-porcelain-state.json
 $strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-has-calls.json
+$strap commands list --json > /tmp/strap-commands.json
+$strap work init > /tmp/strap-work-init.json
+$strap session new 'smoke session' > /tmp/strap-session-new.json
+$strap session ask 'remember this smoke question' > /tmp/strap-session-ask.json
+$strap session show > /tmp/strap-session-show.json
+$strap policy list > /tmp/strap-policy-list.json
+$strap state-bb init > /tmp/strap-state-bb.json
 
 node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("json_echo"); if(!tool) throw new Error("missing json_echo"); const result=await tool.execute({value:"ok"}); if(!result.content[0].text.includes("ok")) throw new Error(result.content[0].text); })'
 
 rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --db /tmp/strap-zk-smoke.sqlite --title 'Local hash memory' --body 'Offline smoke indexing works without network.' --tags smoke > /tmp/strap-zk-create.json
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-zk-smoke.sqlite 'offline indexing' > /tmp/strap-zk-search.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk list --db /tmp/strap-zk-smoke.sqlite > /tmp/strap-zk-list.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk tags --db /tmp/strap-zk-smoke.sqlite > /tmp/strap-zk-tags.json
 STRAP_ZK_EMBED_PROVIDER=hash node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("zk"); if(!tool) throw new Error("missing zk"); const result=await tool.execute({action:"search_hybrid",db:"/tmp/strap-zk-smoke.sqlite",query:"offline indexing",limit:2}); if(!result.content[0].text.includes("Local hash memory")) throw new Error(result.content[0].text); })'

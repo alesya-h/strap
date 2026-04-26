@@ -1,0 +1,6 @@
+Run a command in a bubblewrap sandbox.
+
+Usage:
+  strap sandbox run --profile readonly -- command args...
+
+The `readonly` profile binds the host filesystem read-only, creates a tmpfs `/tmp`, and binds the current `STRAP_WORKSPACE` writable for project work.

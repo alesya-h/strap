@@ -1,2 +1,11 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+if [ "${1:-}" = "remember-state" ] && [ ! -t 0 ]; then
+  tmp="$(mktemp -t strap-zk-state.XXXXXX.json)"
+  cat > "$tmp"
+  trap 'rm -f "$tmp"' EXIT
+  exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" "$@" --file "$tmp"
+fi
+
 exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" "$@"

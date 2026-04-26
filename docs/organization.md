@@ -52,6 +52,8 @@ Useful commands:
 ```bash
 strap help
 strap -a
+strap commands list --json
+strap commands new my-command
 strap help zk
 strap command-dir zk
 strap inner carapace list-commands
@@ -95,6 +97,21 @@ my-project/.strap/
 ```
 
 `user/template/.strap` is a checked-in template for this shape.
+
+Initialize it in a project with:
+
+```bash
+strap work init
+```
+
+Create and update sessions with:
+
+```bash
+strap session new "task name"
+strap session ask "user request"
+strap session show
+strap session save < state.json
+```
 
 ## Command Examples
 

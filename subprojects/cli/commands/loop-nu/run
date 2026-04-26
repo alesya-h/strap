@@ -5,6 +5,7 @@ provider=""
 tools="all"
 max_turns="8"
 finalize="true"
+max_tool_calls="64"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -12,6 +13,7 @@ while [ "$#" -gt 0 ]; do
     --tools) tools="$2"; shift 2 ;;
     --max-turns) max_turns="$2"; shift 2 ;;
     --finalize) finalize="$2"; shift 2 ;;
+    --max-tool-calls) max_tool_calls="$2"; shift 2 ;;
     *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
 done
@@ -21,4 +23,4 @@ if [ -z "$provider" ]; then
   exit 2
 fi
 
-exec node "$STRAP_ROOT/subprojects/porcelain/bin/porcelain.js" run loop run-provider "$provider" "$tools" "$max_turns" "$finalize"
+exec node "$STRAP_ROOT/subprojects/porcelain/bin/porcelain.js" run loop run-provider "$provider" "$tools" "$max_turns" "$finalize" "$max_tool_calls"

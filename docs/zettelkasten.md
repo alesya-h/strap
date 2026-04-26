@@ -73,10 +73,20 @@ strap zk search-hybrid 'provider leakage'
 strap zk search-vector 'semantic memory retrieval'
 strap zk search-text 'canonical state'
 strap zk related zk_note_id
+strap zk backlinks zk_note_id
+strap zk list
+strap zk tags
+strap zk delete zk_note_id
 strap zk link zk_a zk_b --type refines
 ```
 
 `create` and `update` embed and index automatically. The implementation avoids holding write transactions while calling embedding providers.
+
+Remember the latest assistant message from a state:
+
+```bash
+strap session show | strap zk remember-state --tags session,summary
+```
 
 ## Agent Tool
 

@@ -55,16 +55,41 @@ export def add-budget-exhausted [turns: int] {
   $state | update root.children { |children| $children | append $event }
 }
 
-export def run-provider [provider: path, tools: string = "all", max_turns: int = 8, finalize: bool = true] {
+export def add-tool-budget-exhausted [calls: int] {
+  let state = $in
+  let event = {
+    type: "event"
+    from: "harness"
+    to: [assistant]
+    kind: "tool_budget_exhausted"
+    text: $"Tool call budget exhausted after ($calls) requested call\(s\). Answer now using the gathered context. Do not request more tools."
+  }
+  $state | update root.children { |children| $children | append $event }
+}
+
+export def trace-turn [turn: int, calls: int, phase: string] {
+  $in | add-trace loop-turn { turn: $turn, calls: $calls, phase: $phase }
+}
+
+export def run-provider [provider: path, tools: string = "all", max_turns: int = 8, finalize: bool = true, max_tool_calls: int = 64] {
   mut state = $in
   mut final = false
+  mut tool_calls = 0
   for turn in 1..$max_turns {
     $state = ($state | complete-provider-once --provider $provider --tools $tools)
+    let calls = ($state | last-calls | length)
+    $tool_calls = ($tool_calls + $calls)
+    $state = ($state | trace-turn $turn $calls complete)
     if not ($state | has-tool-calls) {
       $final = true
       break
     }
+    if ($tool_calls > $max_tool_calls) {
+      $state = ($state | add-tool-budget-exhausted $tool_calls)
+      break
+    }
     $state = ($state | process-tools-once --tools $tools)
+    $state = ($state | trace-turn $turn $calls tools)
   }
   if (not $final) and $finalize {
     $state = ($state | add-budget-exhausted $max_turns | complete-provider-once --provider $provider --tools none)
@@ -72,16 +97,25 @@ export def run-provider [provider: path, tools: string = "all", max_turns: int =
   $state
 }
 
-export def run-openai [model: string = "gpt-5.1", tools: string = "all", max_turns: int = 8, finalize: bool = true] {
+export def run-openai [model: string = "gpt-5.1", tools: string = "all", max_turns: int = 8, finalize: bool = true, max_tool_calls: int = 64] {
   mut state = $in
   mut final = false
+  mut tool_calls = 0
   for turn in 1..$max_turns {
     $state = ($state | complete-once --model $model --tools $tools)
+    let calls = ($state | last-calls | length)
+    $tool_calls = ($tool_calls + $calls)
+    $state = ($state | trace-turn $turn $calls complete)
     if not ($state | has-tool-calls) {
       $final = true
       break
     }
+    if ($tool_calls > $max_tool_calls) {
+      $state = ($state | add-tool-budget-exhausted $tool_calls)
+      break
+    }
     $state = ($state | process-tools-once --tools $tools)
+    $state = ($state | trace-turn $turn $calls tools)
   }
   if (not $final) and $finalize {
     $state = ($state | add-budget-exhausted $max_turns | complete-once --model $model --tools none)

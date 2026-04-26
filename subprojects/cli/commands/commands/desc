@@ -1,0 +1,10 @@
+List and scaffold filesystem-discovered strap commands.
+
+Usage:
+  strap commands list
+  strap commands list --json
+  strap commands list --all --json
+  strap commands roots
+  strap commands new my-command
+
+New commands are created under $STRAP_WORK/commands.

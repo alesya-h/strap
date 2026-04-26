@@ -1,0 +1,7 @@
+Run Babashka pure state transforms.
+
+Usage:
+  strap state-bb init
+  strap state-bb add-user "hello"
+
+This is the first Clojure/Babashka data-layer subproject.

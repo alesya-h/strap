@@ -23,6 +23,12 @@ This document records what `strap` currently implements.
 - `strap mcp`: run bundled stdio MCP servers.
 - `strap porcelain`: discover and run Nushell porcelain modules.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
+- `strap commands`: list and scaffold filesystem-discovered commands.
+- `strap work`: initialize and inspect project-local `.strap` work directories.
+- `strap session`: create, update, show, save, list, and trace sessions.
+- `strap policy`: list and inspect static policy configs.
+- `strap sandbox`: run commands through bubblewrap profiles.
+- `strap state-bb`: Babashka prototype for pure state transforms.
 
 ## Providers
 
@@ -73,6 +79,8 @@ This document records what `strap` currently implements.
 - sqlite-vec vector search.
 - Hybrid text/vector search.
 - Related-note search.
+- List, delete, tags, and backlink commands.
+- Remember latest assistant output from a state as a note.
 - Typed links between notes.
 - Tags and aliases stored on notes.
 - Automatic synchronous indexing on create/update.

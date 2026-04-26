@@ -6,7 +6,7 @@
     "properties": {
       "action": {
         "type": "string",
-        "enum": ["init", "create", "update", "get", "search_text", "search_vector", "search_hybrid", "related", "link", "reindex"],
+        "enum": ["init", "create", "update", "delete", "list", "tags", "get", "search_text", "search_vector", "search_hybrid", "related", "backlinks", "link", "reindex"],
         "description": "Operation to perform. Defaults to search_hybrid."
       },
       "db": {"type": "string", "description": "Optional database path. Defaults to STRAP_ZK_DB or the Nushell config directory."},

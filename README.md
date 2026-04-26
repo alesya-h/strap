@@ -38,6 +38,20 @@ strap state init \
 
 Use `strap help`, `strap -a`, and `strap paths` to inspect the command surface and resolved roots. See `docs/organization.md`.
 
+Project-local daily workflow:
+
+```bash
+strap work init
+strap session new "repo analysis"
+strap session ask "Analyze this repo"
+strap session show \
+| strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
+| tee session.json \
+| strap session save
+```
+
+See `docs/daily-use.md` and `docs/commands.md`.
+
 ## Nushell
 
 `nu/strap.nu` wraps the Node filters as native structured pipeline commands:
