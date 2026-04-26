@@ -1,4 +1,4 @@
-import { publicToolSpec, toolMap } from "./registry.js";
+import { publicToolSpec, toolMap } from "#strap/tools/registry";
 
 function encodeMessage(message) {
   const json = JSON.stringify(message);

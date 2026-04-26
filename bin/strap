@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { strapCommandDirs, strapConfigRoot, strapRoot, strapWorkRoot, workspaceRoot } from "../src/paths.js";
+import { strapCommandDirs, strapConfigRoot, strapRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
 
 const [command, ...args] = process.argv.slice(2);
 

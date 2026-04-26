@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { toolMap } from "../../../src/registry.js";
-import { flattenVisible, normalizeState } from "../../../src/state.js";
-import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
+import { toolMap } from "#strap/tools/registry";
+import { flattenVisible, normalizeState } from "#strap/core/state";
+import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 
 const args = process.argv.slice(2);
 const group = takeOption(args, "--tools", args[0] || "all");

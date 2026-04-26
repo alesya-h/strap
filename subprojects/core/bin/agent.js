@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { appendEvent, normalizeState } from "../../../src/state.js";
-import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
+import { appendEvent, normalizeState } from "#strap/core/state";
+import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import fs from "node:fs/promises";
 
 const [command, ...args] = process.argv.slice(2);

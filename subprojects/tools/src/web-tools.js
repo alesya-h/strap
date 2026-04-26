@@ -1,5 +1,5 @@
-import { toolResult, truncateText } from "./result.js";
-import { integerSchema, objectSchema, optionalInteger, optionalString, requireString, stringSchema } from "./schemas.js";
+import { toolResult, truncateText } from "#strap/core/result";
+import { integerSchema, objectSchema, optionalInteger, optionalString, requireString, stringSchema } from "#strap/core/schemas";
 
 async function webFetch(args) {
   const url = requireString(args, "url");

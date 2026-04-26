@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import process from "node:process";
-import { authHeaders, loadProviderConfig } from "../../../src/provider-config.js";
+import { authHeaders, loadProviderConfig } from "#strap/providers/config";
 
 function readStdin() {
   return new Promise((resolve, reject) => {

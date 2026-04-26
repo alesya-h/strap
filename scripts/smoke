@@ -15,9 +15,9 @@ $strap porcelain list > /tmp/strap-porcelain-list.json
 $strap state init | $strap porcelain run basic ask 'hello from porcelain' > /tmp/strap-porcelain-state.json
 $strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-has-calls.json
 
-node -e 'import("./src/registry.js").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("json_echo"); if(!tool) throw new Error("missing json_echo"); const result=await tool.execute({value:"ok"}); if(!result.content[0].text.includes("ok")) throw new Error(result.content[0].text); })'
+node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("json_echo"); if(!tool) throw new Error("missing json_echo"); const result=await tool.execute({value:"ok"}); if(!result.content[0].text.includes("ok")) throw new Error(result.content[0].text); })'
 
 rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --db /tmp/strap-zk-smoke.sqlite --title 'Local hash memory' --body 'Offline smoke indexing works without network.' --tags smoke > /tmp/strap-zk-create.json
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-zk-smoke.sqlite 'offline indexing' > /tmp/strap-zk-search.json
-STRAP_ZK_EMBED_PROVIDER=hash node -e 'import("./src/registry.js").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("zk"); if(!tool) throw new Error("missing zk"); const result=await tool.execute({action:"search_hybrid",db:"/tmp/strap-zk-smoke.sqlite",query:"offline indexing",limit:2}); if(!result.content[0].text.includes("Local hash memory")) throw new Error(result.content[0].text); })'
+STRAP_ZK_EMBED_PROVIDER=hash node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("zk"); if(!tool) throw new Error("missing zk"); const result=await tool.execute({action:"search_hybrid",db:"/tmp/strap-zk-smoke.sqlite",query:"offline indexing",limit:2}); if(!result.content[0].text.includes("Local hash memory")) throw new Error(result.content[0].text); })'

@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { displayPath, resolveInWorkspace, workspaceRoot } from "./paths.js";
-import { toolResult, truncateText } from "./result.js";
+import { displayPath, resolveInWorkspace, workspaceRoot } from "#strap/core/paths";
+import { toolResult, truncateText } from "#strap/core/result";
 import {
   arraySchema,
   booleanSchema,
@@ -15,7 +15,7 @@ import {
   optionalString,
   requireString,
   stringSchema,
-} from "./schemas.js";
+} from "#strap/core/schemas";
 
 const execFileAsync = promisify(execFile);
 

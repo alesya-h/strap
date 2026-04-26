@@ -1,9 +1,9 @@
-import { agentTools } from "./agent-tools.js";
-import { fsTools } from "./fs-tools.js";
-import { processTools } from "./process-tools.js";
-import { jsmcpTools } from "./jsmcp-tools.js";
-import { scriptTools } from "./script-tools.js";
-import { webTools } from "./web-tools.js";
+import { agentTools } from "#strap/tools/agent-tools";
+import { fsTools } from "#strap/tools/fs-tools";
+import { processTools } from "#strap/tools/process-tools";
+import { jsmcpTools } from "#strap/jsmcp/tools";
+import { scriptTools } from "#strap/tools/script-tools";
+import { webTools } from "#strap/tools/web-tools";
 
 export function getTools(group = "all") {
   const groups = {

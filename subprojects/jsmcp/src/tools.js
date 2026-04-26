@@ -1,6 +1,6 @@
-import { callMcpTool } from "./mcp-client.js";
-import { toolResult } from "./result.js";
-import { integerSchema, objectSchema, optionalInteger, optionalString, requireString, stringSchema } from "./schemas.js";
+import { callMcpTool } from "#strap/jsmcp/client";
+import { toolResult } from "#strap/core/result";
+import { integerSchema, objectSchema, optionalInteger, optionalString, requireString, stringSchema } from "#strap/core/schemas";
 
 function jsmcpCommand() {
   const command = process.env.STRAP_JSMCP_COMMAND || "jsmcp";

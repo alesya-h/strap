@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
-import { appendEvent, collapseLastOpenScope, createState, normalizeState, readState, writeState } from "./state.js";
-import { toolResult } from "./result.js";
-import { objectSchema, optionalString, requireString, stringSchema } from "./schemas.js";
+import { appendEvent, collapseLastOpenScope, createState, normalizeState, readState, writeState } from "#strap/core/state";
+import { toolResult } from "#strap/core/result";
+import { objectSchema, optionalString, requireString, stringSchema } from "#strap/core/schemas";
 
 async function forkAgent(args) {
   const input = requireString(args, "state_path");

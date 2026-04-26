@@ -3,8 +3,8 @@ import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { readStdin } from "./cli-io.js";
-import { strapRoot, strapPorcelainDirs } from "./paths.js";
+import { readStdin } from "#strap/core/cli-io";
+import { strapRoot, strapPorcelainDirs } from "#strap/core/paths";
 
 export function porcelainDirs() {
   return strapPorcelainDirs();

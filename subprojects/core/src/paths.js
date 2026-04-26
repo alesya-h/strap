@@ -4,7 +4,7 @@ import os from "node:os";
 import { fileURLToPath } from "node:url";
 
 const SOURCE_DIR = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_ROOT = path.resolve(SOURCE_DIR, "..");
+const DEFAULT_ROOT = path.resolve(SOURCE_DIR, "../../..");
 
 export function workspaceRoot() {
   return path.resolve(process.env.STRAP_WORKSPACE || process.cwd());

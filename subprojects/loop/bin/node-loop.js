@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { appendEvent, normalizeState } from "../../../src/state.js";
-import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
-import { loadProviderConfig } from "../../../src/provider-config.js";
-import { completeProvider } from "../../../src/provider-call.js";
-import { getTools, toolMap } from "../../../src/registry.js";
+import { appendEvent, normalizeState } from "#strap/core/state";
+import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
+import { loadProviderConfig } from "#strap/providers/config";
+import { completeProvider } from "#strap/providers/call";
+import { getTools, toolMap } from "#strap/tools/registry";
 
 const args = process.argv.slice(2);
 

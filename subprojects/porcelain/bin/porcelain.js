@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { readStdin, writeJson } from "../../../src/cli-io.js";
-import { listPorcelain, resolvePorcelain, runPorcelain } from "../../../src/porcelain.js";
+import { readStdin, writeJson } from "#strap/core/cli-io";
+import { listPorcelain, resolvePorcelain, runPorcelain } from "#strap/porcelain/porcelain";
 
 const [command, ...args] = process.argv.slice(2);
 

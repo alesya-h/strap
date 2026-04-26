@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { compileChatMessages, compileOpenAIResponses, normalizeState } from "../../../src/state.js";
-import { getTools } from "../../../src/registry.js";
-import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
-import { loadProviderConfig, normalizeProviderConfig } from "../../../src/provider-config.js";
-import { callProvider, compileProviderRequest, completeProvider } from "../../../src/provider-call.js";
+import { compileChatMessages, compileOpenAIResponses, normalizeState } from "#strap/core/state";
+import { getTools } from "#strap/tools/registry";
+import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
+import { loadProviderConfig, normalizeProviderConfig } from "#strap/providers/config";
+import { callProvider, compileProviderRequest, completeProvider } from "#strap/providers/call";
 import fs from "node:fs/promises";
 
 const [command, ...args] = process.argv.slice(2);

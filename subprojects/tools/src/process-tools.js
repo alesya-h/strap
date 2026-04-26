@@ -1,8 +1,8 @@
 import { execFile, spawn } from "node:child_process";
 import { promisify } from "node:util";
-import { resolveInWorkspace } from "./paths.js";
-import { toolResult, truncateText } from "./result.js";
-import { booleanSchema, integerSchema, objectSchema, optionalBoolean, optionalInteger, optionalString, requireString, stringSchema } from "./schemas.js";
+import { resolveInWorkspace } from "#strap/core/paths";
+import { toolResult, truncateText } from "#strap/core/result";
+import { booleanSchema, integerSchema, objectSchema, optionalBoolean, optionalInteger, optionalString, requireString, stringSchema } from "#strap/core/schemas";
 
 const execFileAsync = promisify(execFile);
 

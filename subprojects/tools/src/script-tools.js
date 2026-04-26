@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { strapConfigRoot, strapRoot, strapToolDirs, strapWorkRoot, workspaceRoot } from "./paths.js";
-import { toolResult, truncateText } from "./result.js";
+import { strapConfigRoot, strapRoot, strapToolDirs, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
+import { toolResult, truncateText } from "#strap/core/result";
 
 const DEFAULT_SCHEMA = {
   type: "object",

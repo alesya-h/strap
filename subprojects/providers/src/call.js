@@ -1,5 +1,5 @@
-import { appendEvent, compileChatMessages, compileOpenAIResponses, eventToText, extractOpenAIResponseEvent, flattenVisible, normalizeState, renderActorFrame } from "./state.js";
-import { authHeaders, refreshProviderAuth } from "./provider-config.js";
+import { appendEvent, compileChatMessages, compileOpenAIResponses, eventToText, extractOpenAIResponseEvent, flattenVisible, normalizeState, renderActorFrame } from "#strap/core/state";
+import { authHeaders, refreshProviderAuth } from "#strap/providers/config";
 
 export function compileProviderRequest(state, config, tools = []) {
   const normalized = normalizeState(state);
