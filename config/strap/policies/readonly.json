@@ -1,4 +1,4 @@
 {
   "name": "readonly",
-  "description": "Read-only policy placeholder. Enforcement is future work."
+  "description": "Read-only policy. Enforcement is implemented by the caller/tool selection layer."
 }

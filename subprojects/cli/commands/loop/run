@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec node "$STRAP_ROOT/bin/strap-loop.js" "$@"
+exec node "$STRAP_ROOT/subprojects/loop/bin/node-loop.js" "$@"

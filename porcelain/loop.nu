@@ -3,21 +3,21 @@ use ../nu/plumbing.nu *
 # A first porcelain sketch for agent loops. It delegates provider/tool effects
 # to Node filters and keeps the flow as immutable state pipes.
 
-def root-bin [name: string] {
+def root-file [path_parts: list<string>] {
   let root = ($env.STRAP_ROOT? | default (pwd))
-  [ $root bin $name ] | path join
+  $path_parts | prepend $root | path join
 }
 
 export def complete-once [--model: string = "gpt-5.1", --tools: string = "all"] {
-  $in | to json | ^node (root-bin strap-llm.js) complete-openai --model $model --tools $tools | from json
+  $in | to json | ^node (root-file [subprojects providers bin llm.js]) complete-openai --model $model --tools $tools | from json
 }
 
 export def complete-provider-once [--provider: path, --tools: string = "all"] {
-  $in | to json | ^node (root-bin strap-llm.js) complete --provider $provider --tools $tools | from json
+  $in | to json | ^node (root-file [subprojects providers bin llm.js]) complete --provider $provider --tools $tools | from json
 }
 
 export def process-tools-once [--tools: string = "all"] {
-  $in | to json | ^node (root-bin strap-run-calls.js) --tools $tools | from json
+  $in | to json | ^node (root-file [subprojects tools bin run-calls.js]) --tools $tools | from json
 }
 
 export def complete-and-process [--model: string = "gpt-5.1", --tools: string = "all"] {

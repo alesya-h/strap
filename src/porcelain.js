@@ -38,7 +38,7 @@ export async function resolvePorcelain(nameOrPath) {
 
 export async function runPorcelain({ modulePath, command, args = [], inputJson }) {
   if (!/^[A-Za-z_][A-Za-z0-9_-]*$/.test(command)) throw new Error(`Unsafe Nu command name: ${command}`);
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "strap-porcelain-"));
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "strap-nu-"));
   const argsPath = path.join(tmp, "args.json");
   const statePath = path.join(tmp, "state.json");
   const scriptPath = path.join(tmp, "run.nu");

@@ -26,9 +26,9 @@ STRAP_JSMCP_ARGS="client --profile work"
 ## Example
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-porcelain.js run basic request-tool jsmcp_list_servers '{}' \
-| node bin/strap-run-calls.js --tools jsmcp
+strap state init \
+| strap porcelain run basic request-tool jsmcp_list_servers '{}' \
+| strap run-calls --tools jsmcp
 ```
 
 ## Kagi Smoke Test
@@ -36,9 +36,9 @@ node bin/strap-state.js init \
 The local jsmcp YAML config includes a `kagi` server. Tested flow:
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-porcelain.js run basic request-tool jsmcp_list_tools '{"server":"kagi"}' \
-| node bin/strap-run-calls.js --tools jsmcp
+strap state init \
+| strap porcelain run basic request-tool jsmcp_list_tools '{"server":"kagi"}' \
+| strap run-calls --tools jsmcp
 ```
 
 Then execute a search:
@@ -52,4 +52,4 @@ Then execute a search:
 }
 ```
 
-This successfully returned Kagi search results through `strap-run-calls --tools jsmcp`.
+This successfully returned Kagi search results through `strap run-calls --tools jsmcp`.

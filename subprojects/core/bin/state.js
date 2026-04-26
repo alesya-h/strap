@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { appendEvent, collapseLastOpenScope, compileChatMessages, compileOpenAIResponses, createState, normalizeState, openScope } from "../src/state.js";
-import { readJsonInput, takeOption, writeJson } from "../src/cli-io.js";
+import { appendEvent, collapseLastOpenScope, compileChatMessages, compileOpenAIResponses, createState, normalizeState, openScope } from "../../../src/state.js";
+import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap-state <init|add-user|add-assistant|push|pop|compile-chat|compile-openai|display-last-message> [args] < state.json > next.json");
+  console.error("Usage: strap state <init|add-user|add-assistant|push|pop|compile-chat|compile-openai|display-last-message> [args] < state.json > next.json");
   process.exit(2);
 }
 

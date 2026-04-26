@@ -58,7 +58,7 @@ For `strap`, the safer version is:
 - sidecar JSON supplies `name`, `description`, `inputSchema`, and annotations
 - input is JSON on stdin, not string interpolation into a shell command
 - output is stdout plus metadata
-- scripts are exposed through the `scripts` tool group and `mcp-servers/scripts.js`
+- scripts are exposed through the `scripts` tool group and `subprojects/mcp/servers/scripts.js`
 
 This preserves the unix-ish extensibility while making quoting, injection, and schema drift easier to reason about.
 

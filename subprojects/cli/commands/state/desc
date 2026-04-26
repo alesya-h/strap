@@ -5,4 +5,4 @@ Usage:
   strap state add-user "hello"
   strap state display-last-message
 
-This is a compatibility command around the current state CLI.
+The command reads state from stdin for transforms and writes the next state to stdout.

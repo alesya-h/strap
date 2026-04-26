@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec nu "$STRAP_ROOT/bin/strap-zk.nu" "$@"
+exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" "$@"

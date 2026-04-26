@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { readStdin, writeJson } from "../src/cli-io.js";
-import { listPorcelain, resolvePorcelain, runPorcelain } from "../src/porcelain.js";
+import { readStdin, writeJson } from "../../../src/cli-io.js";
+import { listPorcelain, resolvePorcelain, runPorcelain } from "../../../src/porcelain.js";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap-porcelain list | strap-porcelain run <module|path> <command> [json-or-string args...] < state.json");
+  console.error("Usage: strap porcelain list | strap porcelain run <module|path> <command> [json-or-string args...] < state.json");
   process.exit(2);
 }
 

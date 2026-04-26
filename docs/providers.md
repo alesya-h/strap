@@ -1,14 +1,14 @@
 # Provider Configs
 
-`strap-llm` can call models from a single provider JSON file. The file is meant to be specific to provider + auth + model, so a pipeline only needs `--provider path.json`.
+`strap llm` can call models from a single provider JSON file. The file is specific to provider + auth + model, so a pipeline only needs `--provider path.json`.
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-state.js add-user "Say hi" \
-| node bin/strap-llm.js complete --provider providers/openai.json --tools all
+strap state init \
+| strap state add-user "Say hi" \
+| strap llm complete --provider config/strap/providers/openai-api-key.json --tools all
 ```
 
-Examples live in `providers.example/`.
+Checked-in provider configs live in `config/strap/providers/`.
 
 ## Common Shape
 
@@ -108,28 +108,28 @@ This reads gptel's Emacs-lisp plist token cache, refreshes through `https://auth
 For an end-to-end agent loop with native tool calls/results:
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-state.js add-user "Analyze this repo" \
-| node bin/strap-loop.js --provider providers.example/chatgpt-gptel.json --tools all --max-turns 6 \
+strap state init \
+| strap state add-user "Analyze this repo" \
+| strap loop --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
 | tee session.json \
-| node bin/strap-state.js display-last-message
+| strap state display-last-message
 ```
 
-`strap-loop` repeatedly calls the model, executes pending tool calls, and feeds results back as provider-native `function_call_output` items. If the tool budget is exhausted, it asks for a final no-tools answer using gathered context.
+`strap loop` repeatedly calls the model, executes pending tool calls, and feeds results back as provider-native `function_call_output` items. If the tool budget is exhausted, it asks for a final no-tools answer using gathered context.
 
 ## Commands
 
 Provider-generic commands:
 
 ```bash
-strap-llm compile --provider provider.json < state.json
-strap-llm call --provider provider.json < state.json
-strap-llm complete --provider provider.json < state.json
+strap llm compile --provider provider.json < state.json
+strap llm call --provider provider.json < state.json
+strap llm complete --provider provider.json < state.json
 ```
 
-Legacy aliases still exist for OpenAI:
+OpenAI convenience commands:
 
 ```bash
-strap-llm compile-openai --model gpt-5.1 < state.json
-strap-llm complete-openai --model gpt-5.1 < state.json
+strap llm compile-openai --model gpt-5.1 < state.json
+strap llm complete-openai --model gpt-5.1 < state.json
 ```

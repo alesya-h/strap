@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-import { appendEvent, normalizeState } from "../src/state.js";
-import { readJsonInput, takeOption, writeJson } from "../src/cli-io.js";
-import { loadProviderConfig } from "../src/provider-config.js";
-import { completeProvider } from "../src/provider-call.js";
-import { getTools, toolMap } from "../src/registry.js";
+import { appendEvent, normalizeState } from "../../../src/state.js";
+import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
+import { loadProviderConfig } from "../../../src/provider-config.js";
+import { completeProvider } from "../../../src/provider-call.js";
+import { getTools, toolMap } from "../../../src/registry.js";
 
 const args = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap-loop --provider provider.json [--tools all|fs|process|web|agent|scripts|none] [--max-turns 8] < state.json > next.json");
+  console.error("Usage: strap loop --provider provider.json [--tools all|fs|process|web|agent|scripts|none] [--max-turns 8] < state.json > next.json");
   process.exit(2);
 }
 

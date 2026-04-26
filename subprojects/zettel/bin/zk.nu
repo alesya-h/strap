@@ -71,7 +71,7 @@ def embed-text [text: string] {
     let parsed = ($out | from json)
     { model: $parsed.model, dimensions: $parsed.dimensions, vector: ($parsed.embeddings | first) }
   } else {
-    let helper = ([ (strap-root) bin strap-zk-embed.js ] | path join)
+    let helper = ([ (strap-root) subprojects zettel bin embed.js ] | path join)
     let out = ({ texts: [$text] } | to json | ^node $helper)
     let parsed = ($out | from json)
     { model: $parsed.model, dimensions: $parsed.dimensions, vector: ($parsed.embeddings | first) }
@@ -146,7 +146,7 @@ WHERE id = __ID__ AND deleted_at IS NULL;
 }
 
 export def main [] {
-  print "strap-zk: use init, create, update, get, search-text, search-vector, search-hybrid, related, link, reindex, or tool"
+  print "strap zk: use init, create, update, get, search-text, search-vector, search-hybrid, related, link, reindex, or tool"
 }
 
 export def "main init" [--db: string = "", --dimensions: int = 384] {

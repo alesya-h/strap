@@ -5,7 +5,7 @@
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
 - Separate harness, static config, and project work roots: `STRAP_ROOT`, `STRAP_CONFIG`, and `STRAP_WORK`.
-- Node CLIs for state editing, provider request compilation, agent fork/fold, and pending tool execution.
+- Subproject commands for state editing, provider request compilation, agent fork/fold, and pending tool execution.
 - A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
@@ -72,11 +72,11 @@ See `docs/self-modifying-porcelain.md` for the design.
 Each server speaks MCP over stdio:
 
 ```bash
-node mcp-servers/fs.js
-node mcp-servers/process.js
-node mcp-servers/web.js
-node mcp-servers/agent.js
-node mcp-servers/scripts.js
+node subprojects/mcp/servers/fs.js
+node subprojects/mcp/servers/process.js
+node subprojects/mcp/servers/web.js
+node subprojects/mcp/servers/agent.js
+node subprojects/mcp/servers/scripts.js
 ```
 
 ## jsmcp
@@ -101,15 +101,15 @@ The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` doe
 
 ## Zettelkasten
 
-`strap-zk` is a Nushell CLI backed by `sqlite3`, FTS5, and `sqlite-vec`. It creates notes, auto-indexes embeddings, and supports text, vector, hybrid, and related-note search.
+`strap zk` is a Nushell CLI backed by `sqlite3`, FTS5, and `sqlite-vec`. It creates notes, auto-indexes embeddings, and supports text, vector, hybrid, and related-note search.
 
 ```bash
-STRAP_ZK_EMBED_PROVIDER=hash strap-zk create \
+STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
   --title 'Local agent memory' \
   --body 'Agents can store and recall semantically related notes.' \
   --tags strap,memory
 
-strap-zk search-hybrid 'semantic recall'
+strap zk search-hybrid 'semantic recall'
 ```
 
 The preferred command surface is also available:
@@ -125,15 +125,15 @@ strap zk search-hybrid 'semantic recall'
 
 Agents get the same capability through the `zk` script tool in the `scripts` tool group. See `docs/zettelkasten.md`.
 
-Embeddings can use `OPENAI_API_KEY`, the deterministic hash fallback, or the local ChatGPT subscription OAuth path:
+Embeddings can use `OPENAI_API_KEY`, the deterministic hash provider, or the local ChatGPT subscription OAuth path:
 
 ```bash
-STRAP_ZK_EMBED_PROVIDER=chatgpt strap-zk search-hybrid 'semantic recall'
+STRAP_ZK_EMBED_PROVIDER=chatgpt strap zk search-hybrid 'semantic recall'
 ```
 
 ## Providers
 
-Provider configs are JSON files containing provider, auth, endpoint, and model. Examples live in `providers.example/`.
+Provider configs are JSON files containing provider, auth, endpoint, and model. Checked-in configs live in `config/strap/providers/`.
 
 ```bash
 strap state init \
@@ -205,4 +205,4 @@ The active format is `strap.state.v0.2`:
 }
 ```
 
-Flat `messages` states from `DESIGN.md` are still normalized on read, but new CLIs write the actor/event/scope shape.
+The active format is the actor/event/scope shape.

@@ -93,7 +93,7 @@ async function refreshGptelToken(tokenFile, token, refreshUrl = "https://auth.op
   return next;
 }
 
-async function resolveSecret(auth, fallbackEnv) {
+async function resolveSecret(auth, defaultEnv) {
   if (auth.value) return auth.value;
   if (auth.env) {
     const value = process.env[auth.env];
@@ -101,7 +101,7 @@ async function resolveSecret(auth, fallbackEnv) {
     return value;
   }
   if (auth.file) return (await fs.readFile(expandHome(auth.file), "utf8")).trim();
-  if (fallbackEnv && process.env[fallbackEnv]) return process.env[fallbackEnv];
+  if (defaultEnv && process.env[defaultEnv]) return process.env[defaultEnv];
   throw new Error(`No secret configured for auth type ${auth.type}`);
 }
 

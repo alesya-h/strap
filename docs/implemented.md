@@ -8,22 +8,21 @@ This document records what `strap` currently implements.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
 - Root/config/work path model via `STRAP_ROOT`, `STRAP_CONFIG`, and `STRAP_WORK`.
 - Immutable JSON filter CLIs for state transforms and harness operations.
-- Flat draft states from the original design are normalized on read.
 - Basic scope operations for opening/collapsing context regions.
 - Basic agent fork/fold commands.
 
 ## CLIs
 
 - `strap`: main command runner, with commands discovered from project, config, and built-in command directories.
-- `strap-state`: initialize, append user/assistant messages, push/pop scopes, display last message.
-- `strap-llm`: compile state into provider requests and call configured providers.
-- `strap-loop`: run model/tool loops over canonical state.
+- `strap state`: initialize, append user/assistant messages, push/pop scopes, display last message.
+- `strap llm`: compile state into provider requests and call configured providers.
+- `strap loop`: run model/tool loops over canonical state.
 - `strap loop-nu`: run the editable Nushell reference loop through the command runner.
-- `strap-run-calls`: execute pending tool requests in canonical state.
-- `strap-agent`: fork/fold agent state.
-- `strap-mcp`: run bundled stdio MCP servers.
-- `strap-porcelain`: discover and run Nushell porcelain modules.
-- `strap-zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
+- `strap run-calls`: execute pending tool requests in canonical state.
+- `strap agent`: fork/fold agent state.
+- `strap mcp`: run bundled stdio MCP servers.
+- `strap porcelain`: discover and run Nushell porcelain modules.
+- `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 
 ## Providers
 
@@ -68,7 +67,7 @@ This document records what `strap` currently implements.
 
 ## Zettelkasten
 
-- `strap-zk` is a Nushell CLI around the `sqlite3` CLI, so NixOS sqlite extension loading works.
+- `strap zk` is a Nushell CLI around the `sqlite3` CLI, so NixOS sqlite extension loading works.
 - SQLite WAL mode and 5 second busy timeout are used for multi-agent concurrency.
 - FTS5 text search.
 - sqlite-vec vector search.
@@ -80,7 +79,7 @@ This document records what `strap` currently implements.
 - Embedding providers:
   - OpenAI API key.
   - ChatGPT subscription OAuth via gptel provider config.
-  - Deterministic local hash fallback for offline tests.
+  - Deterministic local hash provider for offline tests.
   - Custom embedding command via `STRAP_ZK_EMBED_CMD`.
 - Agent-facing `zk` script tool.
 - Smoke-tested concurrent writes.

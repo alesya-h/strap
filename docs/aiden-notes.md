@@ -89,13 +89,13 @@ Self-modification should happen as a branch, not directly in the main context:
 
 ```bash
 state \
-| strap-agent fork --prompt "Design a new script tool for X" \
+| strap agent fork --prompt "Design a new script tool for X" \
 > child.json
 
 # child proposes files, tests them, summarizes
 
 state \
-| strap-agent fold --child child.json --summary "Installed tool X after tests" \
+| strap agent fold --child child.json --summary "Installed tool X after tests" \
 > next.json
 ```
 

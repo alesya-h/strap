@@ -12,12 +12,12 @@ The flexible design goal is: a model can write new porcelain, run it against a f
 ## Current Layout
 
 ```text
-nu/plumbing.nu        stable Nushell state primitives
-nu/strap.nu           ergonomic wrappers around Node filters
-porcelain/basic.nu    starter model-editable state helpers
-porcelain/loop.nu     starter completion/tool loop helpers
-porcelain/self.nu     starter self-modification trace helpers
-bin/strap-porcelain.js  generic runner for Nu porcelain modules
+nu/plumbing.nu          stable Nushell state primitives
+nu/strap.nu             ergonomic wrappers around strap subproject commands
+porcelain/basic.nu      starter model-editable state helpers
+porcelain/loop.nu       editable reference completion/tool loop
+porcelain/self.nu       starter self-modification trace helpers
+strap porcelain ...     generic runner for Nu porcelain modules
 ```
 
 Node remains the bridge for provider calls, MCP/jsmcp, and process/web integration. Nu is the preferred language for porcelain because structured JSON pipelines are native.
@@ -27,22 +27,22 @@ Node remains the bridge for provider calls, MCP/jsmcp, and process/web integrati
 List modules:
 
 ```bash
-node bin/strap-porcelain.js list
+strap porcelain list
 ```
 
 Run a porcelain command as an immutable state filter:
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-porcelain.js run basic ask "List files" \
-| node bin/strap-porcelain.js run basic scope "repo scan"
+strap state init \
+| strap porcelain run basic ask "List files" \
+| strap porcelain run basic scope "repo scan"
 ```
 
 Arguments are parsed as JSON when possible, otherwise they are passed as strings:
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-porcelain.js run basic request-tool grep_files '{"pattern":"TODO"}'
+strap state init \
+| strap porcelain run basic request-tool grep_files '{"pattern":"TODO"}'
 ```
 
 Porcelain lookup uses:
@@ -65,14 +65,14 @@ Then immediately run it:
 
 ```bash
 state \
-| node bin/strap-porcelain.js run repo-debug debug-loop "npm test"
+| strap porcelain run repo-debug debug-loop "npm test"
 ```
 
 Useful porcelain changes should be recorded in state as trace events:
 
 ```bash
 state \
-| node bin/strap-porcelain.js run self changed porcelain/repo-debug.nu "Added npm test debug loop"
+| strap porcelain run self changed porcelain/repo-debug.nu "Added npm test debug loop"
 ```
 
 The trace is not an approval mechanism. It is provenance for later folding, comparison, pruning, and packaging.

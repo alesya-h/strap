@@ -32,7 +32,7 @@ command-name/
   desc                help text; first line is the list summary
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion
-  compgen             optional legacy completion
+  compgen             optional shell completion script
   inner/              private helper scripts
   hide                hide from default command list
   wd                  optional executable that prints command cwd
@@ -96,11 +96,9 @@ my-project/.strap/
 
 `user/template/.strap` is a checked-in template for this shape.
 
-## Compatibility
+## Command Examples
 
-Existing commands such as `bin/strap-state.js` and `bin/strap-loop.js` still exist. The new built-in command directories call them for now.
-
-The direction is to teach and use:
+Use:
 
 ```bash
 strap state init
@@ -108,11 +106,4 @@ strap llm complete --provider config/strap/providers/chatgpt-gptel.json
 strap loop --provider config/strap/providers/chatgpt-gptel.json --tools all
 strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all
 strap zk search-hybrid "semantic recall"
-```
-
-instead of:
-
-```bash
-node bin/strap-state.js init
-node bin/strap-loop.js ...
 ```

@@ -50,24 +50,7 @@ export async function writeState(filePath, state) {
 
 export function normalizeState(input) {
   if (input?.root?.type === "scope") return input;
-  const state = createState();
-  state.legacy = { imported_from: input?.version || "flat-messages" };
-  for (const message of input?.messages || []) {
-    const from = message.role === "assistant" ? "assistant" : message.role === "system" ? "harness" : "user";
-    state.root.children.push({
-      type: "event",
-      from,
-      to: from === "assistant" ? ["user", "harness"] : ["assistant"],
-      kind: message.role === "system" ? "context" : "message",
-      text: message.text || "",
-      calls: message.calls,
-      attachments: message.attachments,
-    });
-  }
-  if (input?.system?.current) {
-    state.actors.assistant.peers.user.contract = renderSections(input.system.current);
-  }
-  return state;
+  throw new Error("Expected strap.state.v0.2 state with root scope");
 }
 
 export function appendEvent(state, event) {

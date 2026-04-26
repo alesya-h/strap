@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import process from "node:process";
-import { authHeaders, loadProviderConfig } from "../src/provider-config.js";
+import { authHeaders, loadProviderConfig } from "../../../src/provider-config.js";
 
 function readStdin() {
   return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ async function openAiEmbeddings(texts) {
 }
 
 async function chatGptEmbeddings(texts) {
-  const providerPath = process.env.STRAP_ZK_CHATGPT_PROVIDER || "providers.example/chatgpt-gptel.json";
+  const providerPath = process.env.STRAP_ZK_CHATGPT_PROVIDER || "config/strap/providers/chatgpt-gptel.json";
   const config = await loadProviderConfig(providerPath);
   const headers = await authHeaders(config);
   const model = process.env.STRAP_ZK_EMBED_MODEL || "text-embedding-3-small";
@@ -96,7 +96,7 @@ async function main() {
   const raw = await readStdin();
   const input = raw.trim() ? JSON.parse(raw) : {};
   const texts = Array.isArray(input.texts) ? input.texts.map(String) : [String(input.text || "")];
-  const provider = process.env.STRAP_ZK_EMBED_PROVIDER || (process.env.STRAP_ZK_OPENAI_API_KEY || process.env.OPENAI_API_KEY ? "openai" : "hash");
+  const provider = process.env.STRAP_ZK_EMBED_PROVIDER || "chatgpt";
   if (provider === "openai") {
     process.stdout.write(`${JSON.stringify(await openAiEmbeddings(texts))}\n`);
     return;

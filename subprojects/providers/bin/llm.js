@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-import { compileChatMessages, compileOpenAIResponses, normalizeState } from "../src/state.js";
-import { getTools } from "../src/registry.js";
-import { readJsonInput, takeOption, writeJson } from "../src/cli-io.js";
-import { loadProviderConfig, normalizeProviderConfig } from "../src/provider-config.js";
-import { callProvider, compileProviderRequest, completeProvider } from "../src/provider-call.js";
+import { compileChatMessages, compileOpenAIResponses, normalizeState } from "../../../src/state.js";
+import { getTools } from "../../../src/registry.js";
+import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
+import { loadProviderConfig, normalizeProviderConfig } from "../../../src/provider-config.js";
+import { callProvider, compileProviderRequest, completeProvider } from "../../../src/provider-call.js";
 import fs from "node:fs/promises";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap-llm <compile|complete|call|compile-openai|compile-chat|complete-openai|call-openai> [--provider provider.json] [--model model] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json");
+  console.error("Usage: strap llm <compile|complete|call|compile-openai|compile-chat|complete-openai|call-openai> [--provider provider.json] [--model model] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json");
   process.exit(2);
 }
 

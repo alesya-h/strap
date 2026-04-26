@@ -16,12 +16,12 @@ export function writeJson(value) {
   process.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
 }
 
-export function takeOption(args, name, fallback = undefined) {
+export function takeOption(args, name, defaultValue = undefined) {
   const index = args.indexOf(name);
-  if (index === -1) return fallback;
+  if (index === -1) return defaultValue;
   const value = args[index + 1];
   args.splice(index, value === undefined ? 1 : 2);
-  return value === undefined ? fallback : value;
+  return value === undefined ? defaultValue : value;
 }
 
 export function hasFlag(args, name) {

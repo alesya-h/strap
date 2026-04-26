@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec node "$STRAP_ROOT/bin/strap-llm.js" "$@"
+exec node "$STRAP_ROOT/subprojects/providers/bin/llm.js" "$@"

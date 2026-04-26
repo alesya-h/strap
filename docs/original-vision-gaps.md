@@ -54,7 +54,7 @@ Current state: tool execution is structured, but tool-environment auditability i
 
 ## Agent Loop Control Plane
 
-- `strap-loop` works, but remains a starter loop.
+- `strap loop` works, but remains a starter loop.
 - Missing total tool-call budgets.
 - Missing per-turn and per-session stop policy controls beyond basic limits.
 - Missing rich trace output to stderr or structured trace state.
@@ -118,7 +118,7 @@ Current state: persistence is unix-explicit via files, `tee`, redirection, and `
 ## Testing Gaps
 
 - Provider-native tool-use lowering needs targeted tests.
-- `strap-loop` needs behavior tests for budget/stop/error cases.
+- `strap loop` needs behavior tests for budget/stop/error cases.
 - jsmcp smoke test is not in `npm test` because it depends on local config/services.
 - ChatGPT subscription provider tests are manual because they depend on local auth.
 - Zettelkasten has smoke tests, but not detailed schema/migration/search quality tests.

@@ -21,4 +21,4 @@ if [ -z "$provider" ]; then
   exit 2
 fi
 
-exec node "$STRAP_ROOT/bin/strap-porcelain.js" run loop run-provider "$provider" "$tools" "$max_turns" "$finalize"
+exec node "$STRAP_ROOT/subprojects/porcelain/bin/porcelain.js" run loop run-provider "$provider" "$tools" "$max_turns" "$finalize"

@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec node "$STRAP_ROOT/bin/strap-mcp.js" "$@"
+exec node "$STRAP_ROOT/subprojects/mcp/bin/mcp.js" "$@"

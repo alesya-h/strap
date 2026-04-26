@@ -1,6 +1,6 @@
 # Zettelkasten
 
-`strap-zk` is a Nushell CLI for a shared agent/human zettelkasten backed by SQLite, FTS5, and `sqlite-vec`. It uses the `sqlite3` CLI so NixOS sqlite extension loading works without requiring Node SQLite bindings to see `sqlite-vec`.
+`strap zk` is a Nushell CLI for a shared agent/human zettelkasten backed by SQLite, FTS5, and `sqlite-vec`. It uses the `sqlite3` CLI so NixOS sqlite extension loading works without requiring Node SQLite bindings to see `sqlite-vec`.
 
 ## Setup
 
@@ -32,12 +32,12 @@ Or use the local ChatGPT subscription OAuth route from the gptel provider config
 
 ```bash
 export STRAP_ZK_EMBED_PROVIDER=chatgpt
-export STRAP_ZK_CHATGPT_PROVIDER=providers.example/chatgpt-gptel.json
+export STRAP_ZK_CHATGPT_PROVIDER=config/strap/providers/chatgpt-gptel.json
 ```
 
 This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. It was tested with `text-embedding-3-small`.
 
-For offline tests, use the deterministic hash embedding fallback:
+For offline tests, use the deterministic hash embedding provider:
 
 ```bash
 export STRAP_ZK_EMBED_PROVIDER=hash
@@ -64,16 +64,16 @@ It must output:
 ## CLI
 
 ```bash
-strap-zk create \
+strap zk create \
   --title 'Provider state is not canonical' \
   --body 'Canonical state should preserve semantic conversation state, not provider request IDs.' \
   --tags strap,providers,state
 
-strap-zk search-hybrid 'provider leakage'
-strap-zk search-vector 'semantic memory retrieval'
-strap-zk search-text 'canonical state'
-strap-zk related zk_note_id
-strap-zk link zk_a zk_b --type refines
+strap zk search-hybrid 'provider leakage'
+strap zk search-vector 'semantic memory retrieval'
+strap zk search-text 'canonical state'
+strap zk related zk_note_id
+strap zk link zk_a zk_b --type refines
 ```
 
 `create` and `update` embed and index automatically. The implementation avoids holding write transactions while calling embedding providers.

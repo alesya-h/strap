@@ -1,5 +1,5 @@
 {
   "name": "readonly",
   "groups": ["fs", "web", "scripts", "jsmcp"],
-  "notes": "Policy enforcement is not implemented yet; this is a named preset placeholder."
+  "notes": "Named preset for read-oriented tool selection."
 }

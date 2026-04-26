@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { appendEvent, normalizeState } from "../src/state.js";
-import { readJsonInput, takeOption, writeJson } from "../src/cli-io.js";
+import { appendEvent, normalizeState } from "../../../src/state.js";
+import { readJsonInput, takeOption, writeJson } from "../../../src/cli-io.js";
 import fs from "node:fs/promises";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap-agent fork --prompt <text> < parent.json > child.json | strap-agent fold --child child.json --summary <text> < parent.json > parent-next.json");
+  console.error("Usage: strap agent fork --prompt <text> < parent.json > child.json | strap agent fold --child child.json --summary <text> < parent.json > parent-next.json");
   process.exit(2);
 }
 

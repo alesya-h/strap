@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+node --check bin/strap
+node --check src/*.js
+node --check subprojects/mcp/servers/*.js
+node --check subprojects/core/bin/*.js
+node --check subprojects/providers/bin/*.js
+node --check subprojects/loop/bin/*.js
+node --check subprojects/tools/bin/*.js
+node --check subprojects/mcp/bin/*.js
+node --check subprojects/porcelain/bin/*.js
+node --check subprojects/zettel/bin/*.js
+
+nu --commands 'source subprojects/zettel/bin/zk.nu; source tools/zk; source porcelain/loop.nu'
+
+bash -n subprojects/cli/commands/*/run subprojects/cli/commands/carapace/inner/*
+jq empty package.json config/strap/config.json config/strap/providers/*.json config/strap/tool-groups/*.json config/strap/zettel/config.json config/strap/policies/*.json

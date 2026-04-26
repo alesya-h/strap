@@ -27,26 +27,26 @@ export function requireString(input, key) {
   return input[key];
 }
 
-export function optionalString(input, key, fallback = undefined) {
-  if (input?.[key] === undefined) return fallback;
+export function optionalString(input, key, defaultValue = undefined) {
+  if (input?.[key] === undefined) return defaultValue;
   if (typeof input[key] !== "string") throw new Error(`Expected string: ${key}`);
   return input[key];
 }
 
-export function optionalBoolean(input, key, fallback = false) {
-  if (input?.[key] === undefined) return fallback;
+export function optionalBoolean(input, key, defaultValue = false) {
+  if (input?.[key] === undefined) return defaultValue;
   if (typeof input[key] !== "boolean") throw new Error(`Expected boolean: ${key}`);
   return input[key];
 }
 
-export function optionalInteger(input, key, fallback = undefined) {
-  if (input?.[key] === undefined) return fallback;
+export function optionalInteger(input, key, defaultValue = undefined) {
+  if (input?.[key] === undefined) return defaultValue;
   if (!Number.isInteger(input[key])) throw new Error(`Expected integer: ${key}`);
   return input[key];
 }
 
-export function optionalArray(input, key, fallback = []) {
-  if (input?.[key] === undefined) return fallback;
+export function optionalArray(input, key, defaultValue = []) {
+  if (input?.[key] === undefined) return defaultValue;
   if (!Array.isArray(input[key])) throw new Error(`Expected array: ${key}`);
   return input[key];
 }
