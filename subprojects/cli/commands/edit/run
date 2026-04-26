@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+target_file="run"
+case "${1:-}" in
+  -c) target_file="completion"; shift ;;
+  -d) target_file="desc"; shift ;;
+esac
+
+cmd_name="${1:-}"
+inner_name="${2:-}"
+if [ -z "$cmd_name" ]; then
+  echo "Usage: strap edit [-c|-d] <command> [inner-script]" >&2
+  exit 1
+fi
+
+cmd_dir="$($STRAP_ROOT/bin/strap command-dir "$cmd_name" 2>/dev/null || true)"
+if [ -z "$cmd_dir" ]; then
+  cmd_dir="$STRAP_WORK/commands/$cmd_name"
+fi
+
+if [ -n "$inner_name" ]; then
+  target_file="inner/$inner_name"
+elif [ "$target_file" = "completion" ]; then
+  if [ -f "$cmd_dir/spec.yaml" ]; then
+    target_file="spec.yaml"
+  elif [ -f "$cmd_dir/carapace-complete" ]; then
+    target_file="carapace-complete"
+  else
+    target_file="compgen"
+  fi
+fi
+
+cmd_file="$cmd_dir/$target_file"
+mkdir -p "$(dirname "$cmd_file")"
+"${EDITOR:-vim}" "$cmd_file"
+if [ -f "$cmd_file" ] && [ "$target_file" != "desc" ] && [ "${cmd_file##*.}" != "yaml" ]; then
+  chmod +x "$cmd_file"
+fi

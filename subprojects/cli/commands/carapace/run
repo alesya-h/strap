@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+subcmd="${1:-}"; shift || true
+case "$subcmd" in
+  install|complete|list-commands) exec "$STRAP_CMD_DIR/inner/$subcmd" "$@" ;;
+  *)
+    echo "Usage: strap carapace <install|complete|list-commands>" >&2
+    exit 2
+    ;;
+esac

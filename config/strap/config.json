@@ -1,0 +1,23 @@
+{
+  "version": "strap.config.v0.1",
+  "command_roots": [
+    "$STRAP_WORK/commands",
+    "$STRAP_CONFIG/commands",
+    "$STRAP_ROOT/subprojects/cli/commands"
+  ],
+  "tool_roots": [
+    "$STRAP_WORK/tools",
+    "$STRAP_CONFIG/tools",
+    "$STRAP_ROOT/tools"
+  ],
+  "porcelain_roots": [
+    "$STRAP_WORK/porcelain",
+    "$STRAP_CONFIG/porcelain",
+    "$STRAP_ROOT/porcelain"
+  ],
+  "defaults": {
+    "provider": "chatgpt-gptel",
+    "tool_group": "all",
+    "loop_engine": "node"
+  }
+}

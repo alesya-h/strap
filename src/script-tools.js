@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { resolveInWorkspace, workspaceRoot } from "./paths.js";
+import { strapConfigRoot, strapRoot, strapToolDirs, strapWorkRoot, workspaceRoot } from "./paths.js";
 import { toolResult, truncateText } from "./result.js";
 
 const DEFAULT_SCHEMA = {
@@ -11,9 +11,7 @@ const DEFAULT_SCHEMA = {
 };
 
 function scriptToolDirs() {
-  const configured = process.env.STRAP_SCRIPT_TOOLS || "";
-  const defaults = [path.join(workspaceRoot(), "tools")];
-  return [...configured.split(path.delimiter).filter(Boolean), ...defaults];
+  return strapToolDirs();
 }
 
 function safeName(fileName) {
@@ -83,6 +81,9 @@ function runScript(filePath, input, spec) {
       cwd: workspaceRoot(),
       env: {
         ...process.env,
+        STRAP_ROOT: strapRoot(),
+        STRAP_CONFIG: strapConfigRoot(),
+        STRAP_WORK: strapWorkRoot(),
         STRAP_TOOL_NAME: spec.name,
         STRAP_WORKSPACE: workspaceRoot(),
       },

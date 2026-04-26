@@ -1,0 +1,13 @@
+{
+  "name": "openai-api-key",
+  "provider": "openai",
+  "api": "responses",
+  "model": "gpt-5.1",
+  "auth": {
+    "type": "api_key",
+    "env": "OPENAI_API_KEY"
+  },
+  "parameters": {
+    "store": false
+  }
+}

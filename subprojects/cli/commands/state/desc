@@ -1,0 +1,8 @@
+Transform or display canonical strap state.
+
+Usage:
+  strap state init
+  strap state add-user "hello"
+  strap state display-last-message
+
+This is a compatibility command around the current state CLI.

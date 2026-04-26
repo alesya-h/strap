@@ -1,0 +1,6 @@
+Run the current Node agent/tool loop.
+
+Usage:
+  strap loop --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6
+
+The Nu reference loop lives in porcelain for now and should become a sibling command as it matures.

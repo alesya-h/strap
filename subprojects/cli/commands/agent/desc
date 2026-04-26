@@ -1,0 +1,5 @@
+Fork and fold agent state.
+
+Usage:
+  strap agent fork --prompt "inspect docs"
+  strap agent fold --child child.json --summary "child result"

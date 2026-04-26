@@ -1,0 +1,9 @@
+Edit or create strap command files.
+
+Usage:
+  strap edit zk                  # edit command run script
+  strap edit -c zk               # edit command completion file
+  strap edit -d zk               # edit command docs/help
+  strap edit loop has-tool-calls # edit an inner helper script
+
+Unknown commands are created under $STRAP_WORK/commands.

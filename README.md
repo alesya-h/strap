@@ -3,6 +3,8 @@
 `strap` is a unix-ish agent harness scaffold. The repo currently contains:
 
 - A provider-agnostic canonical state format based on actors, events, and scopes.
+- A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
+- Separate harness, static config, and project work roots: `STRAP_ROOT`, `STRAP_CONFIG`, and `STRAP_WORK`.
 - Node CLIs for state editing, provider request compilation, agent fork/fold, and pending tool execution.
 - A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
@@ -16,23 +18,25 @@
 
 ```bash
 npm test
-node bin/strap-state.js init \
-| node bin/strap-state.js add-user "Inspect this repo" \
+strap state init \
+| strap state add-user "Inspect this repo" \
 | tee state.json \
-| node bin/strap-llm.js compile-openai --tools all
-node bin/strap-mcp.js fs
+| strap llm compile-openai --tools all
+strap mcp fs
 ```
 
 The main harness CLIs are immutable JSON filters: state comes in on stdin and the next state goes out on stdout. Persisting is explicit with `tee`, shell redirection, or Nushell `save`.
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-state.js add-user "List files in the current directory" \
-| node bin/strap-llm.js complete-openai --tools all \
-| node bin/strap-run-calls.js --tools all \
+strap state init \
+| strap state add-user "List files in the current directory" \
+| strap llm complete-openai --tools all \
+| strap run-calls --tools all \
 | tee session.json \
-| node bin/strap-state.js display-last-message
+| strap state display-last-message
 ```
+
+Use `strap help`, `strap -a`, and `strap paths` to inspect the command surface and resolved roots. See `docs/organization.md`.
 
 ## Nushell
 
@@ -54,11 +58,11 @@ init
 Porcelain modules in `porcelain/*.nu` are meant to be cheap for a model to write, rewrite, fork, and discard. The stable substrate lives in `nu/plumbing.nu` and the Node filter CLIs.
 
 ```bash
-node bin/strap-porcelain.js list
+strap porcelain list
 
-node bin/strap-state.js init \
-| node bin/strap-porcelain.js run basic ask "List files" \
-| node bin/strap-porcelain.js run basic scope "repo scan"
+strap state init \
+| strap porcelain run basic ask "List files" \
+| strap porcelain run basic scope "repo scan"
 ```
 
 See `docs/self-modifying-porcelain.md` for the design.
@@ -80,9 +84,9 @@ node mcp-servers/scripts.js
 `strap` can call installed `jsmcp` through the `jsmcp` tool group. By default it runs `jsmcp client`, matching the OpenCode config in `~/.config/opencode/opencode.jsonc`.
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-porcelain.js run basic request-tool jsmcp_list_servers '{}' \
-| node bin/strap-run-calls.js --tools jsmcp
+strap state init \
+| strap porcelain run basic request-tool jsmcp_list_servers '{}' \
+| strap run-calls --tools jsmcp
 ```
 
 Available bridge tools:
@@ -108,6 +112,17 @@ STRAP_ZK_EMBED_PROVIDER=hash strap-zk create \
 strap-zk search-hybrid 'semantic recall'
 ```
 
+The preferred command surface is also available:
+
+```bash
+STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
+  --title 'Local agent memory' \
+  --body 'Agents can store and recall semantically related notes.' \
+  --tags strap,memory
+
+strap zk search-hybrid 'semantic recall'
+```
+
 Agents get the same capability through the `zk` script tool in the `scripts` tool group. See `docs/zettelkasten.md`.
 
 Embeddings can use `OPENAI_API_KEY`, the deterministic hash fallback, or the local ChatGPT subscription OAuth path:
@@ -121,9 +136,9 @@ STRAP_ZK_EMBED_PROVIDER=chatgpt strap-zk search-hybrid 'semantic recall'
 Provider configs are JSON files containing provider, auth, endpoint, and model. Examples live in `providers.example/`.
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-state.js add-user "Say hi" \
-| node bin/strap-llm.js complete --provider providers.example/openai-api-key.json
+strap state init \
+| strap state add-user "Say hi" \
+| strap llm complete --provider config/strap/providers/openai-api-key.json
 ```
 
 See `docs/providers.md`.
@@ -131,11 +146,21 @@ See `docs/providers.md`.
 For gpt-5.5 over ChatGPT subscription credentials from the local gptel fork:
 
 ```bash
-node bin/strap-state.js init \
-| node bin/strap-state.js add-user "Analyze this repo" \
-| node bin/strap-loop.js --provider providers.example/chatgpt-gptel.json --tools all --max-turns 6 \
+strap state init \
+| strap state add-user "Analyze this repo" \
+| strap loop --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
 | tee session.json \
-| node bin/strap-state.js display-last-message
+| strap state display-last-message
+```
+
+There is also an editable Nushell reference loop:
+
+```bash
+strap state init \
+| strap state add-user "Analyze this repo" \
+| strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
+| tee session.json \
+| strap state display-last-message
 ```
 
 ## Script Tools

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+case "${1:-all}" in
+  root) printf '%s\n' "$STRAP_ROOT" ;;
+  config) printf '%s\n' "$STRAP_CONFIG" ;;
+  work) printf '%s\n' "$STRAP_WORK" ;;
+  workspace) printf '%s\n' "$STRAP_WORKSPACE" ;;
+  all)
+    printf 'STRAP_ROOT=%s\n' "$STRAP_ROOT"
+    printf 'STRAP_CONFIG=%s\n' "$STRAP_CONFIG"
+    printf 'STRAP_WORK=%s\n' "$STRAP_WORK"
+    printf 'STRAP_WORKSPACE=%s\n' "$STRAP_WORKSPACE"
+    ;;
+  *) echo "Usage: strap paths [root|config|work|workspace|all]" >&2; exit 2 ;;
+esac

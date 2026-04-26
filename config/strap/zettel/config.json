@@ -1,0 +1,6 @@
+{
+  "database": "$STRAP_WORK/zettel/zettel.sqlite",
+  "sqlite_vec_load": "vec0",
+  "embedding_provider": "chatgpt",
+  "embedding_model": "text-embedding-3-small"
+}

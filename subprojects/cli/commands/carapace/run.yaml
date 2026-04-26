@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: strap
+description: Modular agent harness command runner
+parsing: disabled
+
+completion:
+  positional:
+    - ["$(strap carapace list-commands)"]
+  positionalany:
+    - "$spec(${STRAP_CMD_DIR}/../${C_ARG0}/spec.yaml) ||| $shift(1)"
+    - "$suppress(.*no such file.*)"
+    - "$(strap carapace complete ${C_ARG0})"

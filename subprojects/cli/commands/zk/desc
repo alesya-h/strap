@@ -1,0 +1,5 @@
+Use the shared SQLite/sqlite-vec zettelkasten.
+
+Usage:
+  strap zk create --title "Note" --body "Body" --tags strap,memory
+  strap zk search-hybrid "semantic recall"

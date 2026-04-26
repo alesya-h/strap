@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+cmd="${1:-}"
+[ -n "$cmd" ] || exit 0
+cmd_dir="$($STRAP_ROOT/bin/strap command-dir "$cmd" 2>/dev/null || true)"
+[ -n "$cmd_dir" ] || exit 0
+[ -f "$cmd_dir/spec.yaml" ] && exit 0
+if [ -x "$cmd_dir/carapace-complete" ]; then
+  exec "$cmd_dir/carapace-complete"
+fi
+if [ -x "$cmd_dir/compgen" ]; then
+  exec "$cmd_dir/compgen"
+fi

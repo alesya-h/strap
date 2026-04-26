@@ -1,0 +1,4 @@
+{
+  "name": "default",
+  "groups": ["fs", "process", "web", "agent", "scripts", "jsmcp"]
+}

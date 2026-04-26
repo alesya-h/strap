@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { readStdin } from "./cli-io.js";
+import { strapRoot, strapPorcelainDirs } from "./paths.js";
 
 export function porcelainDirs() {
-  const configured = (process.env.STRAP_PORCELAIN_PATH || "").split(path.delimiter).filter(Boolean);
-  return [...configured, path.resolve(process.cwd(), "porcelain")];
+  return strapPorcelainDirs();
 }
 
 export async function listPorcelain() {
@@ -46,7 +46,7 @@ export async function runPorcelain({ modulePath, command, args = [], inputJson }
   await fs.writeFile(statePath, inputJson ?? await readStdin());
   const argExprs = args.map((_, index) => `($_args | get ${index})`).join(" ");
   const script = [
-    `$env.STRAP_ROOT = '${escapeNuSingle(process.cwd())}'`,
+    `$env.STRAP_ROOT = '${escapeNuSingle(strapRoot())}'`,
     `use '${escapeNuSingle(modulePath)}' *`,
     `let _input = (open '${escapeNuSingle(statePath)}')`,
     `let _args = (open '${escapeNuSingle(argsPath)}')`,

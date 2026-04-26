@@ -1,0 +1,6 @@
+Carapace integration for strap command completion.
+
+Usage:
+  strap carapace install
+  strap carapace list-commands
+  strap carapace complete <command>

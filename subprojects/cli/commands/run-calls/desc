@@ -1,0 +1,4 @@
+Execute pending tool calls in canonical state.
+
+Usage:
+  strap run-calls --tools all < state.json > next.json

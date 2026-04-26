@@ -1,0 +1,122 @@
+#!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
+import { spawn } from "node:child_process";
+import { strapCommandDirs, strapConfigRoot, strapRoot, strapWorkRoot, workspaceRoot } from "../src/paths.js";
+
+const [command, ...args] = process.argv.slice(2);
+
+function usage() {
+  prettyCommands(false);
+}
+
+function commandDir(name) {
+  for (const root of strapCommandDirs()) {
+    const candidate = path.join(root, name);
+    if (fs.existsSync(path.join(candidate, "run"))) return candidate;
+  }
+  return undefined;
+}
+
+function commands() {
+  const found = new Map();
+  for (const root of [...strapCommandDirs()].reverse()) {
+    if (!fs.existsSync(root)) continue;
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const dir = path.join(root, entry.name);
+      if (!fs.existsSync(path.join(dir, "run"))) continue;
+      found.set(entry.name, { name: entry.name, dir });
+    }
+  }
+  return [...found.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function description(dir) {
+  const file = path.join(dir, "desc");
+  if (!fs.existsSync(file)) return "";
+  return fs.readFileSync(file, "utf8").split(/\r?\n/)[0] || "";
+}
+
+function prettyCommands(showHidden) {
+  process.stdout.write("\n  Available commands:\n\n");
+  for (const item of commands()) {
+    if (!showHidden && fs.existsSync(path.join(item.dir, "hide"))) continue;
+    const desc = description(item.dir);
+    process.stdout.write(`  * ${item.name.padEnd(15)}${desc ? ` - ${desc}` : ""}\n`);
+  }
+  process.stdout.write("\nUse `strap help <command>` to see docs for a command.\n\n");
+}
+
+function showHelp(name) {
+  if (!name) die("Usage: strap help <command>");
+  const dir = commandDir(name);
+  if (!dir) die(`Unknown command: ${name}`);
+  const file = path.join(dir, "desc");
+  if (!fs.existsSync(file)) die(`No help found for command: ${name}`);
+  process.stdout.write(`Showing help for: ${name}\n\n${fs.readFileSync(file, "utf8")}`);
+}
+
+function envFor(name, dir) {
+  return {
+    ...process.env,
+    STRAP_ROOT: strapRoot(),
+    STRAP_CONFIG: strapConfigRoot(),
+    STRAP_WORK: strapWorkRoot(),
+    STRAP_WORKSPACE: workspaceRoot(),
+    STRAP_CMD_NAME: name,
+    STRAP_CMD_DIR: dir,
+  };
+}
+
+function commandCwd(dir, env) {
+  const wd = path.join(dir, "wd");
+  if (!fs.existsSync(wd)) return workspaceRoot();
+  const child = spawn(wd, [], { env, stdio: ["ignore", "pipe", "inherit"] });
+  return new Promise((resolve, reject) => {
+    let stdout = "";
+    child.stdout.on("data", (chunk) => { stdout += chunk; });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve(path.resolve(stdout.trim() || workspaceRoot()));
+      else reject(new Error(`wd exited ${code}`));
+    });
+  });
+}
+
+async function runExecutable(file, name, dir, args) {
+  const env = envFor(name, dir);
+  const cwd = await commandCwd(dir, env);
+  const child = spawn(file, args, { cwd, env, stdio: "inherit" });
+  child.on("error", (error) => die(error.message));
+  child.on("close", (code, signal) => {
+    if (signal) process.kill(process.pid, signal);
+    else process.exit(code ?? 1);
+  });
+}
+
+function die(message) {
+  process.stderr.write(`${message}\n`);
+  process.exit(255);
+}
+
+if (!command || command === "-h" || command === "--help") usage();
+else if (command === "-a") prettyCommands(true);
+else if (command === "help") showHelp(args[0]);
+else if (command === "command-dir") {
+  const dir = commandDir(args[0]);
+  if (!dir) die(`Unknown command: ${args[0]}`);
+  process.stdout.write(`${dir}\n`);
+} else if (command === "inner") {
+  const [name, script, ...rest] = args;
+  if (!name || !script) die("Usage: strap inner <command> <script> [args...]");
+  const dir = commandDir(name);
+  if (!dir) die(`Unknown command: ${name}`);
+  const file = path.join(dir, "inner", script);
+  if (!fs.existsSync(file)) die(`Inner script not found: ${file}`);
+  await runExecutable(file, name, dir, rest);
+} else {
+  const dir = commandDir(command);
+  if (!dir) die(`Unknown command: ${command}`);
+  await runExecutable(path.join(dir, "run"), command, dir, args);
+}

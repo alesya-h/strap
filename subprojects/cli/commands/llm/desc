@@ -1,0 +1,5 @@
+Compile or call language model providers from canonical state.
+
+Usage:
+  strap llm compile --provider config/strap/providers/openai.json
+  strap llm complete --provider config/strap/providers/chatgpt-gptel.json

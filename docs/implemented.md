@@ -5,6 +5,8 @@ This document records what `strap` currently implements.
 ## Core Harness
 
 - Provider-agnostic canonical state format using actors, events, and scopes: `strap.state.v0.2`.
+- Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
+- Root/config/work path model via `STRAP_ROOT`, `STRAP_CONFIG`, and `STRAP_WORK`.
 - Immutable JSON filter CLIs for state transforms and harness operations.
 - Flat draft states from the original design are normalized on read.
 - Basic scope operations for opening/collapsing context regions.
@@ -12,9 +14,11 @@ This document records what `strap` currently implements.
 
 ## CLIs
 
+- `strap`: main command runner, with commands discovered from project, config, and built-in command directories.
 - `strap-state`: initialize, append user/assistant messages, push/pop scopes, display last message.
 - `strap-llm`: compile state into provider requests and call configured providers.
 - `strap-loop`: run model/tool loops over canonical state.
+- `strap loop-nu`: run the editable Nushell reference loop through the command runner.
 - `strap-run-calls`: execute pending tool requests in canonical state.
 - `strap-agent`: fork/fold agent state.
 - `strap-mcp`: run bundled stdio MCP servers.
@@ -85,6 +89,7 @@ This document records what `strap` currently implements.
 
 - `README.md`: current feature overview and usage examples.
 - `DESIGN.md`: canonical state and original design direction.
+- `docs/organization.md`: root/config/work organization and command-directory contract.
 - `docs/providers.md`: provider config and auth notes.
 - `docs/jsmcp.md`: jsmcp bridge and Kagi smoke test notes.
 - `docs/self-modifying-porcelain.md`: porcelain/plumbing self-modification model.

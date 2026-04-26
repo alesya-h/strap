@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+for root in ${STRAP_COMMAND_PATH//:/ } "$STRAP_WORK/commands" "$STRAP_CONFIG/commands" "$STRAP_ROOT/subprojects/cli/commands"; do
+  [ -d "$root" ] || continue
+  for dir in "$root"/*; do
+    [ -d "$dir" ] || continue
+    [ -f "$dir/run" ] || continue
+    [ -f "$dir/hide" ] && continue
+    cmd="$(basename "$dir")"
+    desc_file="$dir/desc"
+    if [ -f "$desc_file" ]; then
+      printf '%s\t%s\n' "$cmd" "$(head -1 "$desc_file")"
+    else
+      printf '%s\n' "$cmd"
+    fi
+  done
+done | sort -u
+printf '%s\t%s\t%s\n' 'help' 'Display help for a command' 'dim'
