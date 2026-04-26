@@ -7,6 +7,7 @@
 - A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
+- A shared SQLite/sqlite-vec zettelkasten CLI and script tool for agent memory.
 - jsmcp bridge tools for programmable access to configured MCP servers.
 - Provider config files for OpenAI, OpenRouter, Anthropic, Codex ChatGPT OAuth, and gptel ChatGPT OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
@@ -93,6 +94,27 @@ Available bridge tools:
 - `jsmcp_clear_logs`
 
 The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` does.
+
+## Zettelkasten
+
+`strap-zk` is a Nushell CLI backed by `sqlite3`, FTS5, and `sqlite-vec`. It creates notes, auto-indexes embeddings, and supports text, vector, hybrid, and related-note search.
+
+```bash
+STRAP_ZK_EMBED_PROVIDER=hash strap-zk create \
+  --title 'Local agent memory' \
+  --body 'Agents can store and recall semantically related notes.' \
+  --tags strap,memory
+
+strap-zk search-hybrid 'semantic recall'
+```
+
+Agents get the same capability through the `zk` script tool in the `scripts` tool group. See `docs/zettelkasten.md`.
+
+Embeddings can use `OPENAI_API_KEY`, the deterministic hash fallback, or the local ChatGPT subscription OAuth path:
+
+```bash
+STRAP_ZK_EMBED_PROVIDER=chatgpt strap-zk search-hybrid 'semantic recall'
+```
 
 ## Providers
 

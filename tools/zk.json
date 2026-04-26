@@ -1,0 +1,33 @@
+{
+  "name": "zk",
+  "description": "Shared zettelkasten backed by SQLite, FTS5, and sqlite-vec. Creates, updates, links, semantically searches, and recalls related notes. The database is multi-agent safe via SQLite WAL and short transactions.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["init", "create", "update", "get", "search_text", "search_vector", "search_hybrid", "related", "link", "reindex"],
+        "description": "Operation to perform. Defaults to search_hybrid."
+      },
+      "db": {"type": "string", "description": "Optional database path. Defaults to STRAP_ZK_DB or the Nushell config directory."},
+      "id": {"type": "string", "description": "Note id for get, update, related, or targeted reindex."},
+      "title": {"type": "string", "description": "Note title for create or update."},
+      "body": {"type": "string", "description": "Markdown note body for create or update."},
+      "query": {"type": "string", "description": "Search query."},
+      "limit": {"type": "integer", "minimum": 1, "maximum": 50, "description": "Maximum result count."},
+      "tags": {"type": "array", "items": {"type": "string"}, "description": "Tags to assign on create/update."},
+      "aliases": {"type": "array", "items": {"type": "string"}, "description": "Aliases/synonyms for the note."},
+      "author": {"type": "string", "description": "Actor name creating/updating the note."},
+      "from_note": {"type": "string", "description": "Source note id for link."},
+      "to_note": {"type": "string", "description": "Target note id for link."},
+      "type": {"type": "string", "description": "Link type, such as related, cites, refines, contradicts, parent, or same-as."},
+      "dimensions": {"type": "integer", "description": "Embedding dimensions when initializing a database."}
+    },
+    "additionalProperties": false
+  },
+  "readOnly": false,
+  "destructive": false,
+  "openWorld": false,
+  "timeoutMs": 120000,
+  "maxOutputBytes": 120000
+}
