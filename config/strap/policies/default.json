@@ -1,4 +1,11 @@
 {
   "name": "default",
-  "description": "Default permissive development policy."
+  "description": "Default permissive development policy.",
+  "rules": {
+    "execute": "allow",
+    "destructive": "allow",
+    "commands": { "allow": ["*"] },
+    "read_roots": ["*"],
+    "write_roots": ["work", "workspace"]
+  }
 }

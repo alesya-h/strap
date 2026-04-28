@@ -3,3 +3,5 @@ List and inspect static harness policy configs.
 Usage:
   strap policy list
   strap policy show readonly
+  strap policy decide --policy readonly --action execute --command zk
+  strap policy decide --policy readonly --action write --path .strap/state.json

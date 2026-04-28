@@ -14,6 +14,15 @@ if ! command -v bwrap >/dev/null 2>&1; then
   exit 127
 fi
 
+decision_json="$(STRAP_POLICY="$profile" "$STRAP_ROOT/bin/strap" policy decide --policy "$profile" --action execute --command sandbox 2>/dev/null || true)"
+if [ -n "$decision_json" ] && command -v jq >/dev/null 2>&1; then
+  decision="$(printf '%s' "$decision_json" | jq -r .decision)"
+  if [ "$decision" = "deny" ]; then
+    printf '%s
+    exit 126
+  fi
+fi
+
 case "$profile" in
   readonly)
     exec bwrap \

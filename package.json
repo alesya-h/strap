@@ -10,7 +10,8 @@
     "#strap/tools/*": "./subprojects/tools/src/*.js",
     "#strap/mcp/*": "./subprojects/mcp/src/*.js",
     "#strap/jsmcp/*": "./subprojects/jsmcp/src/*.js",
-    "#strap/porcelain/*": "./subprojects/porcelain/src/*.js"
+    "#strap/porcelain/*": "./subprojects/porcelain/src/*.js",
+    "#strap/policy/*": "./subprojects/policy/src/*.js"
   },
   "bin": {
     "strap": "./bin/strap"

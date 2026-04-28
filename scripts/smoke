@@ -2,6 +2,8 @@
 set -euo pipefail
 
 strap=./bin/strap
+export STRAP_WORK=/tmp/strap-work-smoke
+rm -rf "$STRAP_WORK"
 
 $strap state init > /tmp/strap-smoke.json
 $strap state add-user 'hello' < /tmp/strap-smoke.json > /tmp/strap-smoke-2.json
@@ -15,11 +17,15 @@ $strap porcelain list > /tmp/strap-porcelain-list.json
 $strap state init | $strap porcelain run basic ask 'hello from porcelain' > /tmp/strap-porcelain-state.json
 $strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-has-calls.json
 $strap commands list --json > /tmp/strap-commands.json
+$strap commands validate --json > /tmp/strap-commands-validate.json
 $strap work init > /tmp/strap-work-init.json
 $strap session new 'smoke session' > /tmp/strap-session-new.json
 $strap session ask 'remember this smoke question' > /tmp/strap-session-ask.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap session recall 'offline indexing' > /tmp/strap-session-recall.json
 $strap session show > /tmp/strap-session-show.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap session remember session,smoke > /tmp/strap-session-remember.json
 $strap policy list > /tmp/strap-policy-list.json
+$strap policy decide --policy readonly --action execute --command zk > /tmp/strap-policy-decide.json
 $strap state-bb init > /tmp/strap-state-bb.json
 
 node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("json_echo"); if(!tool) throw new Error("missing json_echo"); const result=await tool.execute({value:"ok"}); if(!result.content[0].text.includes("ok")) throw new Error(result.content[0].text); })'

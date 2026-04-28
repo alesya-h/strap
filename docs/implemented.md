@@ -27,6 +27,7 @@ This document records what `strap` currently implements.
 - `strap work`: initialize and inspect project-local `.strap` work directories.
 - `strap session`: create, update, show, save, list, and trace sessions.
 - `strap policy`: list and inspect static policy configs.
+- Command execution receives an authority decision before spawning.
 - `strap sandbox`: run commands through bubblewrap profiles.
 - `strap state-bb`: Babashka prototype for pure state transforms.
 

@@ -2,8 +2,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { strapConfigRoot } from "#strap/core/paths";
+import { decide, loadPolicy } from "#strap/policy/authority";
 
-const [command, name] = process.argv.slice(2);
+const [command, name, ...args] = process.argv.slice(2);
 const dir = path.join(strapConfigRoot(), "policies");
 
 function policies() {
@@ -21,7 +22,23 @@ if (command === "list") {
   const file = path.join(dir, `${name}.json`);
   if (!fs.existsSync(file)) throw new Error(`Policy not found: ${name}`);
   process.stdout.write(fs.readFileSync(file, "utf8"));
+} else if (command === "decide") {
+  const options = parseOptions([name, ...args].filter(Boolean));
+  const policy = loadPolicy(options.policy || process.env.STRAP_POLICY || "default");
+  process.stdout.write(`${JSON.stringify(decide({ policy, ...options }), null, 2)}\n`);
 } else {
-  console.error("Usage: strap policy <list|show> [name]");
+  console.error("Usage: strap policy <list|show|decide> [args]");
   process.exit(2);
+}
+
+function parseOptions(values) {
+  const out = {};
+  for (let i = 0; i < values.length; i += 1) {
+    const key = values[i];
+    if (!key?.startsWith("--")) continue;
+    out[key.slice(2).replaceAll("-", "_")] = values[i + 1];
+    i += 1;
+  }
+  if (out.action === undefined) out.action = "execute";
+  return { ...out, path: out.path };
 }

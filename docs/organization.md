@@ -30,6 +30,7 @@ Commands are directories with this shape:
 command-name/
   run                 executable public command
   desc                help text; first line is the list summary
+  command.json        optional machine-readable annotations
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion
   compgen             optional shell completion script
@@ -53,6 +54,7 @@ Useful commands:
 strap help
 strap -a
 strap commands list --json
+strap commands validate --json
 strap commands new my-command
 strap help zk
 strap command-dir zk

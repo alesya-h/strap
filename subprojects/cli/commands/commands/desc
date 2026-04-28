@@ -4,6 +4,8 @@ Usage:
   strap commands list
   strap commands list --json
   strap commands list --all --json
+  strap commands manifest zk
+  strap commands validate --json
   strap commands roots
   strap commands new my-command
 

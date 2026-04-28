@@ -1,4 +1,13 @@
 {
   "name": "readonly",
-  "description": "Read-only policy. Enforcement is implemented by the caller/tool selection layer."
+  "description": "Read-only policy.",
+  "rules": {
+    "execute": "sandbox",
+    "destructive": "deny",
+    "commands": {
+      "allow": ["commands", "help", "paths", "policy", "session", "state", "state-bb", "zk"]
+    },
+    "read_roots": ["root", "config", "work", "workspace"],
+    "write_roots": ["work"]
+  }
 }

@@ -6,6 +6,7 @@ The public extension API is a command directory.
 my-command/
   run                 executable public command
   desc                help text; first line appears in command lists
+  command.json        optional machine-readable annotations
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion script
   compgen             optional shell completion script
@@ -22,6 +23,18 @@ Commands receive:
 - `STRAP_WORKSPACE`
 - `STRAP_CMD_NAME`
 - `STRAP_CMD_DIR`
+- `STRAP_AUTHORITY_DECISION`
+
+`command.json` can declare authority annotations:
+
+```json
+{
+  "name": "example",
+  "readOnly": true,
+  "destructive": false,
+  "openWorld": false
+}
+```
 
 Create a project-local command:
 
@@ -36,6 +49,8 @@ List commands for humans or agents:
 ```bash
 strap commands list
 strap commands list --json
+strap commands manifest zk
+strap commands validate --json
 ```
 
 Private helpers go in `inner/` and can be called with:

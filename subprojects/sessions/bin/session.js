@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { createState, appendEvent, normalizeState } from "#strap/core/state";
 import { readJsonInput, writeJson } from "#strap/core/cli-io";
-import { strapWorkRoot } from "#strap/core/paths";
+import { strapRoot, strapWorkRoot } from "#strap/core/paths";
 
 const [command, ...args] = process.argv.slice(2);
 
@@ -48,8 +49,18 @@ function recordTrace(dir, event) {
 }
 
 function usage() {
-  console.error("Usage: strap session <new|list|path|state|show|ask|save|trace> [args]");
+  console.error("Usage: strap session <new|list|path|state|show|ask|recall|remember|save|trace> [args]");
   process.exit(2);
+}
+
+function runZk(args, input = undefined) {
+  const child = spawnSync("nu", [path.join(strapRoot(), "subprojects", "zettel", "bin", "zk.nu"), ...args], {
+    input,
+    encoding: "utf8",
+    env: process.env,
+  });
+  if (child.status !== 0) throw new Error(child.stderr || child.stdout || `zk exited ${child.status}`);
+  return child.stdout;
 }
 
 if (command === "new") {
@@ -92,6 +103,28 @@ if (command === "new") {
   fs.writeFileSync(statePath(dir), `${JSON.stringify(state, null, 2)}\n`);
   recordTrace(dir, { kind: "session_ask", text });
   writeJson(state);
+} else if (command === "recall") {
+  const dir = currentDir();
+  const query = args.join(" ");
+  if (!query) throw new Error("Usage: strap session recall <query>");
+  const results = JSON.parse(runZk(["search-hybrid", query, "--limit", "5"]));
+  const state = normalizeState(JSON.parse(fs.readFileSync(statePath(dir), "utf8")));
+  appendEvent(state, {
+    from: "harness",
+    to: ["assistant"],
+    kind: "memory_context",
+    text: `Relevant zettelkasten memories for: ${query}`,
+    memories: results,
+  });
+  fs.writeFileSync(statePath(dir), `${JSON.stringify(state, null, 2)}\n`);
+  recordTrace(dir, { kind: "session_recall", query, matches: results.length });
+  writeJson(state);
+} else if (command === "remember") {
+  const dir = currentDir();
+  const tags = args.length ? args.join(",") : "session,summary";
+  const output = runZk(["remember-state", "--tags", tags, "--file", statePath(dir)]);
+  recordTrace(dir, { kind: "session_remember", tags });
+  process.stdout.write(output);
 } else if (command === "save") {
   const dir = currentDir();
   const state = normalizeState(await readJsonInput("-"));

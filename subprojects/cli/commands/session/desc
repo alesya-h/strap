@@ -3,6 +3,8 @@ Create and manage project-local strap sessions.
 Usage:
   strap session new "repo analysis"
   strap session ask "Analyze this repo"
+  strap session recall "repo architecture"
+  strap session remember session,summary
   strap session show
   strap session save < state.json
   strap session list

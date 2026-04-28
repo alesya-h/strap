@@ -6,6 +6,7 @@ A minimal project-local workflow:
 strap work init
 strap session new "repo analysis"
 strap session ask "Analyze this repo"
+strap session recall "repo architecture"
 strap session show \
 | strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
 | tee session.json \
@@ -15,7 +16,7 @@ strap session show \
 Store useful conclusions in the shared memory:
 
 ```bash
-strap session show | strap zk remember-state --tags session,summary
+strap session remember session,summary
 ```
 
 Inspect the work area:
@@ -34,6 +35,7 @@ Add project-local commands:
 strap commands new repo-check
 strap edit repo-check
 strap commands list --json
+strap commands validate --json
 ```
 
 Use the Babashka data-layer prototype:

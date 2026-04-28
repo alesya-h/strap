@@ -50,7 +50,7 @@ strap session show \
 | strap session save
 ```
 
-See `docs/daily-use.md` and `docs/commands.md`.
+See `docs/daily-use.md`, `docs/commands.md`, and `docs/authority.md`.
 
 ## Nushell
 

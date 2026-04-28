@@ -19,6 +19,7 @@ node --check subprojects/jsmcp/src/*.js
 node --check subprojects/cli/bin/*.js
 node --check subprojects/sessions/bin/*.js
 node --check subprojects/policy/bin/*.js
+node --check subprojects/policy/src/*.js
 
 nu --commands 'source subprojects/zettel/bin/zk.nu; source tools/zk; source porcelain/loop.nu'
 

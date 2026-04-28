@@ -283,6 +283,7 @@ ORDER BY notes DESC, tag ASC;
 
 export def "main search-text" [query: string, --db: string = "", --limit: int = 10] {
   let dbp = (db-path $db)
+  if not ($dbp | path exists) { main init --db $dbp --dimensions 384 | ignore }
   let q = (fts-query $query)
   if ($q | is-empty) { [] | to json; return }
   let q_sql = (sql-string $q)
@@ -324,8 +325,8 @@ ORDER BY matches.distance;
 }
 
 export def "main search-hybrid" [query: string, --db: string = "", --limit: int = 10] {
-  let text = (main search-text $query --db $db --limit $limit | from json | upsert source {|_| "text" })
   let vector = (main search-vector $query --db $db --limit $limit | from json | upsert source {|_| "vector" })
+  let text = (main search-text $query --db $db --limit $limit | from json | upsert source {|_| "text" })
   ($text | append $vector | group-by note_id | transpose note_id matches | each { |row|
     let best = ($row.matches | sort-by score | reverse | first)
     $best | merge { sources: ($row.matches | get source | uniq), hybrid_score: ($row.matches | get score | math sum) }
