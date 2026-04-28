@@ -25,10 +25,10 @@ if [ "${1:-}" = "remember-state" ] && [ ! -t 0 ]; then
 fi
 
 case "${1:-}" in
-  create|list|get|update|delete|tags|search|search-text|search-vector|search-hybrid|reindex|remember-state|tool)
+  create|list|get|update|delete|tags|search|search-text|search-vector|search-hybrid|links|backlinks|status|workon|promote|discard|reindex|remember-state|tool)
     exec node "$STRAP_ROOT/subprojects/zettel/bin/zk-md.js" "$@"
     ;;
 esac
 
-echo "Usage: strap zk <create|list|get|update|delete|tags|search|search-hybrid|reindex|remember-state>" >&2
+echo "Usage: strap zk <create|list|get|update|delete|tags|search|search-hybrid|links|backlinks|status|workon|promote|discard|reindex|remember-state>" >&2
 exit 2

@@ -3,6 +3,10 @@ Use the shared markdown-source zettelkasten with a derived SQLite/FTS/vector ind
 Usage:
   strap zk create --scope user --title "Note" --body "Body" --tags strap,memory
   strap zk list --scope all
+  strap zk get "Note"
   strap zk search "semantic"
+  strap zk backlinks "Note"
+  strap zk workon "Project note"
+  strap zk promote "Project note"
   strap zk search-hybrid "semantic recall"
   strap zk reindex --scope all

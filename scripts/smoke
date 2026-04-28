@@ -43,6 +43,12 @@ node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=to
 
 rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope user --title 'Local hash memory' --body 'Offline smoke indexing works without network.' --tags smoke > /tmp/strap-zk-create.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope project --title 'Smoke linked memory' --body 'Linked target.' --tags smoke > /tmp/strap-zk-linked-create.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk update 'Local hash memory' --body 'Offline smoke indexing works without network. See [[Smoke linked memory]].' > /tmp/strap-zk-update.json
+$strap zk backlinks 'Smoke linked memory' > /tmp/strap-zk-backlinks.json
+$strap zk links 'Local hash memory' > /tmp/strap-zk-links.json
+$strap zk workon 'Smoke linked memory' > /tmp/strap-zk-workon.json
+$strap zk promote 'Smoke linked memory' > /tmp/strap-zk-promote.json
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-zk-smoke.sqlite 'offline indexing' > /tmp/strap-zk-search.json
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk list --scope all > /tmp/strap-zk-list.json
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk tags > /tmp/strap-zk-tags.json

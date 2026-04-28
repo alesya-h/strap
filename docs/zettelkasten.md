@@ -41,7 +41,7 @@ export STRAP_ZK_CHATGPT_PROVIDER=config/strap/providers/chatgpt.json
 
 This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap auth chatgpt login` or import an existing Codex token with `strap auth chatgpt import-codex`.
 
-Project-shared notes live under `.strap/zettel`; user/private notes live under `.strap-user/zettel`.
+Project-shared notes live under `.strap/zettel`; user/private notes live under `.strap-user/zettel`. Normal `strap zk` output treats them as one zettelkasten: the user layer is a transparent overlay on top of the project layer, and physical `.strap*` paths are hidden unless `--paths` is requested.
 
 ```bash
 strap zk create --scope user --title "Local preference" --body "User prefers CLI examples." --tags user,preference
@@ -66,7 +66,11 @@ updated_at: "2026-04-28T00:00:00.000Z"
 ---
 
 Commands receive authority decisions.
+
+This refines [[Provider state is not canonical]].
 ```
+
+Links are inline `[[wikilinks]]`; there is no separate canonical link table. Use `[[Title]]` for ordinary links and `[[zk_id|label]]` when a link needs to survive title changes or resolve ambiguity.
 
 For offline tests, use the deterministic hash embedding provider:
 
@@ -105,6 +109,12 @@ strap zk search 'canonical state'
 strap zk search-hybrid 'provider leakage'
 strap zk search-vector 'semantic memory retrieval'
 strap zk search-text 'canonical state'
+strap zk links zk_note_id
+strap zk backlinks zk_note_id
+strap zk workon zk_project_note_id
+strap zk promote zk_project_note_id
+strap zk discard zk_project_note_id
+strap zk status
 strap zk list
 strap zk tags
 strap zk delete zk_note_id
@@ -112,6 +122,10 @@ strap zk reindex --scope all
 ```
 
 `create`, `update`, and `delete` operate on markdown files. `search-hybrid`, `search-vector`, `search-text`, and `reindex` rebuild the derived SQLite index from markdown before querying.
+
+Updating a project note automatically creates a user-layer working copy that shadows the project version. `workon` makes that copy explicitly, `promote` writes the user-layer copy back to the project layer, and `discard` removes the user-layer copy.
+
+`get`, `list`, `search`, `links`, `backlinks`, and write results include link diagnostics from inline wikilinks. Ambiguous links include candidate notes and stable `[[id|label]]` suggestions so an agent can repair the source markdown during normal work.
 
 The lower-level SQLite index commands remain available under explicit `index-*` names for debugging, for example `strap zk index-search-hybrid "query"`.
 

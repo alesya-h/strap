@@ -6,16 +6,17 @@
     "properties": {
       "action": {
         "type": "string",
-        "enum": ["create", "update", "delete", "list", "tags", "get", "search", "search_hybrid", "reindex"],
+        "enum": ["create", "update", "delete", "list", "tags", "get", "search", "links", "backlinks", "status", "workon", "promote", "discard", "search_hybrid", "reindex"],
         "description": "Operation to perform. Defaults to search_hybrid."
       },
       "db": {"type": "string", "description": "Optional derived SQLite index path for search_hybrid/reindex. Defaults to STRAP_ZK_DB or STRAP_WORK/zettel/zettel.sqlite."},
       "scope": {"type": "string", "enum": ["user", "project", "all"], "description": "Markdown source scope. Defaults to user for writes and all for reads."},
-      "id": {"type": "string", "description": "Note id for get, update, or delete."},
+      "id": {"type": "string", "description": "Note id, title, alias, slug, or filename for get/update/delete/links/backlinks/workon/promote/discard."},
       "title": {"type": "string", "description": "Note title for create or update."},
       "body": {"type": "string", "description": "Markdown note body for create or update."},
       "query": {"type": "string", "description": "Search query."},
       "limit": {"type": "integer", "minimum": 1, "maximum": 50, "description": "Maximum result count."},
+      "tag": {"type": "string", "description": "Tag filter for list."},
       "tags": {"type": "array", "items": {"type": "string"}, "description": "Tags to assign on create/update."},
       "aliases": {"type": "array", "items": {"type": "string"}, "description": "Aliases/synonyms for the note."},
       "author": {"type": "string", "description": "Actor name creating/updating the note."}

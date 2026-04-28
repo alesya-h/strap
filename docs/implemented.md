@@ -78,6 +78,9 @@ This document records what `strap` currently implements.
 
 - `strap zk` is a Nushell CLI around the `sqlite3` CLI, so NixOS sqlite extension loading works.
 - Markdown-source notes under `.strap/zettel` and `.strap-user/zettel`.
+- Transparent user overlay over project zettel notes, with `workon`, `promote`, `discard`, and `status`.
+- Inline `[[wikilink]]` parsing with derived `links` and `backlinks`.
+- Link diagnostics are included in normal `get`, `list`, `search`, create, and update output.
 - SQLite WAL mode and 5 second busy timeout are used for the derived index.
 - FTS5 text search.
 - sqlite-vec vector search.

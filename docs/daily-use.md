@@ -52,6 +52,7 @@ Create memory and rebuild the derived SQLite index:
 
 ```bash
 strap zk create --scope user --title "Session note" --body "Useful local observation." --tags session
+strap zk backlinks "Session note"
 STRAP_ZK_EMBED_PROVIDER=hash strap zk reindex --scope all
 ```
 

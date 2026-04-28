@@ -78,8 +78,8 @@ Current state: provenance can be recorded manually, but it is not enforced or sy
 - No background indexer/outbox yet.
 - No multi-chunk note splitting yet.
 - Delete/list/tags/search commands exist.
-- No first-class graph/link commands yet.
-- No backlink-rich result expansion.
+- Inline wikilinks and backlinks exist, but graph traversal is still minimal.
+- No backlink-rich result expansion beyond direct backlink/ambiguous mention reporting.
 - No alias-weighted search/reranking.
 - No conflict/merge policy for concurrent semantic edits.
 - No native MCP server for the zettelkasten.

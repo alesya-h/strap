@@ -124,7 +124,7 @@ The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` doe
 
 ## Zettelkasten
 
-`strap zk` stores notes as markdown under `.strap/zettel` or `.strap-user/zettel`. SQLite, FTS5, and `sqlite-vec` are used as a derived index for text/vector/hybrid search.
+`strap zk` stores notes as markdown under `.strap/zettel` or `.strap-user/zettel`, presented as one overlayed zettelkasten. Inline `[[wikilinks]]` provide links/backlinks, and SQLite, FTS5, and `sqlite-vec` are used as a derived index for text/vector/hybrid search.
 
 ```bash
 STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
@@ -134,6 +134,7 @@ STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
   --tags strap,memory
 
 strap zk search-hybrid 'semantic recall'
+strap zk backlinks 'Local agent memory'
 ```
 
 Agents get the same capability through the `zk` script tool in the `scripts` tool group. See `docs/zettelkasten.md`.
