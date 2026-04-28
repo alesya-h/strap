@@ -1,18 +1,21 @@
 # Strap Design
 
-`strap` is a unix-ish, multi-language agent harness. It is organized around explicit state, filesystem-discovered commands, and small composable effect adapters.
+`strap` is a Linux-first, unix-ish agent harness built around ordinary files, explicit roots, provider-agnostic state, and governable command execution.
 
-## Roots
+For the product vision, see [`docs/vision.md`](docs/vision.md).
+For the detailed implementation architecture, see [`docs/architecture.md`](docs/architecture.md).
 
-`strap` resolves three main roots:
+## Core Bet
 
-- `STRAP_ROOT`: installed harness code root.
-- `STRAP_CONFIG`: static harness config, normally `config/strap` or `~/.config/strap`.
-- `STRAP_WORK`: mutable project work directory, normally nearest `.strap`.
+The durable unit of extension is a filesystem command directory:
 
-`STRAP_WORKSPACE` is the filesystem workspace tools operate in. It defaults to the current directory.
-
-## Command Surface
+```text
+command-name/
+  run
+  desc
+  command.json
+  inner/
+```
 
 The public interface is:
 
@@ -20,148 +23,54 @@ The public interface is:
 strap <command> [args...]
 ```
 
-Commands are directories discovered from:
+This makes the harness inspectable and editable by both humans and agents. A project can carry local commands, tools, sessions, porcelain, and memory under `.strap/` without requiring central registration.
+
+## Current Spine
+
+The project should be understood as this chain:
 
 ```text
-STRAP_COMMAND_PATH
-$STRAP_WORK/commands
-$STRAP_CONFIG/commands
-$STRAP_ROOT/subprojects/cli/commands
+command directory
+  -> manifest and docs
+  -> authority decision
+  -> execution environment
+  -> state/tool/memory/provider effect
+  -> traceable result
 ```
 
-Command shape:
+Everything else should orbit that spine.
 
-```text
-command-name/
-  run
-  desc
-  spec.yaml
-  carapace-complete
-  compgen
-  inner/
-  hide
-  wd
-```
+## Roots
 
-The command-directory model lets humans and agents add project-specific commands without editing a central parser.
+- `STRAP_ROOT`: installed harness code.
+- `STRAP_CONFIG`: static harness config.
+- `STRAP_WORK`: project-local mutable `.strap` work state.
+- `STRAP_WORKSPACE`: filesystem workspace for tools.
 
-## Canonical State
+These roots separate code, config, mutable state, and effect targets.
 
-The canonical state format is `strap.state.v0.2`.
+## State
 
-```json
-{
-  "version": "strap.state.v0.2",
-  "actors": {
-    "user": {
-      "kind": "human",
-      "self": {"public": "The user driving the work."},
-      "peers": {
-        "assistant": {"contract": "Collaborate directly."}
-      }
-    },
-    "assistant": {
-      "kind": "agent",
-      "self": {
-        "public": "A pragmatic software agent.",
-        "private": "Compile provider calls from canonical state."
-      },
-      "peers": {
-        "user": {"contract": "Solve the task end-to-end when feasible."},
-        "harness": {"contract": "Use tool calls as structured actor communication."}
-      }
-    }
-  },
-  "root": {
-    "type": "scope",
-    "label": "root",
-    "status": "open",
-    "participants": ["user", "assistant", "harness"],
-    "children": []
-  }
-}
-```
+The canonical state format is `strap.state.v0.2`: actors, events, and scopes.
 
-Events represent communication:
+See [`docs/state-format.md`](docs/state-format.md) for the full format specification.
 
-```json
-{
-  "type": "event",
-  "from": "assistant",
-  "to": ["harness"],
-  "kind": "tool_request",
-  "text": "I need to inspect files.",
-  "calls": [
-    {"tool": "glob_files", "input": {"pattern": "**/*.js"}}
-  ]
-}
-```
-
-Scopes represent branchable or compactable regions:
-
-```json
-{
-  "type": "scope",
-  "label": "explore parser rewrite",
-  "status": "collapsed",
-  "participants": ["assistant", "harness"],
-  "summary": "Parser rewrite is feasible but needs tokenizer cleanup first.",
-  "children": [],
-  "hidden": {"children": []}
-}
-```
-
-Provider request payloads are compiled projections. Provider-managed continuation state is not canonical state.
+Provider payloads are compiled projections. Provider-managed continuation state is not canonical state.
 
 ## Language Split
 
-- Nu: porcelain workflows, human command composition, reference loops, sqlite CLI orchestration.
-- Node: provider calls, streaming, MCP/jsmcp, SDK-heavy protocol glue.
-- Babashka/Clojure: planned home for pure state/config/session/policy engines.
-
-## Porcelain
-
-Porcelain is model-editable Nushell workflow code. It composes stable plumbing and effect adapters.
-
-Properties:
-
-- cheap to write and discard
-- project-local by default when useful
-- runnable immediately through `strap porcelain`
-- traceable through state events
-- isolated later by sandbox/capability boundaries
-
-## Self-Extension
-
-Self-extension means adding ordinary files:
-
-1. create a command, tool, or porcelain module
-2. run it against a fork or test state
-3. record provenance in state when useful
-4. keep it project-local or promote it to config/built-in code
-
-There is no hidden eval-and-persist lane.
+- Node: provider calls, OAuth, streaming, MCP/jsmcp, filesystem/process glue.
+- Nushell: editable porcelain, reference loop, JSON pipeline composition, zettelkasten SQLite orchestration.
+- Babashka/Clojure: small pure-state prototype; not yet a required architectural layer.
 
 ## Safety Direction
 
-The flexible core assumes commands and porcelain can mutate files. The safety boundary should be outside that layer:
+The current authority model makes an execution decision before `strap <command>` is spawned and exposes it as `STRAP_AUTHORITY_DECISION`. This is the correct center, but it is not yet complete end-to-end enforcement.
 
-- bubblewrap
-- overlayfs/tmpfs
-- least-privilege MCP/jsmcp servers
-- tool-group policies
-- network/process/filesystem restrictions
+Near-term design work should focus on:
 
-## Zettelkasten
+1. authority closure across every effect path;
+2. command contract v0 freeze;
+3. trustworthy readonly mode.
 
-The shared memory layer is `strap zk`:
-
-- SQLite WAL
-- FTS5
-- sqlite-vec
-- text/vector/hybrid search
-- typed links
-- tags and aliases
-- ChatGPT/OpenAI/hash/custom embeddings
-
-It is exposed as both a human CLI and an agent script tool.
+Do not expand the platform surface until those are hardened.

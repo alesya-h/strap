@@ -58,3 +58,40 @@ Private helpers go in `inner/` and can be called with:
 ```bash
 strap inner my-command helper-name arg1 arg2
 ```
+
+## Built-in Commands
+
+| Command | Purpose |
+| --- | --- |
+| `agent` | Fork and fold agent state. |
+| `auth` | Authenticate local provider credentials, currently ChatGPT OAuth. |
+| `carapace` | Install and serve shell completion integration. |
+| `commands` | List, inspect, validate, and scaffold command directories. |
+| `edit` | Edit or create command files. |
+| `llm` | Compile, call, or complete provider requests from canonical state. |
+| `loop` | Run the Node model/tool loop. |
+| `loop-nu` | Run the editable Nushell reference loop. |
+| `mcp` | Run bundled stdio MCP servers. |
+| `paths` | Print resolved root/config/work/workspace paths. |
+| `policy` | List, show, and evaluate policy decisions. |
+| `porcelain` | List and run model-editable Nushell porcelain modules. |
+| `run-calls` | Execute pending tool calls in canonical state. |
+| `sandbox` | Run a command through a bubblewrap sandbox profile. |
+| `session` | Create, inspect, update, recall memory into, and remember project-local sessions. |
+| `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
+| `state-bb` | Run the Babashka pure-state prototype. |
+| `work` | Initialize or inspect the project-local `.strap` work directory. |
+| `zk` | Use the shared SQLite/FTS5/sqlite-vec zettelkasten. |
+
+Run `strap help <command>` for command-local usage text.
+
+## Contract Status
+
+The current command contract is intentionally small and file-oriented. The next hardening milestone is to freeze a v0 contract for:
+
+- required files and executable bits;
+- manifest shape;
+- authority annotations;
+- validation semantics;
+- completion hooks;
+- `inner/` helper behavior.

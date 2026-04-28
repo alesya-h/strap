@@ -2,6 +2,15 @@
 
 A minimal project-local workflow:
 
+If you use the ChatGPT/Codex backend provider, authenticate once first:
+
+```bash
+strap auth chatgpt login
+
+# temporary migration path from an existing Codex login
+strap auth chatgpt import-codex
+```
+
 ```bash
 strap work init
 strap session new "repo analysis"
@@ -18,6 +27,8 @@ Store useful conclusions in the shared memory:
 ```bash
 strap session remember session,summary
 ```
+
+`recall` appends zettelkasten matches into the session state as visible `memory_context`. `remember` stores the latest useful assistant message from the current session state.
 
 Inspect the work area:
 
@@ -43,4 +54,11 @@ Use the Babashka data-layer prototype:
 ```bash
 strap state-bb init
 strap state-bb init | strap state-bb add-user "hello"
+```
+
+Inspect authority decisions during development:
+
+```bash
+strap policy decide --policy readonly --action execute --command zk
+strap policy decide --policy readonly --action write --path /etc/passwd
 ```

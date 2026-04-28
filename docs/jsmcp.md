@@ -53,3 +53,7 @@ Then execute a search:
 ```
 
 This successfully returned Kagi search results through `strap run-calls --tools jsmcp`.
+
+## Authority Note
+
+The jsmcp bridge exposes whatever configured jsmcp servers allow. It is currently a powerful effect surface and should be included in the authority-closure audit before `readonly` or other policies are treated as complete security boundaries.

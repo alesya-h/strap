@@ -1,6 +1,6 @@
 # Modular agentic harness
 
-`strap` is a unix-ish agent harness scaffold. The repo currently contains:
+`strap` is a Linux-first, unix-ish agent harness scaffold. The repo currently contains:
 
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
@@ -14,6 +14,13 @@
 - Provider config files for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
 
+Start with:
+
+- [`docs/vision.md`](docs/vision.md): product thesis, principles, non-goals, priorities.
+- [`docs/architecture.md`](docs/architecture.md): current implementation architecture.
+- [`docs/commands.md`](docs/commands.md): command authoring and command reference.
+- [`docs/authority.md`](docs/authority.md): policy/authority model and current limits.
+
 ## Quick Start
 
 ```bash
@@ -21,7 +28,7 @@ npm test
 strap state init \
 | strap state add-user "Inspect this repo" \
 | tee state.json \
-| strap llm compile-openai --tools all
+| strap llm compile-openai
 strap mcp fs
 ```
 
@@ -50,7 +57,7 @@ strap session show \
 | strap session save
 ```
 
-See `docs/daily-use.md`, `docs/commands.md`, and `docs/authority.md`.
+See `docs/daily-use.md`, `docs/commands.md`, `docs/authority.md`, and `docs/architecture.md`.
 
 ## Nushell
 
@@ -116,17 +123,6 @@ The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` doe
 ## Zettelkasten
 
 `strap zk` is a Nushell CLI backed by `sqlite3`, FTS5, and `sqlite-vec`. It creates notes, auto-indexes embeddings, and supports text, vector, hybrid, and related-note search.
-
-```bash
-STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
-  --title 'Local agent memory' \
-  --body 'Agents can store and recall semantically related notes.' \
-  --tags strap,memory
-
-strap zk search-hybrid 'semantic recall'
-```
-
-The preferred command surface is also available:
 
 ```bash
 STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
@@ -227,3 +223,20 @@ The active format is `strap.state.v0.2`:
 ```
 
 The active format is the actor/event/scope shape.
+
+## Documentation Map
+
+- `DESIGN.md`: concise current design summary.
+- `docs/vision.md`: vision, design principles, non-goals, strategic priorities.
+- `docs/architecture.md`: roots, command flow, authority, state, loops, tools, providers, sessions, memory, subprojects.
+- `docs/state-format.md`: canonical `strap.state.v0.2` format specification.
+- `docs/organization.md`: repository and `.strap/` organization.
+- `docs/commands.md`: command contract and built-in command reference.
+- `docs/authority.md`: policy decisions, sandbox notes, and current enforcement caveats.
+- `docs/providers.md`: provider config and auth modes.
+- `docs/daily-use.md`: daily project-local workflow.
+- `docs/zettelkasten.md`: shared memory CLI and agent tool.
+- `docs/jsmcp.md`: jsmcp bridge.
+- `docs/self-modifying-porcelain.md`: editable Nu porcelain model.
+- `docs/implemented.md`: implemented capability inventory.
+- `docs/original-vision-gaps.md`: remaining hardening/product gaps.

@@ -16,7 +16,11 @@ If your extension has a different path or name:
 export STRAP_ZK_SQLITE_VEC_LOAD=/nix/store/.../lib/vec0.so
 ```
 
-The default DB path is `STRAP_ZK_DB`, or `~/.config/nushell/strap/zettel.sqlite` if unset.
+The default DB path is:
+
+1. `STRAP_ZK_DB`, when set;
+2. `$STRAP_WORK/zettel/zettel.sqlite`, when `STRAP_WORK` is set by the command runner;
+3. `~/.config/nushell/strap/zettel.sqlite` as a Nushell fallback.
 
 ## Embeddings
 
@@ -87,6 +91,15 @@ Remember the latest assistant message from a state:
 ```bash
 strap session show | strap zk remember-state --tags session,summary
 ```
+
+The project-local session wrapper is usually more convenient:
+
+```bash
+strap session recall "repo architecture"
+strap session remember session,summary
+```
+
+`recall` writes matched memories into session state as `memory_context`; `remember` calls `zk remember-state` for the current session file.
 
 ## Agent Tool
 

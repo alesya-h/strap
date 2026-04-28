@@ -24,8 +24,9 @@ This document records what `strap` currently implements.
 - `strap porcelain`: discover and run Nushell porcelain modules.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
+- `strap auth`: manage local provider auth credentials.
 - `strap work`: initialize and inspect project-local `.strap` work directories.
-- `strap session`: create, update, show, save, list, and trace sessions.
+- `strap session`: create, update, recall memory into, remember, show, save, list, and trace sessions.
 - `strap policy`: list and inspect static policy configs.
 - Command execution receives an authority decision before spawning.
 - `strap sandbox`: run commands through bubblewrap profiles.
@@ -38,7 +39,7 @@ This document records what `strap` currently implements.
 - OpenRouter chat completions route exists.
 - Anthropic Messages route exists.
 - Public OpenAI `/v1/responses` is API-key only in this harness; Codex/ChatGPT OAuth tokens are not compatible with that endpoint.
-- ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`.
+- ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`, with tokens managed by `strap auth chatgpt`.
 - ChatGPT subscription OAuth token also works for embeddings through `https://api.openai.com/v1/embeddings`.
 
 ## Tooling
@@ -95,15 +96,21 @@ This document records what `strap` currently implements.
 
 ## Documentation
 
-- `README.md`: current feature overview and usage examples.
-- `DESIGN.md`: canonical state and original design direction.
+- `README.md`: current feature overview, quick start, and documentation map.
+- `DESIGN.md`: concise current design summary.
+- `docs/vision.md`: product thesis, principles, non-goals, and current priorities.
+- `docs/architecture.md`: implementation architecture and subsystem map.
+- `docs/state-format.md`: canonical `strap.state.v0.2` format specification.
 - `docs/organization.md`: root/config/work organization and command-directory contract.
+- `docs/commands.md`: command authoring, validation, and built-in command reference.
+- `docs/authority.md`: policy/authority model and enforcement caveats.
 - `docs/providers.md`: provider config and auth notes.
 - `docs/jsmcp.md`: jsmcp bridge and Kagi smoke test notes.
 - `docs/self-modifying-porcelain.md`: porcelain/plumbing self-modification model.
 - `docs/zettelkasten.md`: shared semantic memory usage.
 - `docs/reference-tool-ux.md`: reference harness/tool UX analysis.
 - `docs/aiden-notes.md`: notes from the older Ruby self-modifying harness.
+- `docs/original-vision-gaps.md`: remaining gaps and hardening work.
 
 ## Validation
 
