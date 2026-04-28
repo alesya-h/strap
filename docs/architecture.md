@@ -231,11 +231,11 @@ Current provider adapter families:
 ChatGPT OAuth is managed by:
 
 ```bash
-strap auth chatgpt login
-strap auth chatgpt import-codex
-strap auth chatgpt refresh
-strap auth chatgpt show
-strap auth chatgpt logout
+strap provider chatgpt auth login
+strap provider chatgpt auth import-codex
+strap provider chatgpt auth refresh
+strap provider chatgpt auth show
+strap provider chatgpt auth logout
 ```
 
 The token cache defaults to `~/.config/strap/auth/chatgpt.json`.

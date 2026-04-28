@@ -39,7 +39,7 @@ export STRAP_ZK_EMBED_PROVIDER=chatgpt
 export STRAP_ZK_CHATGPT_MODEL=current
 ```
 
-This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap auth chatgpt login` or import an existing Codex token with `strap auth chatgpt import-codex`.
+This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap provider chatgpt auth login` or import an existing Codex token with `strap provider chatgpt auth import-codex`.
 
 Project-shared notes live under `.strap/zettel`; user/private notes live under `.strap-user/zettel`. Normal `strap zk` output treats them as one zettelkasten: the user layer is a transparent overlay on top of the project layer, and physical `.strap*` paths are hidden unless `--paths` is requested.
 

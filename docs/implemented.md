@@ -42,7 +42,7 @@ This document records what `strap` currently implements.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
 - `strap context`: render or quote extracted context.
-- `strap auth`: manage local provider auth credentials.
+- `strap provider`: run provider-specific operations and ChatGPT auth.
 - `strap history`: manage jj-backed user-local state history under `.strap-user`.
 - `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
 - `strap session`: create, copy, update, show, save, list, and trace sessions.
@@ -58,7 +58,7 @@ This document records what `strap` currently implements.
 - OpenRouter chat completions route exists.
 - Anthropic Messages route exists.
 - Public OpenAI `/v1/responses` is API-key only in this harness; Codex/ChatGPT OAuth tokens are not compatible with that endpoint.
-- ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`, with tokens managed by `strap auth chatgpt`.
+- ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`, with tokens managed by `strap provider chatgpt auth`.
 - ChatGPT subscription OAuth token also works for embeddings through `https://api.openai.com/v1/embeddings`.
 
 ## Tooling
@@ -109,7 +109,7 @@ This document records what `strap` currently implements.
 - `search-hybrid` and `reindex` rebuild the derived SQLite FTS/vector index from markdown notes.
 - Embedding providers:
   - OpenAI API key.
-  - ChatGPT subscription OAuth via `strap auth chatgpt` token cache.
+  - ChatGPT subscription OAuth via `strap provider chatgpt auth` token cache.
   - Deterministic local hash provider for offline tests.
   - Custom embedding command via `STRAP_ZK_EMBED_CMD`.
 - Agent-facing `zk` script tool.

@@ -85,15 +85,15 @@ This reads `strap`'s ChatGPT OAuth token cache:
 Create or update the token with:
 
 ```bash
-strap auth chatgpt login
-strap auth chatgpt refresh
-strap auth chatgpt show
+strap provider chatgpt auth login
+strap provider chatgpt auth refresh
+strap provider chatgpt auth show
 ```
 
 As a temporary migration path from an existing Codex login, import the Codex ChatGPT OAuth token into the `strap` cache:
 
 ```bash
-strap auth chatgpt import-codex
+strap provider chatgpt auth import-codex
 ```
 
 If the access token is near expiry, `strap` refreshes it using OpenAI's OAuth refresh endpoint and writes the updated token file back with mode `0600`. This is an auth-store mutation, not a session-state mutation.
@@ -147,3 +147,14 @@ strap llm compile --model current < state.json
 strap llm call --model gpt-5.5-chatgpt < state.json
 strap llm complete --model config/strap/models/gpt-5.1-openai.json < state.json
 ```
+
+Provider-specific commands are available when you want to target the adapter explicitly:
+
+```bash
+strap provider list
+strap provider chatgpt compile --model current < state.json
+strap provider openai compile --model gpt-5.1-openai < state.json
+strap provider anthropic complete --model claude-sonnet-4.5-anthropic < state.json
+```
+
+`strap llm` loads the model profile and dispatches through the matching provider operation.

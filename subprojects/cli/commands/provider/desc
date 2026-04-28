@@ -1,0 +1,14 @@
+Run provider-specific operations and authentication.
+
+Usage:
+  strap provider list
+  strap provider chatgpt compile --model current < state.json
+  strap provider openai call --model gpt-5.1-openai < state.json
+  strap provider anthropic complete --model claude-sonnet-4.5-anthropic < state.json
+  strap provider chatgpt auth login
+  strap provider chatgpt auth import-codex
+  strap provider chatgpt auth refresh
+  strap provider chatgpt auth show
+  strap provider chatgpt auth logout
+
+`strap llm` loads a model profile and routes to the corresponding provider operation.

@@ -24,6 +24,9 @@ $strap llm compile --model gpt-5.1-openai < /tmp/strap-smoke-2.json > /tmp/strap
 $strap llm compile --model openai-gpt-5.1-openrouter < /tmp/strap-smoke-2.json > /tmp/strap-model-openrouter.json
 $strap llm compile --model claude-sonnet-4.5-anthropic < /tmp/strap-smoke-2.json > /tmp/strap-model-anthropic.json
 $strap llm compile < /tmp/strap-smoke-2.json > /tmp/strap-model-current.json
+$strap provider list > /tmp/strap-provider-list.json
+$strap provider chatgpt compile < /tmp/strap-smoke-2.json > /tmp/strap-provider-chatgpt-compile.json
+$strap provider openai compile --model gpt-5.1-openai < /tmp/strap-smoke-2.json > /tmp/strap-provider-openai-compile.json
 $strap agent fork --prompt 'inspect docs' < /tmp/strap-smoke-2.json > /tmp/strap-child.json
 $strap agent fold --child /tmp/strap-child.json --summary 'child result' < /tmp/strap-smoke-2.json > /tmp/strap-folded.json
 $strap porcelain list > /tmp/strap-porcelain-list.json
@@ -39,6 +42,7 @@ $strap nu use-line plumbing > /tmp/strap-nu-use-line.txt
 $strap nu use-line strap > /tmp/strap-nu-strap-use-line.txt
 STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap state init | strap agents apply chat-concise | strap skills apply concise | get actors.assistant.skills | save -f /tmp/strap-nu-module-skills.json"
 STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap model current | get model_id | save -f /tmp/strap-nu-model-current.json"
+STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap state init | strap add-user hello | strap provider chatgpt compile | get model | save -f /tmp/strap-nu-provider-compile.json"
 NU_LIB_DIRS="$($strap nu lib-dir)" STRAP_BIN=./bin/strap nu --commands 'use strap; strap init | strap add-user "hello from use strap" | strap events | get text | save -f /tmp/strap-nu-use-strap.json'
 $strap commands list --json > /tmp/strap-commands.json
 $strap commands validate --json > /tmp/strap-commands-validate.json

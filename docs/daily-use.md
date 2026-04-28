@@ -5,10 +5,10 @@ A minimal project workflow:
 If you use the ChatGPT/Codex backend provider, authenticate once first:
 
 ```bash
-strap auth chatgpt login
+strap provider chatgpt auth login
 
 # temporary migration path from an existing Codex login
-strap auth chatgpt import-codex
+strap provider chatgpt auth import-codex
 ```
 
 ```bash

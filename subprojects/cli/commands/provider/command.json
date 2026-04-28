@@ -1,0 +1,6 @@
+{
+  "name": "provider",
+  "readOnly": false,
+  "destructive": false,
+  "openWorld": false
+}

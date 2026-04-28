@@ -234,10 +234,10 @@ See `docs/providers.md`.
 For gpt-5.5 over ChatGPT subscription credentials:
 
 ```bash
-strap auth chatgpt login
+strap provider chatgpt auth login
 
 # Or, as a temporary migration path from an existing Codex login:
-strap auth chatgpt import-codex
+strap provider chatgpt auth import-codex
 ```
 
 ```bash

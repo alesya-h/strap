@@ -67,7 +67,6 @@ strap inner my-command helper-name arg1 arg2
 | `agent` | Fork and fold agent state. |
 | `agents` | List, show, apply, and import markdown agent profiles. |
 | `artifact` | Inspect and manage layered command/tool/porcelain artifacts. |
-| `auth` | Authenticate local provider credentials, currently ChatGPT OAuth. |
 | `carapace` | Install and serve shell completion integration. |
 | `commands` | List, inspect, validate, and scaffold command directories. |
 | `context` | Transform extracted context, including quoting and summarization. |
@@ -83,6 +82,7 @@ strap inner my-command helper-name arg1 arg2
 | `paths` | Print resolved root/config/project/work/workspace paths. |
 | `policy` | List, show, and evaluate policy decisions. |
 | `porcelain` | List and run model-editable Nushell porcelain modules. |
+| `provider` | Run provider-specific operations and authentication. |
 | `run-calls` | Execute pending tool calls in canonical state. |
 | `sandbox` | Run a command through a bubblewrap sandbox profile. |
 | `session` | Create, inspect, update, save, list, and trace user-local project sessions. |
