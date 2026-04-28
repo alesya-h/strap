@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { appendEvent, collapseLastOpenScope, compileChatMessages, compileOpenAIResponses, createState, normalizeState, openScope } from "#strap/core/state";
+import { appendEvent, collapseLastOpenScope, compileChatMessages, compileOpenAIResponses, createState, flattenVisible, normalizeState, openScope } from "#strap/core/state";
 import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import crypto from "node:crypto";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap state <init|add-user|add-assistant|push|pop|bookmark|fold|locate|show|tree|compile-chat|compile-openai|display-last-message> [args] < state.json > next.json");
+  console.error("Usage: strap state <init|add-user|add-assistant|push|pop|bookmark|extract|fold|locate|show|tree|compile-chat|compile-openai|display-last-message> [args] < state.json > next.json");
   process.exit(2);
 }
 
@@ -46,6 +46,14 @@ switch (command) {
   }
   case "bookmark": {
     await bookmarkCommand();
+    break;
+  }
+  case "extract": {
+    const state = await inputState();
+    const from = takeOption(args, "--from");
+    const to = takeOption(args, "--to", from);
+    if (!from || !to) throw new Error("Usage: strap state extract --from <bookmark> [--to <bookmark>]");
+    writeJson(extractBookmarkedRange(state, { from, to }));
     break;
   }
   case "fold": {
@@ -176,6 +184,29 @@ function foldBookmarkedRange(state, { from, to, summary, label }) {
     hidden: { children },
   };
   siblings.splice(first, children.length, scope);
+}
+
+function extractBookmarkedRange(state, { from, to }) {
+  const start = locateUniqueBookmark(state, from, { includeHidden: true });
+  const end = locateUniqueBookmark(state, to, { includeHidden: true });
+  if (start.hidden || end.hidden) throw new Error("Cannot extract bookmarks inside a collapsed scope. Unfold or target visible bookmarks first.");
+  if (start.parent !== end.parent || start.key !== end.key) throw new Error("Bookmarks must resolve to siblings in the same visible scope");
+  const first = Math.min(start.index, end.index);
+  const last = Math.max(start.index, end.index);
+  const children = start.parent[start.key].slice(first, last + 1).map((node) => JSON.parse(JSON.stringify(node)));
+  const scope = { type: "scope", label: "extracted context", status: "open", participants: [...new Set(children.flatMap(nodeParticipants).filter(Boolean))], children };
+  return {
+    version: "strap.context.v0.1",
+    source: {
+      state_version: state.version,
+      from,
+      to,
+      path_from: start.path,
+      path_to: end.path,
+    },
+    nodes: children,
+    events: flattenVisible(scope),
+  };
 }
 
 function nodeParticipants(node) {

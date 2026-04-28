@@ -9,6 +9,8 @@ This document records what `strap` currently implements.
 - Root/config/project/work/workspace path model via `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Immutable JSON filter CLIs for state transforms and harness operations.
 - Basic scope operations for opening/collapsing context regions.
+- Bookmark-based state extraction into `strap.context.v0.1`.
+- Quoted context rendering with `strap context quote`.
 - Basic agent fork/fold commands.
 - Generic layered artifact model for command, tool, and porcelain artifacts.
 - `strap status` reports roots, layers, zettel status, and visible artifact overlays.
@@ -29,10 +31,11 @@ This document records what `strap` currently implements.
 - `strap status`: inspect active roots, layers, and overlay status.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
+- `strap context`: render or quote extracted context.
 - `strap auth`: manage local provider auth credentials.
 - `strap history`: manage jj-backed user-local state history under `.strap-user`.
 - `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
-- `strap session`: create, update, show, save, list, and trace sessions.
+- `strap session`: create, copy, update, show, save, list, and trace sessions.
 - `strap policy`: list and inspect static policy configs.
 - Command execution receives an authority decision before spawning.
 - `strap sandbox`: run commands through bubblewrap profiles.

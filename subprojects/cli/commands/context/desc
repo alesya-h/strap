@@ -1,0 +1,7 @@
+Transform extracted context.
+
+Usage:
+  strap context quote < context.json
+  strap context render < context.json
+
+`quote` marks extracted conversation as evidence, not active dialogue history.

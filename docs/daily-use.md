@@ -90,13 +90,21 @@ strap policy decide --policy readonly --action write --path /etc/passwd
 
 Fold stale context by placing bookmarks on unique text and folding the range:
 
-```bash
-strap session show > state.json
-strap state bookmark add --text "first unique phrase" --label fold-start < state.json > marked-1.json
-strap state bookmark add --text "last unique phrase" --label fold-end < marked-1.json > marked-2.json
-strap state bookmark list < marked-2.json
-strap state fold --from bm_start --to bm_end --summary "What this range established." < marked-2.json > folded.json
-strap session save < folded.json
+```nu
+strap session show | save -f state.json
+open state.json | strap state bookmark add --text "first unique phrase" --label fold-start | save -f marked-1.json
+open marked-1.json | strap state bookmark add --text "last unique phrase" --label fold-end | save -f marked-2.json
+open marked-2.json | strap state bookmark list
+open marked-2.json | strap state extract --from bm_start --to bm_end | strap context quote | save -f quote.json
+open marked-2.json | strap state fold --from bm_start --to bm_end --summary "What this range established." | save -f folded.json
+open folded.json | strap session save
 ```
 
 Use the actual bookmark IDs from `bookmark list` in the `fold` command.
+
+Copy a session to continue in another direction:
+
+```nu
+strap session copy "alternative direction"
+strap session copy "alternative from bookmark" --at bm_start
+```

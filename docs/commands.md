@@ -69,6 +69,7 @@ strap inner my-command helper-name arg1 arg2
 | `auth` | Authenticate local provider credentials, currently ChatGPT OAuth. |
 | `carapace` | Install and serve shell completion integration. |
 | `commands` | List, inspect, validate, and scaffold command directories. |
+| `context` | Transform extracted context, including quoted conversation rendering. |
 | `edit` | Edit or create command files. |
 | `history` | Manage jj-backed user-local strap history. |
 | `llm` | Compile, call, or complete provider requests from canonical state. |
@@ -110,6 +111,7 @@ Canonical state does not require permanent IDs on every event. When an agent nee
 ```bash
 strap state bookmark add --text "unique substring" --label fold-start < state.json > next.json
 strap state bookmark list < next.json
+strap state extract --from bm_start --to bm_end < next.json > context.json
 strap state fold --from bm_start --to bm_end --summary "summary" < next.json > folded.json
 ```
 

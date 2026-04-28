@@ -187,6 +187,25 @@ Folding replaces sibling nodes between the two bookmarks with a collapsed scope 
 
 By default, folding refuses bookmarks that are already inside collapsed hidden children. This avoids accidental surgery inside compressed history.
 
+## Extracted Context
+
+`strap state extract --from <bookmark> --to <bookmark>` emits a context object without mutating state:
+
+```json
+{
+  "version": "strap.context.v0.1",
+  "source": {
+    "state_version": "strap.state.v0.2",
+    "from": "bm_start",
+    "to": "bm_end"
+  },
+  "nodes": [],
+  "events": []
+}
+```
+
+`nodes` preserves the selected state nodes. `events` is the visible flattened event stream for those nodes. `strap context quote` converts this into `strap.quoted-context.v0.1`, marking the conversation as evidence rather than active dialogue history.
+
 ## Standard event kinds
 
 Current code uses these event kinds:

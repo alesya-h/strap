@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createState, appendEvent, normalizeState } from "#strap/core/state";
-import { readJsonInput, writeJson } from "#strap/core/cli-io";
+import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import { strapWorkRoot } from "#strap/core/paths";
 
 const [command, ...args] = process.argv.slice(2);
@@ -48,7 +48,7 @@ function recordTrace(dir, event) {
 }
 
 function usage() {
-  console.error("Usage: strap session <new|list|path|state|show|ask|save|trace> [args]");
+  console.error("Usage: strap session <new|copy|list|path|state|show|ask|save|trace> [args]");
   process.exit(2);
 }
 
@@ -64,6 +64,28 @@ if (command === "new") {
   setCurrent(dir);
   recordTrace(dir, { kind: "session_new", title });
   process.stdout.write(`${JSON.stringify({ ok: true, dir, state: statePath(dir) }, null, 2)}\n`);
+} else if (command === "copy") {
+  const source = currentDir();
+  const at = takeOption(args, "--at", "");
+  const title = args.join(" ") || `${readSessionTitle(source)} copy`;
+  const dir = path.join(sessionsRoot(), `${stamp()}-${slug(title)}`);
+  fs.cpSync(source, dir, { recursive: true, errorOnExist: true });
+  const meta = readSessionMeta(dir);
+  fs.writeFileSync(path.join(dir, "meta.json"), `${JSON.stringify({
+    ...meta,
+    title,
+    created_at: new Date().toISOString(),
+    copied_from: source,
+    copied_at: at || undefined,
+  }, null, 2)}\n`);
+  if (at) {
+    const state = normalizeState(JSON.parse(fs.readFileSync(statePath(dir), "utf8")));
+    truncateStateAfterBookmark(state, at);
+    fs.writeFileSync(statePath(dir), `${JSON.stringify(state, null, 2)}\n`);
+  }
+  setCurrent(dir);
+  recordTrace(dir, { kind: "session_copy", copied_from: source, title, at: at || undefined });
+  writeJson({ ok: true, dir, state: statePath(dir), copied_from: source, copied_at: at || undefined });
 } else if (command === "list") {
   const items = fs.readdirSync(sessionsRoot(), { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -100,4 +122,37 @@ if (command === "new") {
   writeJson({ ok: true, state: statePath(dir) });
 } else {
   usage();
+}
+
+function readSessionMeta(dir) {
+  const file = path.join(dir, "meta.json");
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
+}
+
+function readSessionTitle(dir) {
+  return readSessionMeta(dir).title || path.basename(dir);
+}
+
+function truncateStateAfterBookmark(state, bookmarkId) {
+  if (!truncateScopeAfterBookmark(state.root, bookmarkId)) throw new Error(`Bookmark not found: ${bookmarkId}`);
+}
+
+function truncateScopeAfterBookmark(scope, bookmarkId) {
+  const children = scope.children || [];
+  for (let index = 0; index < children.length; index += 1) {
+    const node = children[index];
+    if (bookmarkIds(node).includes(bookmarkId)) {
+      scope.children = children.slice(0, index + 1);
+      return true;
+    }
+    if (node.type === "scope" && node.status !== "collapsed" && truncateScopeAfterBookmark(node, bookmarkId)) {
+      scope.children = children.slice(0, index + 1);
+      return true;
+    }
+  }
+  return false;
+}
+
+function bookmarkIds(node) {
+  return (node.bookmarks || []).map((bookmark) => typeof bookmark === "string" ? bookmark : bookmark?.id).filter(Boolean);
 }
