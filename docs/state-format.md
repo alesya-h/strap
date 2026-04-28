@@ -136,7 +136,56 @@ Fields:
 | `results` | array | no | Optional result records. Current tool execution stores results on `calls[*]`. |
 | `provider` | object | no | Provider response metadata for audit/debugging. |
 | `hidden` | object | no | Non-rendered attached data, such as folded child state. |
+| `bookmarks` | array | no | Optional inline addressability markers. |
 | custom fields | any | no | Event kinds may add fields, such as `memories`. |
+
+## Bookmarks
+
+Bookmarks are optional inline attributes on event and scope nodes. They provide stable addressability only where an agent or human asks for it, without requiring permanent IDs on every message.
+
+```json
+{
+  "type": "event",
+  "from": "user",
+  "to": ["assistant"],
+  "kind": "message",
+  "text": "Can agents fold this range?",
+  "bookmarks": [
+    {
+      "id": "bm_te6nvs_b573",
+      "label": "fold-start",
+      "created_by": "assistant",
+      "created_at": "2026-04-28T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Bookmark IDs are generated as a short time-plus-random string. The current CLI shape is:
+
+```bash
+strap state bookmark add --text "unique substring" --label fold-start < state.json > next.json
+strap state bookmark list < state.json
+strap state bookmark remove bm_te6nvs_b573 < state.json > next.json
+strap state show bm_te6nvs_b573 < state.json
+strap state locate --text "unique substring" < state.json
+```
+
+`bookmark add` finds a unique visible text match and attaches the bookmark to that node. If the text is missing or ambiguous, the command fails and the caller should provide a longer substring.
+
+Ranges are represented as two bookmarks:
+
+```bash
+strap state fold \
+  --from bm_start \
+  --to bm_end \
+  --summary "Messages in this range established the folding API." \
+  < state.json > next.json
+```
+
+Folding replaces sibling nodes between the two bookmarks with a collapsed scope and preserves the original nodes under `hidden.children`. Bookmarks inside the folded range remain attached to their original nodes inside `hidden.children`.
+
+By default, folding refuses bookmarks that are already inside collapsed hidden children. This avoids accidental surgery inside compressed history.
 
 ## Standard event kinds
 
@@ -262,6 +311,8 @@ strap state add-user "text" < state.json > next.json
 strap state add-assistant "text" < state.json > next.json
 strap state push "scope label" < state.json > next.json
 strap state pop "summary" < state.json > next.json
+strap state bookmark add --text "unique substring" --label fold-start < state.json > next.json
+strap state fold --from bm_start --to bm_end --summary "summary" < state.json > next.json
 ```
 
 Session commands intentionally write the current session file under `$STRAP_WORK/sessions`.

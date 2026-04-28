@@ -99,6 +99,8 @@ State is provider-agnostic and structured as:
 - events: messages, tool requests, tool results, memory context, fork/fold records;
 - scopes: branchable/collapsible regions that can hold summaries and hidden children.
 
+Addressability is optional. `strap state bookmark add` attaches inline bookmarks to visible nodes by unique text match, and `strap state fold --from <bookmark> --to <bookmark>` folds a sibling range into a collapsed scope. This keeps the base state hand-editable while still giving agents stable handles when needed.
+
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 
 ## Execution Loops

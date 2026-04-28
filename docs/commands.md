@@ -85,6 +85,18 @@ strap inner my-command helper-name arg1 arg2
 
 Run `strap help <command>` for command-local usage text.
 
+## Bookmark Addressability
+
+Canonical state does not require permanent IDs on every event. When an agent needs a stable handle, it can place optional inline bookmarks on visible messages/scopes:
+
+```bash
+strap state bookmark add --text "unique substring" --label fold-start < state.json > next.json
+strap state bookmark list < next.json
+strap state fold --from bm_start --to bm_end --summary "summary" < next.json > folded.json
+```
+
+The text match must be unique. If it is ambiguous, provide a longer substring. A range is always two single-node bookmarks.
+
 ## Contract Status
 
 The current command contract is intentionally small and file-oriented. The next hardening milestone is to freeze a v0 contract for:

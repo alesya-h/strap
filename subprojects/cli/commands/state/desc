@@ -3,6 +3,12 @@ Transform or display canonical strap state.
 Usage:
   strap state init
   strap state add-user "hello"
+  strap state bookmark add --text "unique substring" --label fold-start < state.json > next.json
+  strap state bookmark list < state.json
+  strap state fold --from bm_a --to bm_b --summary "summary" < state.json > next.json
+  strap state locate --text "unique substring" < state.json
+  strap state show bm_a < state.json
+  strap state tree --hidden < state.json
   strap state display-last-message
 
 The command reads state from stdin for transforms and writes the next state to stdout.
