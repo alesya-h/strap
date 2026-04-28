@@ -83,7 +83,7 @@ Current state: provenance can be recorded manually, but it is not enforced or sy
 - No alias-weighted search/reranking.
 - No conflict/merge policy for concurrent semantic edits.
 - No native MCP server for the zettelkasten.
-- `remember-state` and `strap session remember` exist, but there is no automatic note creation from full traces or completed tasks.
+- Memory writes are explicit through `strap zk` or the `zk` tool; there is no automatic note creation from full traces or completed tasks.
 
 Current state: semantic memory is useful and shared, but it is an MVP.
 

@@ -32,7 +32,7 @@ This document records what `strap` currently implements.
 - `strap auth`: manage local provider auth credentials.
 - `strap history`: manage jj-backed user-local state history under `.strap-user`.
 - `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
-- `strap session`: create, update, recall memory into, remember, show, save, list, and trace sessions.
+- `strap session`: create, update, show, save, list, and trace sessions.
 - `strap policy`: list and inspect static policy configs.
 - Command execution receives an authority decision before spawning.
 - `strap sandbox`: run commands through bubblewrap profiles.

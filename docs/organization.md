@@ -130,13 +130,11 @@ strap work init
 
 Create and update sessions with:
 
-```bash
+```nu
 strap session new "task name"
 strap session ask "user request"
-strap session recall "related memory"
-strap session remember session,summary
 strap session show
-strap session save < state.json
+open state.json | strap session save
 ```
 
 ## Command Examples

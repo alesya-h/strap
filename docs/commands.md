@@ -80,7 +80,7 @@ strap inner my-command helper-name arg1 arg2
 | `porcelain` | List and run model-editable Nushell porcelain modules. |
 | `run-calls` | Execute pending tool calls in canonical state. |
 | `sandbox` | Run a command through a bubblewrap sandbox profile. |
-| `session` | Create, inspect, update, recall memory into, and remember user-local project sessions. |
+| `session` | Create, inspect, update, save, list, and trace user-local project sessions. |
 | `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
 | `state-bb` | Run the Babashka pure-state prototype. |
 | `status` | Show roots, layers, and overlayed artifact status. |

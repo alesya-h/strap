@@ -15,20 +15,20 @@ strap auth chatgpt import-codex
 strap work init
 strap session new "repo analysis"
 strap session ask "Analyze this repo"
-strap session recall "repo architecture"
 strap session show \
 | strap loop-nu --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
 | tee session.json \
 | strap session save
 ```
 
-Store useful conclusions in the shared memory:
+Store and recall useful conclusions through the zettelkasten:
 
 ```bash
-strap session remember session,summary
+strap zk create --scope user --title "Repo architecture" --body "Useful local observation." --tags session,summary
+STRAP_ZK_EMBED_PROVIDER=hash strap zk search-hybrid "repo architecture"
 ```
 
-`recall` appends zettelkasten matches into the session state as visible `memory_context`. `remember` stores the latest useful assistant message from the current session state.
+Memory is explicit: use `strap zk` directly or let the agent call the `zk` tool. Session commands do not implicitly inject or write memory.
 
 Inspect the work area:
 

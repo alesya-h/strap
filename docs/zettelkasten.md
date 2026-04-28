@@ -129,20 +129,14 @@ Updating a project note automatically creates a user-layer working copy that sha
 
 The lower-level SQLite index commands remain available under explicit `index-*` names for debugging, for example `strap zk index-search-hybrid "query"`.
 
-Remember the latest assistant message from a state:
+Use zettelkasten memory explicitly:
 
 ```bash
-strap session show | strap zk remember-state --tags session,summary
+strap zk search-hybrid "repo architecture"
+strap zk create --scope user --title "Repo architecture" --body "Useful local observation." --tags session,summary
 ```
 
-The project-local session wrapper is usually more convenient:
-
-```bash
-strap session recall "repo architecture"
-strap session remember session,summary
-```
-
-`recall` writes matched memories into session state as `memory_context`; `remember` calls `zk remember-state` for the current session file.
+Agents get the same memory surface through the `zk` script tool. Session commands do not implicitly recall or remember zettelkasten notes.
 
 ## Agent Tool
 

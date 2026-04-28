@@ -43,7 +43,7 @@ Commands and effect surfaces should be able to explain why an action was allowed
 
 ### Make memory explicit
 
-Memory is useful only when it is inspectable and attributable. `strap session recall` injects zettelkasten results as a visible `memory_context` event, and `strap session remember` records session state through an explicit command.
+Memory is useful only when it is inspectable and attributable. Agents should use `strap zk` or the `zk` tool explicitly to search, create, and update memory; session commands should not hide memory reads or writes.
 
 ### Use languages by role
 

@@ -198,7 +198,7 @@ Current code uses these event kinds:
 | `summary` | `harness` | Synthetic visible replacement for collapsed scope. |
 | `fork` | `harness` | Created a child/forked agent state. |
 | `agent_fold` | `harness` | Folded a child state summary into parent state. |
-| `memory_context` | `harness` | Injected explicit zettelkasten search results into session state. |
+| `memory_context` | `harness` | Visible zettelkasten context from explicit memory/tool operations. |
 | `tool_budget_exhausted` | `harness` | Loop budget exhausted; assistant should answer without more tools. |
 
 Other porcelain or commands may add additional `kind` values. They should keep the same event shape.
@@ -239,9 +239,9 @@ Fields after execution:
 
 `run-calls` and `loop` skip calls where `ok` is already set.
 
-## Memory context events
+## Memory Tool Results
 
-`strap session recall <query>` appends a visible memory event:
+Zettelkasten memory should enter state through explicit tool calls/results or explicit user-provided context. A memory result can be represented as an ordinary event when a harness or tool wrapper needs visible context:
 
 ```json
 {
@@ -254,7 +254,7 @@ Fields after execution:
 }
 ```
 
-The `memories` field contains the JSON results from `strap zk search-hybrid`.
+The `memories` field may contain JSON results from `strap zk search-hybrid`, but there is no session command that injects this implicitly.
 
 ## Provider metadata
 

@@ -191,7 +191,7 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 - `provider-requests/`
 - `tool-results/`
 
-`strap session recall <query>` searches the zettelkasten and appends visible memory context to state. `strap session remember [tags]` writes useful state into zettelkasten memory.
+Memory is explicit: agents and humans use `strap zk` or the `zk` script tool to search, create, and update zettelkasten notes. Session commands do not implicitly inject or write memory.
 
 `strap zk` stores markdown notes under `.strap-user/zettel` for user/private memory or `.strap/zettel` for project-shared memory. The user layer is a transparent overlay on the project layer: user notes shadow project notes with the same id, `workon` copies a project note into the user layer, `promote` writes it back, and normal output hides physical `.strap*` paths. Inline `[[wikilinks]]` are the canonical link source; backlinks and ambiguity diagnostics are derived during normal reads/writes. SQLite/FTS/vector data under `$STRAP_WORK/zettel` is a derived cache rebuilt by `strap zk reindex` and on hybrid/vector searches.
 
