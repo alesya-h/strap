@@ -45,7 +45,7 @@ strap work init
 strap session new "repo analysis"
 strap session ask "Analyze this repo"
 strap session show \
-| strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
+| strap loop-nu --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
 | tee session.json \
 | strap session save
 ```
@@ -157,12 +157,19 @@ strap state init \
 
 See `docs/providers.md`.
 
-For gpt-5.5 over ChatGPT subscription credentials from the local gptel fork:
+For gpt-5.5 over ChatGPT subscription credentials:
+
+```bash
+strap auth chatgpt login
+
+# Or, as a temporary migration path from an existing Codex login:
+strap auth chatgpt import-codex
+```
 
 ```bash
 strap state init \
 | strap state add-user "Analyze this repo" \
-| strap loop --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
+| strap loop --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
 | tee session.json \
 | strap state display-last-message
 ```
@@ -172,7 +179,7 @@ There is also an editable Nushell reference loop:
 ```bash
 strap state init \
 | strap state add-user "Analyze this repo" \
-| strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
+| strap loop-nu --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
 | tee session.json \
 | strap state display-last-message
 ```

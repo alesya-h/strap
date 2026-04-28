@@ -1,0 +1,8 @@
+Authenticate local provider credentials.
+
+Usage:
+  strap auth chatgpt login
+  strap auth chatgpt import-codex
+  strap auth chatgpt refresh
+  strap auth chatgpt show
+  strap auth chatgpt logout

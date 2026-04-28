@@ -54,36 +54,47 @@ The secret can come from `env`, `file`, or `value`.
 
 This sends `x-api-key` instead of `Authorization: Bearer`.
 
-### ChatGPT/Codex backend via Codex OAuth/subscription
+### ChatGPT/Codex backend OAuth/subscription
 
 ```json
 {
-  "type": "codex_chatgpt",
-  "auth_file": "~/.codex/auth.json",
-  "refresh": true,
-  "account_id": "optional-workspace-id"
+  "type": "chatgpt_oauth",
+  "token_file": "~/.config/strap/auth/chatgpt.json",
+  "refresh": true
 }
 ```
 
-This reads Codex-style `auth.json` token data:
+This reads `strap`'s ChatGPT OAuth token cache:
 
-- `tokens.access_token`
-- `tokens.refresh_token`
-- `tokens.account_id`
+- `access_token`
+- `refresh_token`
+- `account_id`
+- `expires_at`
 
-If the access token is near expiry, `strap` refreshes it using OpenAI's OAuth refresh endpoint and Codex's client id, then writes the updated auth file back with mode `0600`. This mirrors the relevant Codex behavior. It is an auth-store mutation, not a session-state mutation.
+Create or update the token with:
 
-Codex/ChatGPT OAuth is a separate auth family from normal OpenAI API-key auth. Do not use `codex_chatgpt` credentials with `https://api.openai.com/v1/responses`; that public endpoint expects API-token/project-key credentials. Use Codex/ChatGPT OAuth only with ChatGPT/Codex backend endpoints such as `https://chatgpt.com/backend-api/codex/responses`.
+```bash
+strap auth chatgpt login
+strap auth chatgpt refresh
+strap auth chatgpt show
+```
+
+As a temporary migration path from an existing Codex login, import the Codex ChatGPT OAuth token into the `strap` cache:
+
+```bash
+strap auth chatgpt import-codex
+```
+
+If the access token is near expiry, `strap` refreshes it using OpenAI's OAuth refresh endpoint and writes the updated token file back with mode `0600`. This is an auth-store mutation, not a session-state mutation.
+
+ChatGPT OAuth is a separate auth family from normal OpenAI API-key auth. Do not use ChatGPT OAuth credentials with `https://api.openai.com/v1/responses`; that public endpoint expects API-token/project-key credentials. Use ChatGPT OAuth only with ChatGPT/Codex backend endpoints such as `https://chatgpt.com/backend-api/codex/responses`.
 
 Request headers include:
 
 - `Authorization: Bearer <access_token>`
 - `ChatGPT-Account-ID: <account_id>` when available
-- `X-OpenAI-Fedramp: true` when the token claims require it
 
-### ChatGPT/Codex backend via gptel OAuth/subscription
-
-The local gptel fork uses a different working path for ChatGPT subscription access:
+Provider config:
 
 ```json
 {
@@ -92,10 +103,9 @@ The local gptel fork uses a different working path for ChatGPT subscription acce
   "model": "gpt-5.5",
   "base_url": "https://chatgpt.com/backend-api/codex/responses",
   "auth": {
-    "type": "gptel_chatgpt",
-    "token_file": "~/.emacs.d/.cache/gptel/chatgpt-token",
-    "refresh": true,
-    "originator": "gptel"
+    "type": "chatgpt_oauth",
+    "token_file": "~/.config/strap/auth/chatgpt.json",
+    "refresh": true
   },
   "stream": true,
   "parameters": {
@@ -105,14 +115,12 @@ The local gptel fork uses a different working path for ChatGPT subscription acce
 }
 ```
 
-This reads gptel's Emacs-lisp plist token cache, refreshes through `https://auth.openai.com/oauth/token`, and calls `chatgpt.com/backend-api/codex/responses`. This is the currently tested subscription/OAuth route. Like Codex OAuth, it is not for public `api.openai.com/v1/responses`; that route is API-key auth only.
-
 For an end-to-end agent loop with native tool calls/results:
 
 ```bash
 strap state init \
 | strap state add-user "Analyze this repo" \
-| strap loop --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
+| strap loop --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
 | tee session.json \
 | strap state display-last-message
 ```

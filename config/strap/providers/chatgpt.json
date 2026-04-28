@@ -1,14 +1,13 @@
 {
-  "name": "chatgpt-gptel-codex",
+  "name": "chatgpt-codex",
   "provider": "chatgpt",
   "api": "responses",
   "model": "gpt-5.5",
   "base_url": "https://chatgpt.com/backend-api/codex/responses",
   "auth": {
-    "type": "gptel_chatgpt",
-    "token_file": "~/.emacs.d/.cache/gptel/chatgpt-token",
-    "refresh": true,
-    "originator": "gptel"
+    "type": "chatgpt_oauth",
+    "token_file": "~/.config/strap/auth/chatgpt.json",
+    "refresh": true
   },
   "stream": true,
   "parameters": {

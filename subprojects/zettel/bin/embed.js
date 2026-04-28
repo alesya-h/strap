@@ -67,7 +67,7 @@ async function openAiEmbeddings(texts) {
 }
 
 async function chatGptEmbeddings(texts) {
-  const providerPath = process.env.STRAP_ZK_CHATGPT_PROVIDER || "config/strap/providers/chatgpt-gptel.json";
+  const providerPath = process.env.STRAP_ZK_CHATGPT_PROVIDER || "config/strap/providers/chatgpt.json";
   const config = await loadProviderConfig(providerPath);
   const headers = await authHeaders(config);
   const model = process.env.STRAP_ZK_EMBED_MODEL || "text-embedding-3-small";

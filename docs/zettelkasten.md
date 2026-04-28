@@ -28,14 +28,14 @@ export OPENAI_API_KEY=...
 export STRAP_ZK_EMBED_MODEL=text-embedding-3-small
 ```
 
-Or use the local ChatGPT subscription OAuth route from the gptel provider config:
+Or use the local ChatGPT subscription OAuth route:
 
 ```bash
 export STRAP_ZK_EMBED_PROVIDER=chatgpt
-export STRAP_ZK_CHATGPT_PROVIDER=config/strap/providers/chatgpt-gptel.json
+export STRAP_ZK_CHATGPT_PROVIDER=config/strap/providers/chatgpt.json
 ```
 
-This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. It was tested with `text-embedding-3-small`.
+This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap auth chatgpt login` or import an existing Codex token with `strap auth chatgpt import-codex`.
 
 For offline tests, use the deterministic hash embedding provider:
 

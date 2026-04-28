@@ -121,8 +121,8 @@ Use:
 
 ```bash
 strap state init
-strap llm complete --provider config/strap/providers/chatgpt-gptel.json
-strap loop --provider config/strap/providers/chatgpt-gptel.json --tools all
-strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all
+strap llm complete --provider config/strap/providers/chatgpt.json
+strap loop --provider config/strap/providers/chatgpt.json --tools all
+strap loop-nu --provider config/strap/providers/chatgpt.json --tools all
 strap zk search-hybrid "semantic recall"
 ```

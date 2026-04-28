@@ -8,7 +8,7 @@ strap session new "repo analysis"
 strap session ask "Analyze this repo"
 strap session recall "repo architecture"
 strap session show \
-| strap loop-nu --provider config/strap/providers/chatgpt-gptel.json --tools all --max-turns 6 \
+| strap loop-nu --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
 | tee session.json \
 | strap session save
 ```

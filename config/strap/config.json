@@ -16,7 +16,7 @@
     "$STRAP_ROOT/porcelain"
   ],
   "defaults": {
-    "provider": "chatgpt-gptel",
+    "provider": "chatgpt",
     "tool_group": "all",
     "loop_engine": "node"
   }

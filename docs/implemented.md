@@ -87,7 +87,7 @@ This document records what `strap` currently implements.
 - Automatic synchronous indexing on create/update.
 - Embedding providers:
   - OpenAI API key.
-  - ChatGPT subscription OAuth via gptel provider config.
+  - ChatGPT subscription OAuth via `strap auth chatgpt` token cache.
   - Deterministic local hash provider for offline tests.
   - Custom embedding command via `STRAP_ZK_EMBED_CMD`.
 - Agent-facing `zk` script tool.
