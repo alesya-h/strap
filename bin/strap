@@ -88,7 +88,7 @@ function commandCwd(dir, env) {
 
 async function runExecutable(file, name, dir, args) {
   const env = envFor(name, dir);
-  const auth = decide({ policy: loadPolicy(env.STRAP_POLICY || "default"), action: "execute", command: name, annotations: commandAnnotations(dir) });
+  const auth = decide({ policy: loadPolicy(env.STRAP_POLICY || "default"), action: "execute", command: name });
   if (auth.decision === "deny") die(`Policy denied ${name}: ${auth.reason}`);
   env.STRAP_AUTHORITY_DECISION = JSON.stringify(auth);
   const cwd = await commandCwd(dir, env);
@@ -98,12 +98,6 @@ async function runExecutable(file, name, dir, args) {
     if (signal) process.kill(process.pid, signal);
     else process.exit(code ?? 1);
   });
-}
-
-function commandAnnotations(dir) {
-  const file = path.join(dir, "command.json");
-  if (!fs.existsSync(file)) return {};
-  return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
 function die(message) {

@@ -10,7 +10,7 @@ This document records the main pieces from the original `strap` vision that are 
 - No eBPF/seccomp/network policy layer.
 - No formal propose/test/approve/install workflow for generated capabilities.
 
-Current state: command execution receives an authority decision, and a basic bwrap command exists. Generated porcelain can be written and run cheaply, but end-to-end enforcement across every effect path is not complete.
+Current state: generated porcelain can be written and run cheaply, and a basic bwrap command exists. Restricted modes should be enforced by the launch environment rather than command-owned metadata.
 
 ## Branch, Fold, And Context-Pop Semantics
 
@@ -101,10 +101,10 @@ Current state: the system is CLI-usable, but not polished as a daily product.
 
 - Tool groups and first-pass policies exist, but not per-agent/per-branch capabilities.
 - jsmcp exposes whatever configured servers allow.
-- A first-pass policy decision engine exists for command execution and explicit read/write decisions. It is not yet complete enforcement for read-only, networkless, repo-only, or memory-only agents.
+- A first-pass launch policy engine exists for command execution and explicit read/write decisions. It is not complete enforcement for read-only, networkless, repo-only, or memory-only agents.
 - No approval boundary for high-risk tools beyond the surrounding host/client behavior.
 
-Current state: capability separation is now partly implemented, but authority closure across tools, MCP/jsmcp, memory, auth, and self-modification remains the major hardening gap.
+Current state: capability separation is partly implemented, but restricted modes depend on operational isolation across tools, MCP/jsmcp, memory, auth, and self-modification.
 
 ## Persistence And Session Management
 

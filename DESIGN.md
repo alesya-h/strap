@@ -13,7 +13,6 @@ The durable unit of extension is a filesystem command directory:
 command-name/
   run
   desc
-  command.json
   inner/
 ```
 
@@ -32,8 +31,7 @@ The project should be understood as this chain:
 ```text
 command directory
   -> manifest and docs
-  -> authority decision
-  -> execution environment
+  -> execution profile
   -> state/tool/memory/provider effect
   -> traceable result
 ```
@@ -64,14 +62,14 @@ Provider payloads are compiled projections. Provider-managed continuation state 
 - Nushell: editable porcelain, reference loop, JSON pipeline composition, zettelkasten SQLite orchestration.
 - Babashka/Clojure: small pure-state prototype; not yet a required architectural layer.
 
-## Safety Direction
+## Isolation Direction
 
-The current authority model makes an execution decision before `strap <command>` is spawned and exposes it as `STRAP_AUTHORITY_DECISION`. This is the correct center, but it is not yet complete end-to-end enforcement.
+`strap` is flexibility-first. Restrictions should be imposed by the launch environment rather than trusted command metadata.
 
-Near-term design work should focus on:
+The intended hardening path is operational isolation:
 
-1. authority closure across every effect path;
-2. command contract v0 freeze;
-3. trustworthy readonly mode.
+1. run restricted work under Linux isolation such as bubblewrap;
+2. mount filesystems read-only or with explicit writable overlays;
+3. use restricted MCP/jsmcp profiles for restricted modes.
 
-Do not expand the platform surface until those are hardened.
+Command metadata is not a security boundary.

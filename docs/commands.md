@@ -6,7 +6,6 @@ The public extension API is a command directory.
 my-command/
   run                 executable public command
   desc                help text; first line appears in command lists
-  command.json        optional machine-readable annotations
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion script
   compgen             optional shell completion script
@@ -26,16 +25,7 @@ Commands receive:
 - `STRAP_CMD_DIR`
 - `STRAP_AUTHORITY_DECISION`
 
-`command.json` can declare authority annotations:
-
-```json
-{
-  "name": "example",
-  "readOnly": true,
-  "destructive": false,
-  "openWorld": false
-}
-```
+Command safety is not described by command-owned metadata. Use launch profiles, sandboxing, and restricted tool/jsmcp configuration for restricted modes.
 
 Create a user-local temporary command under `.strap-user/commands`:
 
@@ -206,11 +196,10 @@ The text match must be unique. If it is ambiguous, provide a longer substring. A
 
 ## Contract Status
 
-The current command contract is intentionally small and file-oriented. The next hardening milestone is to freeze a v0 contract for:
+The current command contract is intentionally small and file-oriented. The next milestone is to freeze a v0 contract for:
 
 - required files and executable bits;
 - manifest shape;
-- authority annotations;
 - validation semantics;
 - completion hooks;
 - `inner/` helper behavior.

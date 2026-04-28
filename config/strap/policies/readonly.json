@@ -3,7 +3,6 @@
   "description": "Read-only policy.",
   "rules": {
     "execute": "sandbox",
-    "destructive": "deny",
     "commands": {
       "allow": ["commands", "help", "paths", "policy", "session", "state", "state-bb", "zk"]
     },

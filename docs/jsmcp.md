@@ -56,4 +56,4 @@ This successfully returned Kagi search results through `strap run-calls --tools 
 
 ## Authority Note
 
-The jsmcp bridge exposes whatever configured jsmcp servers allow. It is currently a powerful effect surface and should be included in the authority-closure audit before `readonly` or other policies are treated as complete security boundaries.
+The jsmcp bridge exposes whatever configured jsmcp servers allow. Treat it as a powerful effect surface unless the run uses a restricted jsmcp profile and an isolated launch environment.

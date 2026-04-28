@@ -12,7 +12,7 @@
 - `porcelain/`: runner for model-editable Nushell porcelain modules.
 - `zettel/`: markdown-source zettelkasten, derived SQLite/FTS/vector index, and embedding helper.
 - `sessions/`: `.strap` project artifact and `.strap-user` local work/session CLIs.
-- `policy/`: authority decision model and policy CLI.
+- `policy/`: launch-policy helper and policy CLI.
 - `state-bb/`: Babashka pure-state prototype.
 
 Subprojects group code by capability, not implementation type. Public access should still go through `strap <command>` unless a developer is working directly on internals.

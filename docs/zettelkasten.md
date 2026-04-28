@@ -45,9 +45,9 @@ Project-shared notes live under `.strap/zettel`; user/private notes live under `
 
 ```bash
 strap zk create --scope user --title "Local preference" --body "User prefers CLI examples." --tags user,preference
-strap zk create --scope project --title "Authority model" --body "Commands receive authority decisions." --tags strap,architecture
+strap zk create --scope project --title "Launch isolation" --body "Restricted modes come from the launch environment." --tags strap,architecture
 strap zk list --scope all
-strap zk search "authority"
+strap zk search "isolation"
 STRAP_ZK_EMBED_PROVIDER=hash strap zk reindex --scope all
 ```
 
@@ -56,7 +56,7 @@ The markdown format uses simple frontmatter:
 ```markdown
 ---
 id: "zk_..."
-title: "Authority model"
+title: "Launch isolation"
 tags: ["strap", "architecture"]
 aliases: []
 author: "agent"
@@ -65,7 +65,7 @@ created_at: "2026-04-28T00:00:00.000Z"
 updated_at: "2026-04-28T00:00:00.000Z"
 ---
 
-Commands receive authority decisions.
+Restricted modes come from the launch environment.
 
 This refines [[Provider state is not canonical]].
 ```

@@ -23,9 +23,6 @@
     },
     "additionalProperties": false
   },
-  "readOnly": false,
-  "destructive": false,
-  "openWorld": false,
   "timeoutMs": 120000,
   "maxOutputBytes": 120000
 }

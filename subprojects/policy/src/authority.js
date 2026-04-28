@@ -24,20 +24,19 @@ export function rootForPath(filePath) {
   return "outside";
 }
 
-export function decide({ policy = loadPolicy(), action, command, path: targetPath, annotations = {} }) {
+export function decide({ policy = loadPolicy(), action, command, path: targetPath }) {
   const rules = policy.rules || {};
-  if (action === "execute") return decideExecute(policy, rules, command, annotations);
+  if (action === "execute") return decideExecute(policy, rules, command);
   if (action === "read" || action === "write") return decidePath(policy, rules, action, targetPath);
   return decision("deny", policy, `unknown action: ${action}`);
 }
 
-function decideExecute(policy, rules, command, annotations) {
+function decideExecute(policy, rules, command) {
   const commands = rules.commands || {};
   if (commands.deny?.includes(command)) return decision("deny", policy, `command denied: ${command}`);
   if (commands.allow && !commands.allow.includes("*") && !commands.allow.includes(command)) {
     return decision("deny", policy, `command not allowed: ${command}`);
   }
-  if (annotations.destructive && rules.destructive === "deny") return decision("deny", policy, `destructive command denied: ${command}`);
   if (rules.execute === "sandbox") return decision("sandbox", policy, `command requires sandbox: ${command}`);
   return decision("allow", policy, `command allowed: ${command}`);
 }

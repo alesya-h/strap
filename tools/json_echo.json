@@ -11,6 +11,5 @@
     },
     "required": ["value"],
     "additionalProperties": false
-  },
-  "readOnly": true
+  }
 }

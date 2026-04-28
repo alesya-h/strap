@@ -10,7 +10,7 @@ This document describes the current architecture of `strap` as implemented in th
 strap <command> [args...]
 ```
 
-The runner resolves command directories, builds a standard environment, asks the authority model for an execution decision, then spawns the command's `run` file.
+The runner resolves command directories, builds a standard environment, evaluates the active launch policy, then spawns the command's `run` file.
 
 ## Roots
 
@@ -59,7 +59,6 @@ A command directory can contain:
 command-name/
   run                 executable public command
   desc                help text; first line is list summary
-  command.json        optional authority/metadata annotations
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion script
   compgen             optional shell completion script
@@ -104,14 +103,13 @@ $STRAP_ROOT/skills
 
 Each skill is a directory containing `SKILL.md`, compatible with OpenCode-style skill directories. `strap skills apply <name>` attaches the skill to an actor without replacing the agent profile. Provider compilation renders applied skills as named instruction blocks after the actor's private instructions. `strap skills import-opencode ~/.config/opencode/skills` copies existing OpenCode skills into the user overlay.
 
-## Authority Flow
+## Launch Policy And Isolation
 
 Before a command runs, `bin/strap` calls `#strap/policy/authority` with:
 
 - active policy (`STRAP_POLICY`, default `default`);
 - action `execute`;
 - command name;
-- annotations from `command.json`.
 
 The decision is one of:
 
@@ -120,6 +118,8 @@ The decision is one of:
 - `sandbox`
 
 The command receives the decision in `STRAP_AUTHORITY_DECISION`.
+
+This decision is not based on command-authored safety metadata. Restricted modes should be enforced by the environment that launches the command, such as bubblewrap mounts and restricted MCP/jsmcp profiles.
 
 Path decisions for `read` and `write` classify paths as:
 
@@ -130,7 +130,7 @@ Path decisions for `read` and `write` classify paths as:
 - `workspace`
 - `outside`
 
-Current caveat: authority is implemented at command spawn and policy-inspection boundaries first. Lower-level tool, MCP, jsmcp, provider-auth, and memory effect paths still need an authority-closure audit before the model should be treated as complete enforcement.
+Current caveat: this policy layer is not an end-to-end security boundary. Lower-level tool, MCP, jsmcp, provider-auth, and memory effect paths are only constrained when the surrounding launch environment constrains them.
 
 ## Canonical State
 
@@ -274,7 +274,7 @@ Code is grouped by capability:
 - `porcelain`: Nushell porcelain runner.
 - `zettel`: zettelkasten CLI and embedding helper.
 - `sessions`: project work and session CLIs.
-- `policy`: authority decision model and policy CLI.
+- `policy`: launch-policy helper and policy CLI.
 - `state-bb`: Babashka pure-state prototype.
 
 ## Validation

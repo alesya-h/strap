@@ -31,7 +31,6 @@ Commands are directories with this shape:
 command-name/
   run                 executable public command
   desc                help text; first line is the list summary
-  command.json        optional machine-readable annotations
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion
   compgen             optional shell completion script

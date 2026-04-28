@@ -79,7 +79,7 @@ The trace is not an approval mechanism. It is provenance for later folding, comp
 
 ## Safety Boundary
 
-This layer intentionally prioritizes flexibility. Current command execution receives an authority decision before spawning, but generated porcelain and the tools it calls still need end-to-end authority closure before the system should be treated as securely sandboxed.
+This layer intentionally prioritizes flexibility. Generated porcelain and the tools it calls should be treated as powerful unless the process is launched inside a restrictive environment.
 
 The safety model should live around it:
 
@@ -88,7 +88,7 @@ The safety model should live around it:
 - use overlays/tmpfs for speculative filesystem work
 - give each branch least-privilege tool servers
 - optionally add eBPF/seccomp/network policy outside the harness
-- require generated commands/porcelain to declare authority annotations before promotion
+- use restricted MCP/jsmcp profiles for restricted runs
 
 In other words: let the model mutate porcelain freely, but ensure the process has no ambient authority worth stealing.
 

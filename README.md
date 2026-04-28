@@ -23,7 +23,7 @@ Start with:
 - [`docs/vision.md`](docs/vision.md): product thesis, principles, non-goals, priorities.
 - [`docs/architecture.md`](docs/architecture.md): current implementation architecture.
 - [`docs/commands.md`](docs/commands.md): command authoring and command reference.
-- [`docs/authority.md`](docs/authority.md): policy/authority model and current limits.
+- [`docs/authority.md`](docs/authority.md): launch policy, sandbox notes, and current isolation limits.
 
 ## Quick Start
 
@@ -275,8 +275,7 @@ Add a sidecar JSON file, either `tools/name.json` or `tools/name.sh.json`, to de
     },
     "required": ["name"],
     "additionalProperties": false
-  },
-  "readOnly": true
+  }
 }
 ```
 
@@ -306,11 +305,11 @@ The active format is the actor/event/scope shape.
 
 - `DESIGN.md`: concise current design summary.
 - `docs/vision.md`: vision, design principles, non-goals, strategic priorities.
-- `docs/architecture.md`: roots, command flow, authority, state, loops, tools, providers, sessions, memory, subprojects.
+- `docs/architecture.md`: roots, command flow, launch policy, state, loops, tools, providers, sessions, memory, subprojects.
 - `docs/state-format.md`: canonical `strap.state.v0.2` format specification.
 - `docs/organization.md`: repository, `.strap`, and `.strap-user` organization.
 - `docs/commands.md`: command contract and built-in command reference.
-- `docs/authority.md`: policy decisions, sandbox notes, and current enforcement caveats.
+- `docs/authority.md`: launch policy, sandbox notes, and current isolation caveats.
 - `docs/providers.md`: model profiles and auth modes.
 - `docs/daily-use.md`: daily project-local workflow.
 - `docs/zettelkasten.md`: shared memory CLI and agent tool.

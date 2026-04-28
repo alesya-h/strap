@@ -27,19 +27,13 @@ function commandItems() {
 }
 
 function commandManifest(name, dir) {
-  const file = path.join(dir, "command.json");
-  const declared = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
   return {
     name,
     description: readDescription(dir),
-    readOnly: Boolean(declared.readOnly),
-    destructive: Boolean(declared.destructive),
-    openWorld: Boolean(declared.openWorld),
     hasSpec: fs.existsSync(path.join(dir, "spec.yaml")),
     hasDynamicCompletion: fs.existsSync(path.join(dir, "carapace-complete")) || fs.existsSync(path.join(dir, "compgen")),
     inner: fs.existsSync(path.join(dir, "inner")) ? fs.readdirSync(path.join(dir, "inner")).sort() : [],
     dir,
-    ...declared,
   };
 }
 
@@ -116,7 +110,6 @@ if (command === "list") {
   fs.writeFileSync(path.join(dir, "run"), `#!/usr/bin/env bash\nset -euo pipefail\n\necho "${name}: implement me"\n`);
   fs.chmodSync(path.join(dir, "run"), 0o755);
   fs.writeFileSync(path.join(dir, "desc"), `${name} command.\n\nUsage:\n  strap ${name}\n`);
-  fs.writeFileSync(path.join(dir, "command.json"), `${JSON.stringify({ name, readOnly: false, destructive: false, openWorld: false }, null, 2)}\n`);
   fs.mkdirSync(path.join(dir, "inner"));
   process.stdout.write(`${JSON.stringify({ ok: true, name, dir }, null, 2)}\n`);
 } else {
