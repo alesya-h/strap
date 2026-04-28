@@ -24,6 +24,12 @@
     "$STRAP_CONFIG/agents",
     "$STRAP_ROOT/agents"
   ],
+  "skill_roots": [
+    "$STRAP_WORK/skills",
+    "$STRAP_PROJECT/skills",
+    "$STRAP_CONFIG/skills",
+    "$STRAP_ROOT/skills"
+  ],
   "defaults": {
     "provider": "chatgpt",
     "tool_group": "all",

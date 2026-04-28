@@ -1,0 +1,10 @@
+List, show, apply, and import skill instruction bundles.
+
+Usage:
+  strap skills list
+  strap skills show concise
+  strap skills apply concise < state.json > next.json
+  strap skills roots
+  strap skills import-opencode ~/.config/opencode/skills
+
+Skills are directories containing `SKILL.md` with optional OpenCode-style frontmatter. They are discovered from `.strap-user/skills`, `.strap/skills`, config skills, and root skills.

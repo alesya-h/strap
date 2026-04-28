@@ -46,6 +46,16 @@ const TYPES = {
     discover: discoverAgentArtifacts,
     destination: (root, artifact) => path.join(root, artifact.entryName),
   },
+  skill: {
+    roots: () => ({
+      user: path.join(strapWorkRoot(), "skills"),
+      project: path.join(strapProjectRoot(), "skills"),
+      config: path.join(strapConfigRoot(), "skills"),
+      root: path.join(strapRoot(), "skills"),
+    }),
+    discover: discoverSkillArtifacts,
+    destination: (root, artifact) => path.join(root, artifact.entryName),
+  },
 };
 
 export function artifactTypes() {
@@ -167,6 +177,14 @@ function discoverAgentArtifacts(root, layer) {
     .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
     .map((entry) => path.join(root, entry.name))
     .map((file) => ({ type: "agent", name: path.basename(file, ".md"), layer, kind: "file", entryName: path.basename(file), root, path: file, files: [file] }));
+}
+
+function discoverSkillArtifacts(root, layer) {
+  if (!isDirectory(root)) return [];
+  return fs.readdirSync(root)
+    .filter((name) => fs.existsSync(path.join(root, name, "SKILL.md")))
+    .map((name) => path.join(root, name))
+    .map((dir) => ({ type: "skill", name: path.basename(dir), layer, kind: "directory", entryName: path.basename(dir), root, path: dir, files: filesForDirectory(dir) }));
 }
 
 function describeArtifact(artifact, all, includePaths) {

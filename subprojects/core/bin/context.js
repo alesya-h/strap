@@ -3,7 +3,7 @@ import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import { flattenVisible, normalizeState } from "#strap/core/state";
 import { loadProviderConfig } from "#strap/providers/config";
 import { runOneShot } from "#strap/loop/one-shot";
-import { loadAgent } from "#strap/core/profiles";
+import { loadAgent, loadSkill } from "#strap/core/profiles";
 
 const [command, ...args] = process.argv.slice(2);
 
@@ -40,6 +40,7 @@ if (command === "quote") {
 } else if (command === "summarize") {
   const providerPath = takeOption(args, "--provider", "");
   const agentName = takeOption(args, "--agent", "");
+  const skillNames = takeRepeatedOption(args, "--skill");
   const toolsName = takeOption(args, "--tools", "none");
   const maxTurns = Number(takeOption(args, "--max-turns", "8"));
   const dryRun = takeFlag("--dry-run");
@@ -47,8 +48,9 @@ if (command === "quote") {
   if (!providerPath && !dryRun) throw new Error("Usage: strap context summarize <framing> --provider provider.json [--tools none] < context.json");
   const provider = providerPath ? await loadProviderConfig(providerPath) : undefined;
   const agentProfile = agentName ? loadAgent(agentName, { includePaths: true }) : undefined;
+  const skillProfiles = skillNames.map((name) => loadSkill(name, { includePaths: true }));
   const task = `Summarize the quoted context with this framing:\n\n${framing}`;
-  const result = await runOneShot({ input: ensureQuoted(input), task, provider, toolsName, maxTurns, dryRun, agentProfile });
+  const result = await runOneShot({ input: ensureQuoted(input), task, provider, toolsName, maxTurns, dryRun, agentProfile, skillProfiles });
   writeJson({
     version: "strap.context-summary.v0.1",
     framing,
@@ -73,6 +75,17 @@ function ensureQuoted(input) {
     text: renderConversation(events, title),
     events,
   };
+}
+
+function takeRepeatedOption(values, name) {
+  const output = [];
+  while (values.includes(name)) {
+    const index = values.indexOf(name);
+    const value = values[index + 1];
+    values.splice(index, value === undefined ? 1 : 2);
+    if (value !== undefined) output.push(value);
+  }
+  return output;
 }
 
 function contextEvents(input) {

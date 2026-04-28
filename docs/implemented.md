@@ -13,10 +13,11 @@ This document records what `strap` currently implements.
 - Quoted context rendering with `strap context quote`.
 - One-shot-backed context summarization with `strap context summarize`.
 - Basic agent fork/fold commands.
-- Generic layered artifact model for command, tool, and porcelain artifacts.
+- Generic layered artifact model for command, tool, porcelain, agent, and skill artifacts.
 - Markdown agent profiles as layered artifacts.
+- Skill instruction bundles as layered artifacts.
 - `strap status` reports roots, layers, zettel status, and visible artifact overlays.
-- `strap artifact workon/promote/discard/status` manages user/project overlays for commands, tools, and porcelain.
+- `strap artifact workon/promote/discard/status` manages user/project overlays for commands, tools, porcelain, agents, and skills.
 
 ## CLIs
 
@@ -29,9 +30,10 @@ This document records what `strap` currently implements.
 - `strap run-calls`: execute pending tool requests in canonical state.
 - `strap agent`: fork/fold agent state.
 - `strap agents`: list, show, apply, and import agent profiles.
+- `strap skills`: list, show, apply, and import skill instruction bundles.
 - `strap mcp`: run bundled stdio MCP servers.
 - `strap porcelain`: discover and run Nushell porcelain modules.
-- `strap artifact`: inspect and manage layered command/tool/porcelain artifacts.
+- `strap artifact`: inspect and manage layered command/tool/porcelain/agent/skill artifacts.
 - `strap status`: inspect active roots, layers, and overlay status.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.

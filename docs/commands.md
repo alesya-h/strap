@@ -84,6 +84,7 @@ strap inner my-command helper-name arg1 arg2
 | `run-calls` | Execute pending tool calls in canonical state. |
 | `sandbox` | Run a command through a bubblewrap sandbox profile. |
 | `session` | Create, inspect, update, save, list, and trace user-local project sessions. |
+| `skills` | List, show, apply, and import skill instruction bundles. |
 | `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
 | `state-bb` | Run the Babashka pure-state prototype. |
 | `status` | Show roots, layers, and overlayed artifact status. |
@@ -100,6 +101,7 @@ Commands, script tools, and porcelain modules can be inspected and moved through
 strap status
 strap artifact status command
 strap artifact status agent
+strap artifact status skill
 strap artifact workon porcelain basic
 strap artifact promote porcelain basic
 strap artifact discard porcelain basic
@@ -119,6 +121,19 @@ strap agents import-opencode ~/.config/opencode/agents
 ```
 
 `apply` updates the selected actor, defaulting to `assistant`, with the profile description, instructions, and permission metadata.
+
+## Skills
+
+Skills are `skills/name/SKILL.md` instruction bundles:
+
+```nu
+strap skills list
+strap skills show concise
+open state.json | strap skills apply concise | save -f next.json
+strap skills import-opencode ~/.config/opencode/skills
+```
+
+`apply` attaches the skill to the selected actor, defaulting to `assistant`, without replacing the active agent profile.
 
 ## Bookmark Addressability
 

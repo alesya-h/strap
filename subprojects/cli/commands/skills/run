@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec node "$STRAP_ROOT/subprojects/core/bin/skills.js" "$@"

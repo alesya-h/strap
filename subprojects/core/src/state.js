@@ -84,6 +84,10 @@ export function renderActorFrame(state, actorId = "assistant") {
   const chunks = [];
   if (actor.self?.public) chunks.push(`<self_public>\n${actor.self.public}\n</self_public>`);
   if (actor.self?.private) chunks.push(`<self_private>\n${actor.self.private}\n</self_private>`);
+  for (const skillName of actor.skills || []) {
+    const instruction = actor.skill_instructions?.[skillName];
+    if (instruction) chunks.push(`<skill name=${JSON.stringify(skillName)}>\n${instruction}\n</skill>`);
+  }
   for (const [peer, relation] of Object.entries(actor.peers || {})) {
     if (relation.public) chunks.push(`<peer name="${peer}" field="public">\n${relation.public}\n</peer>`);
     if (relation.inferred) chunks.push(`<peer name="${peer}" field="inferred">\n${relation.inferred}\n</peer>`);

@@ -95,6 +95,17 @@ export function strapAgentDirs() {
   ];
 }
 
+export function strapSkillDirs() {
+  const configured = (process.env.STRAP_SKILL_PATH || "").split(path.delimiter).filter(Boolean);
+  return [
+    ...configured,
+    path.join(strapWorkRoot(), "skills"),
+    path.join(strapProjectRoot(), "skills"),
+    path.join(strapConfigRoot(), "skills"),
+    path.join(strapRoot(), "skills"),
+  ];
+}
+
 export function resolveInWorkspace(inputPath, root = workspaceRoot()) {
   const resolved = path.resolve(root, inputPath || ".");
   if (process.env.STRAP_ALLOW_OUTSIDE_WORKSPACE === "1") return resolved;

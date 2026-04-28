@@ -37,7 +37,7 @@ Commands, script tools, and porcelain modules share a layered artifact model:
 
 The user layer shadows lower layers. `strap artifact workon <type> <name>` copies a lower-layer artifact into the user layer, `strap artifact promote <type> <name>` writes the user-layer artifact to the project layer and clears the overlay, and `strap artifact discard <type> <name>` removes the user-layer overlay.
 
-Supported artifact types are currently `command`, `tool`, `porcelain`, and `agent`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
+Supported artifact types are currently `command`, `tool`, `porcelain`, `agent`, and `skill`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
 
 ## Command Discovery
 
@@ -89,6 +89,20 @@ $STRAP_ROOT/agents
 ```
 
 Profiles support OpenCode-style frontmatter with fields like `description`, `permission`, and `color`, followed by instruction text. `strap agents apply <name>` writes the selected profile into a canonical-state actor, usually `actors.assistant`, so provider compilation uses it as the actor frame. `strap agents import-opencode ~/.config/opencode/agents` copies existing OpenCode profiles into the user overlay.
+
+## Skills
+
+Skills are instruction bundles discovered from:
+
+```text
+STRAP_SKILL_PATH
+$STRAP_WORK/skills
+$STRAP_PROJECT/skills
+$STRAP_CONFIG/skills
+$STRAP_ROOT/skills
+```
+
+Each skill is a directory containing `SKILL.md`, compatible with OpenCode-style skill directories. `strap skills apply <name>` attaches the skill to an actor without replacing the agent profile. Provider compilation renders applied skills as named instruction blocks after the actor's private instructions. `strap skills import-opencode ~/.config/opencode/skills` copies existing OpenCode skills into the user overlay.
 
 ## Authority Flow
 

@@ -90,6 +90,7 @@ Project-shared artifacts live in:
 ```text
 my-project/.strap/
   agents/
+  skills/
   commands/
   tools/
   porcelain/
@@ -105,6 +106,7 @@ User/agent-local runtime state lives in:
 ```text
 my-project/.strap-user/
   agents/
+  skills/
   history/
   sessions/
   logs/
@@ -120,7 +122,7 @@ my-project/.strap-user/
 
 This directory should be ignored by the project VCS. It is where sessions, caches, logs, jj-backed state history, private memory, and temporary generated commands/tools/porcelain belong.
 
-Agents, commands, tools, porcelain, and zettel notes use `.strap-user` as an overlay on top of `.strap`. Inspect overlays with `strap status` or `strap artifact status`, create working copies with `strap artifact workon <type> <name>`, promote agent/command/tool/porcelain artifacts with `strap artifact promote <type> <name>`, and promote zettel notes with `strap zk promote <note>`.
+Agents, skills, commands, tools, porcelain, and zettel notes use `.strap-user` as an overlay on top of `.strap`. Inspect overlays with `strap status` or `strap artifact status`, create working copies with `strap artifact workon <type> <name>`, promote agent/skill/command/tool/porcelain artifacts with `strap artifact promote <type> <name>`, and promote zettel notes with `strap zk promote <note>`.
 
 `user/template/.strap` and `user/template/.strap-user` are checked-in templates for this split.
 

@@ -12,6 +12,7 @@
 - A shared markdown-source zettelkasten CLI and script tool for agent memory, with inline wikilinks and a derived SQLite/sqlite-vec index.
 - A generic layered artifact model for command, tool, and porcelain workon/promote/discard flows.
 - Layered markdown agent profiles compatible with OpenCode-style frontmatter.
+- Layered skill instruction bundles compatible with OpenCode-style `SKILL.md` directories.
 - jj-backed user-local state history under `.strap-user`.
 - jsmcp bridge tools for programmable access to configured MCP servers.
 - Provider config files for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
@@ -68,7 +69,7 @@ Run a one-shot agent over quoted context without mutating a session:
 open state.json
 | strap state extract --from bm_a --to bm_b
 | strap context quote
-| strap context summarize "Summarize only architectural decisions and unresolved risks" --agent chat-concise --provider config/strap/providers/chatgpt.json --tools none
+| strap context summarize "Summarize only architectural decisions and unresolved risks" --agent chat-concise --skill concise --provider config/strap/providers/chatgpt.json --tools none
 ```
 
 Agent profiles are layered artifacts:
@@ -78,6 +79,15 @@ strap agents list
 strap agents show chat-concise
 open state.json | strap agents apply chat-concise | save -f concise-state.json
 strap agents import-opencode ~/.config/opencode/agents
+```
+
+Skill bundles layer the same way:
+
+```nu
+strap skills list
+strap skills show concise
+open state.json | strap skills apply concise | save -f concise-state.json
+strap skills import-opencode ~/.config/opencode/skills
 ```
 
 ## Nushell

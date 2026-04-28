@@ -3,7 +3,7 @@ Transform extracted context.
 Usage:
   strap context quote < context.json
   strap context render < context.json
-  strap context summarize "only architectural decisions and unresolved risks" --provider config/strap/providers/chatgpt.json --agent chat-concise < context.json
+  strap context summarize "only architectural decisions and unresolved risks" --provider config/strap/providers/chatgpt.json --agent chat-concise --skill concise < context.json
   strap context summarize "dry run" --dry-run < context.json
 
 `quote` marks extracted conversation as evidence, not active dialogue history.
