@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import { flattenVisible, normalizeState } from "#strap/core/state";
-import { loadProviderConfig } from "#strap/providers/config";
+import { loadModelConfig } from "#strap/providers/config";
 import { runOneShot } from "#strap/loop/one-shot";
 import { loadAgent, loadSkill } from "#strap/core/profiles";
 
@@ -38,15 +38,14 @@ if (command === "quote") {
 } else if (command === "render") {
   process.stdout.write(renderConversation(contextEvents(input), takeOption(args, "--title", "conversation")));
 } else if (command === "summarize") {
-  const providerPath = takeOption(args, "--provider", "");
+  const modelName = takeOption(args, "--model", "current");
   const agentName = takeOption(args, "--agent", "");
   const skillNames = takeRepeatedOption(args, "--skill");
   const toolsName = takeOption(args, "--tools", "none");
   const maxTurns = Number(takeOption(args, "--max-turns", "8"));
   const dryRun = takeFlag("--dry-run");
   const framing = args.join(" ") || "Summarize the quoted context.";
-  if (!providerPath && !dryRun) throw new Error("Usage: strap context summarize <framing> --provider provider.json [--tools none] < context.json");
-  const provider = providerPath ? await loadProviderConfig(providerPath) : undefined;
+  const provider = dryRun ? undefined : await loadModelConfig(modelName);
   const agentProfile = agentName ? loadAgent(agentName, { includePaths: true }) : undefined;
   const skillProfiles = skillNames.map((name) => loadSkill(name, { includePaths: true }));
   const task = `Summarize the quoted context with this framing:\n\n${framing}`;

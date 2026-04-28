@@ -30,8 +30,14 @@
     "$STRAP_CONFIG/skills",
     "$STRAP_ROOT/skills"
   ],
+  "model_roots": [
+    "$STRAP_WORK/models",
+    "$STRAP_PROJECT/models",
+    "$STRAP_CONFIG/models",
+    "$STRAP_ROOT/models"
+  ],
   "defaults": {
-    "provider": "chatgpt",
+    "model": "current",
     "tool_group": "all",
     "loop_engine": "node"
   }

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { appendEvent, collapseLastOpenScope, compileChatMessages, compileOpenAIResponses, createState, flattenVisible, normalizeState, openScope } from "#strap/core/state";
+import { appendEvent, collapseLastOpenScope, createState, flattenVisible, normalizeState, openScope } from "#strap/core/state";
 import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import crypto from "node:crypto";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap state <init|add-user|add-assistant|push|pop|bookmark|extract|fold|locate|show|tree|compile-chat|compile-openai|display-last-message> [args] < state.json > next.json");
+  console.error("Usage: strap state <init|add-user|add-assistant|push|pop|bookmark|extract|fold|locate|show|tree|display-last-message> [args] < state.json > next.json");
   process.exit(2);
 }
 
@@ -87,15 +87,6 @@ switch (command) {
     const state = await inputState();
     const hidden = takeFlag(args, "--hidden");
     process.stdout.write(renderTree(state, { includeHidden: hidden }));
-    break;
-  }
-  case "compile-chat":
-    writeJson(compileChatMessages(await inputState()));
-    break;
-  case "compile-openai": {
-    const modelIndex = args.indexOf("--model");
-    const model = modelIndex === -1 ? "gpt-5.1" : args[modelIndex + 1];
-    writeJson(compileOpenAIResponses(await inputState(), { model }));
     break;
   }
   case "display-last-message": {

@@ -1,6 +1,6 @@
 # Strap Design
 
-`strap` is a Linux-first, unix-ish agent harness built around ordinary files, explicit roots, provider-agnostic state, and governable command execution.
+`strap` is a Linux-only, unix-ish agent harness built around ordinary files, explicit roots, provider-agnostic state, and governable command execution.
 
 For the product vision, see [`docs/vision.md`](docs/vision.md).
 For the detailed implementation architecture, see [`docs/architecture.md`](docs/architecture.md).

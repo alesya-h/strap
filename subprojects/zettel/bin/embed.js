@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import process from "node:process";
-import { authHeaders, loadProviderConfig } from "#strap/providers/config";
+import { authHeaders, loadModelConfig } from "#strap/providers/config";
 
 function readStdin() {
   return new Promise((resolve, reject) => {
@@ -67,8 +67,7 @@ async function openAiEmbeddings(texts) {
 }
 
 async function chatGptEmbeddings(texts) {
-  const providerPath = process.env.STRAP_ZK_CHATGPT_PROVIDER || "config/strap/providers/chatgpt.json";
-  const config = await loadProviderConfig(providerPath);
+  const config = await loadModelConfig(process.env.STRAP_ZK_CHATGPT_MODEL || "current");
   const headers = await authHeaders(config);
   const model = process.env.STRAP_ZK_EMBED_MODEL || "text-embedding-3-small";
   const body = { model, input: texts };

@@ -1,24 +1,23 @@
 #!/usr/bin/env node
 import { appendEvent, normalizeState } from "#strap/core/state";
 import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
-import { loadProviderConfig } from "#strap/providers/config";
+import { loadModelConfig } from "#strap/providers/config";
 import { completeProvider } from "#strap/providers/call";
 import { getTools, toolMap } from "#strap/tools/registry";
 
 const args = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap loop --provider provider.json [--tools all|fs|process|web|agent|scripts|none] [--max-turns 8] < state.json > next.json");
+  console.error("Usage: strap loop [--model current|name|path.json] [--tools all|fs|process|web|agent|scripts|none] [--max-turns 8] < state.json > next.json");
   process.exit(2);
 }
 
-const providerPath = takeOption(args, "--provider");
-if (!providerPath) usage();
+const modelName = takeOption(args, "--model", "current");
 const toolsName = takeOption(args, "--tools", "all");
 const maxTurns = Number(takeOption(args, "--max-turns", "8"));
 const finalize = takeOption(args, "--finalize", "true") !== "false";
 
-const provider = await loadProviderConfig(providerPath);
+const provider = await loadModelConfig(modelName);
 const tools = toolsName === "none" ? [] : getTools(toolsName);
 const toolsByName = toolsName === "none" ? new Map() : toolMap(toolsName);
 const state = normalizeState(await readJsonInput(takeOption(args, "--file", "-")));

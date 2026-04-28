@@ -4,7 +4,7 @@
 
 - `cli/`: filesystem-discovered command runner and built-in command directories.
 - `core/`: canonical state, path resolution, CLI I/O, layered artifact/profile/skill helpers, and agent state helpers.
-- `providers/`: provider configs, request compilation/calls, streaming, and auth.
+- `providers/`: model-profile loading, provider request compilation/calls, streaming, and auth.
 - `loop/`: Node model/tool loop.
 - `tools/`: built-in tool registry and tool implementations.
 - `mcp/`: bundled stdio MCP servers.

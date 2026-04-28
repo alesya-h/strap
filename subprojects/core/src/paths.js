@@ -106,6 +106,17 @@ export function strapSkillDirs() {
   ];
 }
 
+export function strapModelDirs() {
+  const configured = (process.env.STRAP_MODEL_PATH || "").split(path.delimiter).filter(Boolean);
+  return [
+    ...configured,
+    path.join(strapWorkRoot(), "models"),
+    path.join(strapProjectRoot(), "models"),
+    path.join(strapConfigRoot(), "models"),
+    path.join(strapRoot(), "models"),
+  ];
+}
+
 export function resolveInWorkspace(inputPath, root = workspaceRoot()) {
   const resolved = path.resolve(root, inputPath || ".");
   if (process.env.STRAP_ALLOW_OUTSIDE_WORKSPACE === "1") return resolved;

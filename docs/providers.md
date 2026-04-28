@@ -1,23 +1,34 @@
-# Provider Configs
+# Model Profiles
 
-`strap llm` can call models from a single provider JSON file. The file is specific to provider + auth + model, so a pipeline only needs `--provider path.json`.
+`strap llm`, `strap loop`, `strap loop-nu`, `strap one-shot`, and `strap context summarize` use model profiles. A profile is the model plus its provider street address: provider adapter, API family, endpoint, auth, headers, and default parameters.
+
+Runtime commands default to `--model current`, so this is enough:
 
 ```bash
 strap state init \
 | strap state add-user "Say hi" \
-| strap llm complete --provider config/strap/providers/openai-api-key.json --tools all
+| strap llm complete --tools all
 ```
 
-Checked-in provider configs live in `config/strap/providers/`.
+Checked-in model profiles live in `config/strap/models/`. `current.json` is a Linux symlink to the selected default profile.
+
+Inspect and select models with:
+
+```bash
+strap model list
+strap model show current
+strap model use gpt-5.5-chatgpt
+strap model fork current gpt-5.6-chatgpt --set-model-id gpt-5.6
+```
 
 ## Common Shape
 
 ```json
 {
-  "name": "openai-gpt-5.1-api-key",
+  "name": "gpt-5.1-openai",
   "provider": "openai",
   "api": "responses",
-  "model": "gpt-5.1",
+  "model_id": "gpt-5.1",
   "auth": {
     "type": "api_key",
     "env": "OPENAI_API_KEY"
@@ -94,13 +105,13 @@ Request headers include:
 - `Authorization: Bearer <access_token>`
 - `ChatGPT-Account-ID: <account_id>` when available
 
-Provider config:
+Model profile:
 
 ```json
 {
   "provider": "chatgpt",
   "api": "responses",
-  "model": "gpt-5.5",
+  "model_id": "gpt-5.5",
   "base_url": "https://chatgpt.com/backend-api/codex/responses",
   "auth": {
     "type": "chatgpt_oauth",
@@ -120,7 +131,7 @@ For an end-to-end agent loop with native tool calls/results:
 ```bash
 strap state init \
 | strap state add-user "Analyze this repo" \
-| strap loop --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
+| strap loop --tools all --max-turns 6 \
 | tee session.json \
 | strap state display-last-message
 ```
@@ -129,17 +140,10 @@ strap state init \
 
 ## Commands
 
-Provider-generic commands:
+Model-profile commands:
 
 ```bash
-strap llm compile --provider provider.json < state.json
-strap llm call --provider provider.json < state.json
-strap llm complete --provider provider.json < state.json
-```
-
-OpenAI convenience commands:
-
-```bash
-strap llm compile-openai --model gpt-5.1 < state.json
-strap llm complete-openai --model gpt-5.1 < state.json
+strap llm compile --model current < state.json
+strap llm call --model gpt-5.5-chatgpt < state.json
+strap llm complete --model config/strap/models/gpt-5.1-openai.json < state.json
 ```

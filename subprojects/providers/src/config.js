@@ -1,27 +1,108 @@
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { decodeJwt, expandHome, loadChatgptToken } from "#strap/providers/chatgpt-auth";
+import { strapModelDirs, strapWorkRoot } from "#strap/core/paths";
 
-export async function loadProviderConfig(filePath) {
-  const config = JSON.parse(await fs.readFile(expandHome(filePath), "utf8"));
-  if (!config.provider) throw new Error("Provider config requires provider");
-  if (!config.model) throw new Error("Provider config requires model");
-  return normalizeProviderConfig(config, filePath);
+export function modelRoots() {
+  return strapModelDirs();
 }
 
-export function normalizeProviderConfig(config, sourcePath = undefined) {
+export async function listModelConfigs({ includePaths = false } = {}) {
+  const seen = new Set();
+  const models = [];
+  for (const root of modelRoots()) {
+    if (!isDirectory(root)) continue;
+    for (const entry of fsSync.readdirSync(root, { withFileTypes: true })) {
+      if ((!entry.isFile() && !entry.isSymbolicLink()) || !entry.name.endsWith(".json")) continue;
+      const name = path.basename(entry.name, ".json");
+      if (seen.has(name)) continue;
+      seen.add(name);
+      const file = path.join(root, entry.name);
+      models.push(publicModel(normalizeModelConfig(JSON.parse(await fs.readFile(file, "utf8")), file, name), includePaths));
+    }
+  }
+  return models.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function loadModelConfig(nameOrPath = "current") {
+  const file = resolveModelFile(nameOrPath || "current");
+  const config = JSON.parse(await fs.readFile(file, "utf8"));
+  return normalizeModelConfig(config, file, path.basename(file, ".json"));
+}
+
+export async function useModel(name) {
+  const file = resolveModelFile(name);
+  const targetDir = path.join(strapWorkRoot(), "models");
+  await fs.mkdir(targetDir, { recursive: true });
+  const target = path.join(targetDir, "current.json");
+  await fs.rm(target, { force: true });
+  await fs.symlink(file, target);
+  return { ok: true, current: "current", target, model: publicModel(await loadModelConfig(name), true) };
+}
+
+export async function forkModel(source, target, { modelId } = {}) {
+  const config = await loadModelConfig(source);
+  const targetDir = path.join(strapWorkRoot(), "models");
+  await fs.mkdir(targetDir, { recursive: true });
+  const targetFile = path.join(targetDir, `${target}.json`);
+  const next = {
+    ...config,
+    name: target,
+    model_id: modelId || config.model_id,
+  };
+  delete next.model;
+  delete next.sourcePath;
+  await fs.writeFile(targetFile, `${JSON.stringify(next, null, 2)}\n`);
+  return { ok: true, source, target, path: targetFile, model: publicModel(normalizeModelConfig(next, targetFile), true) };
+}
+
+export function normalizeModelConfig(config, sourcePath = undefined, fallbackName = undefined) {
   const provider = config.provider;
+  if (!provider) throw new Error("Model config requires provider");
+  if (!config.model_id) throw new Error("Model config requires model_id");
   const api = config.api || defaultApi(provider);
   return {
     ...config,
+    name: fallbackName || config.name,
     sourcePath,
     provider,
     api,
+    model: config.model_id,
     base_url: config.base_url || defaultBaseUrl(provider, api),
     headers: config.headers || {},
     auth: config.auth || defaultAuth(provider),
   };
+}
+
+function resolveModelFile(nameOrPath) {
+  const expanded = expandHome(nameOrPath);
+  if (expanded.endsWith(".json") || expanded.includes("/")) {
+    const direct = path.resolve(expanded);
+    if (fsSync.existsSync(direct)) return direct;
+  }
+  const fileName = nameOrPath.endsWith(".json") ? nameOrPath : `${nameOrPath}.json`;
+  for (const root of modelRoots()) {
+    const file = path.join(root, fileName);
+    if (fsSync.existsSync(file)) return file;
+  }
+  throw new Error(`Model profile not found: ${nameOrPath}`);
+}
+
+function publicModel(config, includePaths) {
+  return {
+    name: config.name,
+    model_id: config.model_id,
+    provider: config.provider,
+    api: config.api,
+    source: config.sourcePath ? path.basename(config.sourcePath) : undefined,
+    ...(includePaths ? { path: config.sourcePath } : {}),
+  };
+}
+
+function isDirectory(dir) {
+  return fsSync.existsSync(dir) && fsSync.statSync(dir).isDirectory();
 }
 
 export async function authHeaders(config) {

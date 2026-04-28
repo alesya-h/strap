@@ -1,0 +1,11 @@
+List, show, select, and fork model profiles.
+
+Usage:
+  strap model list
+  strap model show current
+  strap model current
+  strap model use gpt-5.5-chatgpt
+  strap model fork gpt-5.4-chatgpt gpt-5.5-chatgpt --set-model-id gpt-5.5
+  strap model roots
+
+Model profiles are layered JSON artifacts discovered from `.strap-user/models`, `.strap/models`, config models, and root models. Runtime commands default to `--model current`.

@@ -4,8 +4,8 @@ import path from "node:path";
 import { strapProjectRoot, strapWorkRoot } from "#strap/core/paths";
 
 const [command = "init"] = process.argv.slice(2);
-const projectDirs = ["agents", "skills", "commands", "tools", "porcelain", "zettel", "config", "policies"];
-const workDirs = ["agents", "skills", "history", "sessions", "logs", "cache", "branches", "scratch", "commands", "tools", "porcelain", "zettel", "config"];
+const projectDirs = ["agents", "skills", "models", "commands", "tools", "porcelain", "zettel", "config", "policies"];
+const workDirs = ["agents", "skills", "models", "history", "sessions", "logs", "cache", "branches", "scratch", "commands", "tools", "porcelain", "zettel", "config"];
 
 if (command === "init") {
   const project = strapProjectRoot();
@@ -16,11 +16,11 @@ if (command === "init") {
   for (const dir of workDirs) fs.mkdirSync(path.join(work, dir), { recursive: true });
   const projectReadme = path.join(project, "README.md");
   if (!fs.existsSync(projectReadme)) {
-    fs.writeFileSync(projectReadme, `# Strap Project\n\nProject-shared harness artifacts. This directory may be committed with the project.\n\n- agents/\n- skills/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n- policies/\n`);
+    fs.writeFileSync(projectReadme, `# Strap Project\n\nProject-shared harness artifacts. This directory may be committed with the project.\n\n- agents/\n- skills/\n- models/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n- policies/\n`);
   }
   const workReadme = path.join(work, "README.md");
   if (!fs.existsSync(workReadme)) {
-    fs.writeFileSync(workReadme, `# Strap User Work\n\nUser/agent-local mutable harness state. This directory should be ignored by the project VCS.\n\n- agents/\n- skills/\n- history/\n- sessions/\n- logs/\n- cache/\n- branches/\n- scratch/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n`);
+    fs.writeFileSync(workReadme, `# Strap User Work\n\nUser/agent-local mutable harness state. This directory should be ignored by the project VCS.\n\n- agents/\n- skills/\n- models/\n- history/\n- sessions/\n- logs/\n- cache/\n- branches/\n- scratch/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n`);
   }
   process.stdout.write(`${JSON.stringify({ ok: true, project, work, project_dirs: projectDirs, work_dirs: workDirs }, null, 2)}\n`);
 } else if (command === "path") {

@@ -29,20 +29,12 @@ export def pop [summary: string] {
   $in | to json | ^node (strap-file [subprojects core bin state.js]) pop $summary | from json
 }
 
-export def compile-openai [--model: string = "gpt-5.1", --tools: string = "all"] {
-  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) compile-openai --model $model --tools $tools | from json
+export def compile [--model: string = "current", --tools: string = "all"] {
+  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) compile --model $model --tools $tools | from json
 }
 
-export def compile [--provider: path, --tools: string = "all"] {
-  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) compile --provider $provider --tools $tools | from json
-}
-
-export def complete-openai [--model: string = "gpt-5.1", --tools: string = "all"] {
-  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) complete-openai --model $model --tools $tools | from json
-}
-
-export def complete [--provider: path, --tools: string = "all"] {
-  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) complete --provider $provider --tools $tools | from json
+export def complete [--model: string = "current", --tools: string = "all"] {
+  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) complete --model $model --tools $tools | from json
 }
 
 export def process-tools [--tools: string = "all"] {

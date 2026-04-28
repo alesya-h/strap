@@ -1,8 +1,8 @@
 {
-  "name": "chatgpt-codex",
+  "name": "gpt-5.5-chatgpt",
   "provider": "chatgpt",
   "api": "responses",
-  "model": "gpt-5.5",
+  "model_id": "gpt-5.5",
   "base_url": "https://chatgpt.com/backend-api/codex/responses",
   "auth": {
     "type": "chatgpt_oauth",

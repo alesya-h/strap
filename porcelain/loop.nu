@@ -8,24 +8,16 @@ def root-file [path_parts: list<string>] {
   $path_parts | prepend $root | path join
 }
 
-export def complete-once [--model: string = "gpt-5.1", --tools: string = "all"] {
-  $in | to json | ^node (root-file [subprojects providers bin llm.js]) complete-openai --model $model --tools $tools | from json
-}
-
-export def complete-provider-once [--provider: path, --tools: string = "all"] {
-  $in | to json | ^node (root-file [subprojects providers bin llm.js]) complete --provider $provider --tools $tools | from json
+export def complete-once [--model: string = "current", --tools: string = "all"] {
+  $in | to json | ^node (root-file [subprojects providers bin llm.js]) complete --model $model --tools $tools | from json
 }
 
 export def process-tools-once [--tools: string = "all"] {
   $in | to json | ^node (root-file [subprojects tools bin run-calls.js]) --tools $tools | from json
 }
 
-export def complete-and-process [--model: string = "gpt-5.1", --tools: string = "all"] {
+export def complete-and-process [--model: string = "current", --tools: string = "all"] {
   $in | complete-once --model $model --tools $tools | process-tools-once --tools $tools
-}
-
-export def complete-provider-and-process [--provider: path, --tools: string = "all"] {
-  $in | complete-provider-once --provider $provider --tools $tools | process-tools-once --tools $tools
 }
 
 export def last-event [] {
@@ -71,12 +63,12 @@ export def trace-turn [turn: int, calls: int, phase: string] {
   $in | add-trace loop-turn { turn: $turn, calls: $calls, phase: $phase }
 }
 
-export def run-provider [provider: path, tools: string = "all", max_turns: int = 8, finalize: bool = true, max_tool_calls: int = 64] {
+export def run-model [model: string = "current", tools: string = "all", max_turns: int = 8, finalize: bool = true, max_tool_calls: int = 64] {
   mut state = $in
   mut final = false
   mut tool_calls = 0
   for turn in 1..$max_turns {
-    $state = ($state | complete-provider-once --provider $provider --tools $tools)
+    $state = ($state | complete-once --model $model --tools $tools)
     let calls = ($state | last-calls | length)
     $tool_calls = ($tool_calls + $calls)
     $state = ($state | trace-turn $turn $calls complete)
@@ -92,12 +84,12 @@ export def run-provider [provider: path, tools: string = "all", max_turns: int =
     $state = ($state | trace-turn $turn $calls tools)
   }
   if (not $final) and $finalize {
-    $state = ($state | add-budget-exhausted $max_turns | complete-provider-once --provider $provider --tools none)
+    $state = ($state | add-budget-exhausted $max_turns | complete-once --model $model --tools none)
   }
   $state
 }
 
-export def run-openai [model: string = "gpt-5.1", tools: string = "all", max_turns: int = 8, finalize: bool = true, max_tool_calls: int = 64] {
+export def run [model: string = "current", tools: string = "all", max_turns: int = 8, finalize: bool = true, max_tool_calls: int = 64] {
   mut state = $in
   mut final = false
   mut tool_calls = 0

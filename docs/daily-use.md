@@ -16,7 +16,7 @@ strap work init
 strap session new "repo analysis"
 strap session ask "Analyze this repo"
 strap session show \
-| strap loop-nu --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
+| strap loop-nu --tools all --max-turns 6 \
 | tee session.json \
 | strap session save
 ```
@@ -131,7 +131,7 @@ open state.json | strap state bookmark add --text "first unique phrase" --label 
 open marked-1.json | strap state bookmark add --text "last unique phrase" --label fold-end | save -f marked-2.json
 open marked-2.json | strap state bookmark list
 open marked-2.json | strap state extract --from bm_start --to bm_end | strap context quote | save -f quote.json
-open quote.json | strap context summarize "only architectural decisions and unresolved risks" --provider config/strap/providers/chatgpt.json --tools none | save -f summary.json
+open quote.json | strap context summarize "only architectural decisions and unresolved risks" --tools none | save -f summary.json
 open marked-2.json | strap state fold --from bm_start --to bm_end --summary "What this range established." | save -f folded.json
 open folded.json | strap session save
 ```

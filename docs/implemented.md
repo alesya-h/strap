@@ -14,17 +14,18 @@ This document records what `strap` currently implements.
 - Quoted context rendering with `strap context quote`.
 - One-shot-backed context summarization with `strap context summarize`.
 - Basic agent fork/fold commands.
-- Generic layered artifact model for command, tool, porcelain, agent, and skill artifacts.
+- Generic layered artifact model for command, tool, porcelain, model, agent, and skill artifacts.
 - Markdown agent profiles as layered artifacts.
 - Skill instruction bundles as layered artifacts.
+- Model profiles as layered artifacts with symlinked `current.json` selection.
 - `strap status` reports roots, layers, zettel status, and visible artifact overlays.
-- `strap artifact workon/promote/discard/status` manages user/project overlays for commands, tools, porcelain, agents, and skills.
+- `strap artifact workon/promote/discard/status` manages user/project overlays for commands, tools, porcelain, models, agents, and skills.
 
 ## CLIs
 
 - `strap`: main command runner, with commands discovered from project, config, and built-in command directories.
 - `strap state`: initialize, append user/assistant messages, push/pop scopes, display last message.
-- `strap llm`: compile state into provider requests and call configured providers.
+- `strap llm`: compile state into model-profile requests and call configured providers.
 - `strap loop`: run model/tool loops over canonical state.
 - `strap loop-nu`: run the editable Nushell reference loop through the command runner.
 - `strap one-shot`: run a temporary child agent until its first final answer.
@@ -32,10 +33,11 @@ This document records what `strap` currently implements.
 - `strap agent`: fork/fold agent state.
 - `strap agents`: list, show, apply, and import agent profiles.
 - `strap skills`: list, show, apply, and import skill instruction bundles.
+- `strap model`: list, show, select, and fork model profiles.
 - `strap mcp`: run bundled stdio MCP servers.
 - `strap nu`: inspect installed Nushell module paths and generated `use` lines.
 - `strap porcelain`: discover and run Nushell porcelain modules.
-- `strap artifact`: inspect and manage layered command/tool/porcelain/agent/skill artifacts.
+- `strap artifact`: inspect and manage layered command/tool/porcelain/model/agent/skill artifacts.
 - `strap status`: inspect active roots, layers, and overlay status.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
@@ -123,7 +125,7 @@ This document records what `strap` currently implements.
 - `docs/organization.md`: root/config/work organization and command-directory contract.
 - `docs/commands.md`: command authoring, validation, and built-in command reference.
 - `docs/authority.md`: policy/authority model and enforcement caveats.
-- `docs/providers.md`: provider config and auth notes.
+- `docs/providers.md`: model profile and auth notes.
 - `docs/jsmcp.md`: jsmcp bridge and Kagi smoke test notes.
 - `docs/self-modifying-porcelain.md`: porcelain/plumbing self-modification model.
 - `docs/zettelkasten.md`: shared semantic memory usage.

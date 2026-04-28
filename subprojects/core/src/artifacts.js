@@ -56,6 +56,16 @@ const TYPES = {
     discover: discoverSkillArtifacts,
     destination: (root, artifact) => path.join(root, artifact.entryName),
   },
+  model: {
+    roots: () => ({
+      user: path.join(strapWorkRoot(), "models"),
+      project: path.join(strapProjectRoot(), "models"),
+      config: path.join(strapConfigRoot(), "models"),
+      root: path.join(strapRoot(), "models"),
+    }),
+    discover: discoverModelArtifacts,
+    destination: (root, artifact) => path.join(root, artifact.entryName),
+  },
 };
 
 export function artifactTypes() {
@@ -187,6 +197,14 @@ function discoverSkillArtifacts(root, layer) {
     .map((dir) => ({ type: "skill", name: path.basename(dir), layer, kind: "directory", entryName: path.basename(dir), root, path: dir, files: filesForDirectory(dir) }));
 }
 
+function discoverModelArtifacts(root, layer) {
+  if (!isDirectory(root)) return [];
+  return fs.readdirSync(root, { withFileTypes: true })
+    .filter((entry) => (entry.isFile() || entry.isSymbolicLink()) && entry.name.endsWith(".json"))
+    .map((entry) => path.join(root, entry.name))
+    .map((file) => ({ type: "model", name: path.basename(file, ".json"), layer, kind: fs.lstatSync(file).isSymbolicLink() ? "symlink" : "file", entryName: path.basename(file), root, path: file, files: [file] }));
+}
+
 function describeArtifact(artifact, all, includePaths) {
   const base = all.find((item) => item.name === artifact.name && LAYERS.indexOf(item.layer) > LAYERS.indexOf(artifact.layer));
   const shadows = all.filter((item) => item.name === artifact.name && item.layer !== artifact.layer).map((item) => item.layer);
@@ -225,6 +243,11 @@ function copyArtifact(artifact, target) {
   if (artifact.kind === "directory") {
     fs.rmSync(target, { recursive: true, force: true });
     copyDirectory(artifact.path, target);
+    return;
+  }
+  if (artifact.kind === "symlink") {
+    fs.rmSync(target, { force: true });
+    fs.symlinkSync(fs.readlinkSync(artifact.path), target);
     return;
   }
   fs.copyFileSync(artifact.path, target);

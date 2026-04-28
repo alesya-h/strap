@@ -1,6 +1,6 @@
 # Vision
 
-`strap` is a Linux-first, unix-ish agent harness for local, inspectable, self-modifying work.
+`strap` is a Linux-only, unix-ish agent harness for local, inspectable, self-modifying work.
 
 The core idea is simple:
 

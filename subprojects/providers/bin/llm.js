@@ -1,43 +1,32 @@
 #!/usr/bin/env node
-import { compileChatMessages, compileOpenAIResponses, normalizeState } from "#strap/core/state";
+import { normalizeState } from "#strap/core/state";
 import { getTools } from "#strap/tools/registry";
 import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
-import { loadProviderConfig, normalizeProviderConfig } from "#strap/providers/config";
+import { loadModelConfig } from "#strap/providers/config";
 import { callProvider, compileProviderRequest, completeProvider } from "#strap/providers/call";
 import fs from "node:fs/promises";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap llm <compile|complete|call|compile-openai|compile-chat|complete-openai|call-openai> [--provider provider.json] [--model model] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json");
+  console.error("Usage: strap llm <compile|complete|call> [--model current|name|path.json] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json");
   process.exit(2);
 }
 
 if (!command) usage();
 
-const providerPath = takeOption(args, "--provider");
-const model = takeOption(args, "--model", "gpt-5.1");
+const modelName = takeOption(args, "--model", "current");
 const toolGroup = takeOption(args, "--tools", "all");
 const tools = await loadTools(toolGroup);
 const state = normalizeState(await readJsonInput(takeOption(args, "--file", "-")));
-const providerConfig = providerPath
-  ? await loadProviderConfig(providerPath)
-  : normalizeProviderConfig({ provider: "openai", api: command.endsWith("chat") ? "chat" : "responses", model });
+const modelConfig = await loadModelConfig(modelName);
 
 if (command === "compile") {
-  writeJson(compileProviderRequest(state, providerConfig, tools));
+  writeJson(compileProviderRequest(state, modelConfig, tools));
 } else if (command === "call") {
-  writeJson(await callProvider(state, providerConfig, tools));
+  writeJson(await callProvider(state, modelConfig, tools));
 } else if (command === "complete") {
-  writeJson(await completeProvider(state, providerConfig, tools));
-} else if (command === "compile-openai") {
-  writeJson(compileOpenAIResponses(state, { model, tools }));
-} else if (command === "compile-chat") {
-  writeJson({ model, messages: compileChatMessages(state), tools: tools.map((tool) => ({ type: "function", function: { name: tool.name, description: tool.description, parameters: tool.inputSchema } })) });
-} else if (command === "complete-openai" || command === "call-openai") {
-  const openaiConfig = normalizeProviderConfig({ provider: "openai", api: "responses", model, auth: providerConfig.auth, base_url: providerConfig.base_url, headers: providerConfig.headers });
-  if (command === "call-openai") writeJson(await callProvider(state, openaiConfig, tools));
-  else writeJson(await completeProvider(state, openaiConfig, tools));
+  writeJson(await completeProvider(state, modelConfig, tools));
 } else {
   usage();
 }

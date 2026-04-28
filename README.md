@@ -1,21 +1,21 @@
 # Modular agentic harness
 
-`strap` is a Linux-first, unix-ish agent harness scaffold. The repo currently contains:
+`strap` is a Linux-only, unix-ish agent harness scaffold. The repo currently contains:
 
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
 - Separate harness, static config, project, user-work, and workspace roots: `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
-- Subproject commands for state editing, provider request compilation, agent fork/fold, and pending tool execution.
+- Subproject commands for state editing, model request compilation, agent fork/fold, and pending tool execution.
 - Nu-first structured plumbing with a git-like plumbing/porcelain split for model-authored workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from overlayed user/project/config/root tool dirs.
 - A shared markdown-source zettelkasten CLI and script tool for agent memory, with inline wikilinks and a derived SQLite/sqlite-vec index.
-- A generic layered artifact model for command, tool, and porcelain workon/promote/discard flows.
+- A generic layered artifact model for command, tool, porcelain, model, agent, and skill workon/promote/discard flows.
 - Layered markdown agent profiles compatible with OpenCode-style frontmatter.
 - Layered skill instruction bundles compatible with OpenCode-style `SKILL.md` directories.
 - jj-backed user-local state history under `.strap-user`.
 - jsmcp bridge tools for programmable access to configured MCP servers.
-- Provider config files for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
+- Layered model profiles for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
 
 Start with:
@@ -32,7 +32,7 @@ npm test
 strap state init \
 | strap state add-user "Inspect this repo" \
 | tee state.json \
-| strap llm compile-openai
+| strap llm compile
 strap mcp fs
 ```
 
@@ -41,7 +41,7 @@ The main harness CLIs are immutable JSON filters: state comes in on stdin and th
 ```bash
 strap state init \
 | strap state add-user "List files in the current directory" \
-| strap llm complete-openai --tools all \
+| strap llm complete --tools all \
 | strap run-calls --tools all \
 | tee session.json \
 | strap state display-last-message
@@ -56,7 +56,7 @@ strap work init
 strap session new "repo analysis"
 strap session ask "Analyze this repo"
 strap session show \
-| strap loop-nu --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
+| strap loop-nu --tools all --max-turns 6 \
 | tee session.json \
 | strap session save
 ```
@@ -69,7 +69,7 @@ Run a one-shot agent over quoted context without mutating a session:
 open state.json
 | strap state extract --from bm_a --to bm_b
 | strap context quote
-| strap context summarize "Summarize only architectural decisions and unresolved risks" --agent chat-concise --skill concise --provider config/strap/providers/chatgpt.json --tools none
+| strap context summarize "Summarize only architectural decisions and unresolved risks" --agent chat-concise --skill concise --tools none
 ```
 
 Agent profiles are layered artifacts:
@@ -102,7 +102,7 @@ strap state init
 | strap skills apply concise
 ```
 
-If the module is installed on `NU_LIB_DIR`, the import can be shortened:
+If the module is installed on `NU_LIB_DIRS`, the import can be shortened:
 
 ```nu
 use strap
@@ -139,7 +139,7 @@ use nu/strap.nu *
 
 init
 | add-user "List files in the current directory"
-| complete-openai --tools all
+| complete --tools all
 | process-tools --tools all
 | tee { save -f session.json }
 | display-last-message
@@ -216,14 +216,17 @@ Embeddings can use `OPENAI_API_KEY`, the deterministic hash provider, or the loc
 STRAP_ZK_EMBED_PROVIDER=chatgpt strap zk search-hybrid 'semantic recall'
 ```
 
-## Providers
+## Models
 
-Provider configs are JSON files containing provider, auth, endpoint, and model. Checked-in configs live in `config/strap/providers/`.
+Model profiles are JSON files containing `model_id`, provider, auth, endpoint, and default parameters. Runtime commands default to `--model current`. Checked-in configs live in `config/strap/models/`, with `current.json` as a Linux symlink to the selected model profile.
 
 ```bash
+strap model list
+strap model show current
+
 strap state init \
 | strap state add-user "Say hi" \
-| strap llm complete --provider config/strap/providers/openai-api-key.json
+| strap llm complete
 ```
 
 See `docs/providers.md`.
@@ -240,7 +243,7 @@ strap auth chatgpt import-codex
 ```bash
 strap state init \
 | strap state add-user "Analyze this repo" \
-| strap loop --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
+| strap loop --tools all --max-turns 6 \
 | tee session.json \
 | strap state display-last-message
 ```
@@ -250,7 +253,7 @@ There is also an editable Nushell reference loop:
 ```bash
 strap state init \
 | strap state add-user "Analyze this repo" \
-| strap loop-nu --provider config/strap/providers/chatgpt.json --tools all --max-turns 6 \
+| strap loop-nu --tools all --max-turns 6 \
 | tee session.json \
 | strap state display-last-message
 ```
@@ -308,7 +311,7 @@ The active format is the actor/event/scope shape.
 - `docs/organization.md`: repository, `.strap`, and `.strap-user` organization.
 - `docs/commands.md`: command contract and built-in command reference.
 - `docs/authority.md`: policy decisions, sandbox notes, and current enforcement caveats.
-- `docs/providers.md`: provider config and auth modes.
+- `docs/providers.md`: model profiles and auth modes.
 - `docs/daily-use.md`: daily project-local workflow.
 - `docs/zettelkasten.md`: shared memory CLI and agent tool.
 - `docs/jsmcp.md`: jsmcp bridge.

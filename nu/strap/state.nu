@@ -7,8 +7,6 @@ export def push [label: string] { $in | filter-json [state push $label] }
 export def pop [summary: string] { $in | filter-json [state pop $summary] }
 export def tree [--hidden] { $in | filter-text ([state tree] ++ (maybe-switch "--hidden" $hidden)) }
 export def display-last-message [] { $in | filter-text [state display-last-message] }
-export def compile-openai [--model: string = "gpt-5.1"] { $in | filter-json [state compile-openai "--model" $model] }
-
 export def bookmark-list [--hidden] { $in | filter-json ([state bookmark list] ++ (maybe-switch "--hidden" $hidden)) }
 export def bookmark-add [--text: string, --label: string = "", --id: string = ""] {
   $in | filter-json ([state bookmark add] ++ (maybe-flag "--text" $text) ++ (maybe-flag "--label" $label) ++ (maybe-flag "--id" $id))

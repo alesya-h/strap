@@ -24,6 +24,7 @@ export use ../plumbing.nu [
 export use ./state.nu
 export use ./agents.nu
 export use ./skills.nu
+export use ./model.nu
 export use ./session.nu
 export use ./work.nu
 export use ./context.nu
@@ -36,3 +37,7 @@ export use ./commands.nu
 export use ./paths.nu
 export use ./status.nu
 export use ./policy.nu
+
+export def "model use" [name: string] {
+  run-external ($env.STRAP_BIN? | default "strap") model use $name | from json
+}

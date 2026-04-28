@@ -207,11 +207,21 @@ They receive JSON on stdin and can expose a sidecar JSON schema.
 
 Bundled stdio MCP servers live under `subprojects/mcp/servers/`. The jsmcp bridge shells out to `jsmcp client` and exposes configured MCP servers as programmable tools.
 
-## Providers And Auth
+## Models, Providers, And Auth
 
-Provider configs live in `config/strap/providers/` and describe provider, API family, endpoint, model, auth, headers, and parameters.
+Model profiles live in layered `models/` directories and describe model id, provider street address, API family, endpoint, auth, headers, and parameters. Runtime commands default to `--model current`, where `current.json` is a Linux symlink to the selected profile.
 
-Current provider families:
+Model roots:
+
+```text
+STRAP_MODEL_PATH
+$STRAP_WORK/models
+$STRAP_PROJECT/models
+$STRAP_CONFIG/models
+$STRAP_ROOT/models
+```
+
+Current provider adapter families:
 
 - OpenAI public API with API-key auth.
 - OpenRouter chat completions.

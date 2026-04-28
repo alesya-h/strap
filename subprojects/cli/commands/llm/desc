@@ -1,4 +1,9 @@
-Compile or call language model providers from canonical state.
+Compile or call model profiles from canonical state.
+
+Usage:
+  strap llm compile [--model current] [--tools all]
+  strap llm call [--model current] [--tools all]
+  strap llm complete [--model current] [--tools all]
 
 Usage:
   strap llm compile --provider config/strap/providers/openai.json

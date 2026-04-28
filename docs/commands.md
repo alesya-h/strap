@@ -73,10 +73,11 @@ strap inner my-command helper-name arg1 arg2
 | `context` | Transform extracted context, including quoting and summarization. |
 | `edit` | Edit or create command files. |
 | `history` | Manage jj-backed user-local strap history. |
-| `llm` | Compile, call, or complete provider requests from canonical state. |
+| `llm` | Compile, call, or complete model-profile requests from canonical state. |
 | `loop` | Run the Node model/tool loop. |
 | `loop-nu` | Run the editable Nushell reference loop. |
 | `mcp` | Run bundled stdio MCP servers. |
+| `model` | List, show, select, and fork model profiles. |
 | `nu` | Inspect Nushell plumbing module paths. |
 | `one-shot` | Run an agent once until its first final answer. |
 | `paths` | Print resolved root/config/project/work/workspace paths. |
@@ -103,6 +104,7 @@ strap status
 strap artifact status command
 strap artifact status agent
 strap artifact status skill
+strap artifact status model
 strap artifact workon porcelain basic
 strap artifact promote porcelain basic
 strap artifact discard porcelain basic
@@ -136,6 +138,19 @@ strap skills import-opencode ~/.config/opencode/skills
 
 `apply` attaches the skill to the selected actor, defaulting to `assistant`, without replacing the active agent profile.
 
+## Model Profiles
+
+Model profiles are layered `models/name.json` artifacts. Runtime commands default to `--model current`.
+
+```nu
+strap model list
+strap model show current
+strap model use gpt-5.5-chatgpt
+strap model fork current next-chatgpt --set-model-id gpt-next
+```
+
+`current.json` is a Linux symlink to the selected profile in the active overlay.
+
 ## Nushell Plumbing
 
 The grouped Nu module lives in `nu/strap/mod.nu` and is normally imported as:
@@ -148,7 +163,7 @@ strap state init
 | strap skills apply concise
 ```
 
-If installed on `NU_LIB_DIR`, use `use strap`.
+If installed on `NU_LIB_DIRS`, use `use strap`.
 
 For a development shell:
 

@@ -36,7 +36,7 @@ Or use the local ChatGPT subscription OAuth route:
 
 ```bash
 export STRAP_ZK_EMBED_PROVIDER=chatgpt
-export STRAP_ZK_CHATGPT_PROVIDER=config/strap/providers/chatgpt.json
+export STRAP_ZK_CHATGPT_MODEL=current
 ```
 
 This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap auth chatgpt login` or import an existing Codex token with `strap auth chatgpt import-codex`.
