@@ -8,6 +8,9 @@ This directory contains user/agent-local runtime state. It should be ignored by 
 - `cache/`: disposable cache and derived indexes.
 - `branches/`: branch/fork working state.
 - `scratch/`: temporary files.
+- `agents/`: user-local agent profile overlays.
+- `skills/`: user-local skill instruction overlays.
+- `models/`: user-local model profile overlays.
 - `commands/`: temporary generated commands.
 - `tools/`: temporary generated script tools.
 - `porcelain/`: temporary generated Nushell porcelain.

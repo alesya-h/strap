@@ -97,7 +97,7 @@ Run `strap help <command>` for command-local usage text.
 
 ## Layered Artifacts
 
-Commands, script tools, and porcelain modules can be inspected and moved through the user/project overlay lifecycle:
+Commands, script tools, porcelain modules, model profiles, agent profiles, and skill bundles can be inspected and moved through the user/project overlay lifecycle:
 
 ```bash
 strap status

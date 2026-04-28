@@ -37,7 +37,7 @@ Commands, script tools, and porcelain modules share a layered artifact model:
 
 The user layer shadows lower layers. `strap artifact workon <type> <name>` copies a lower-layer artifact into the user layer, `strap artifact promote <type> <name>` writes the user-layer artifact to the project layer and clears the overlay, and `strap artifact discard <type> <name>` removes the user-layer overlay.
 
-Supported artifact types are currently `command`, `tool`, `porcelain`, `agent`, and `skill`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
+Supported artifact types are currently `command`, `tool`, `porcelain`, `model`, `agent`, and `skill`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
 
 ## Command Discovery
 
