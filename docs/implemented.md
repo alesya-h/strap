@@ -37,8 +37,8 @@ This document records what `strap` currently implements.
 - OpenAI API-key route exists.
 - OpenRouter chat completions route exists.
 - Anthropic Messages route exists.
-- Codex-style ChatGPT OAuth auth loading exists, but direct public `/v1/responses` is blocked by missing scopes.
-- gptel ChatGPT OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`.
+- Public OpenAI `/v1/responses` is API-key only in this harness; Codex/ChatGPT OAuth tokens are not compatible with that endpoint.
+- ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`.
 - ChatGPT subscription OAuth token also works for embeddings through `https://api.openai.com/v1/embeddings`.
 
 ## Tooling

@@ -11,7 +11,7 @@
 - Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
 - A shared SQLite/sqlite-vec zettelkasten CLI and script tool for agent memory.
 - jsmcp bridge tools for programmable access to configured MCP servers.
-- Provider config files for OpenAI, OpenRouter, Anthropic, Codex ChatGPT OAuth, and gptel ChatGPT OAuth auth.
+- Provider config files for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
 
 ## Quick Start

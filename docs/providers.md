@@ -30,7 +30,7 @@ Checked-in provider configs live in `config/strap/providers/`.
 
 Supported `provider` / `api` combinations now:
 
-- `openai` / `responses`
+- `openai` / `responses` through `https://api.openai.com/v1/responses` with API-key auth
 - `openai` / `chat`
 - `chatgpt` / `responses` via ChatGPT Codex endpoint
 - `openrouter` / `chat`
@@ -54,7 +54,7 @@ The secret can come from `env`, `file`, or `value`.
 
 This sends `x-api-key` instead of `Authorization: Bearer`.
 
-### OpenAI via Codex ChatGPT OAuth/subscription
+### ChatGPT/Codex backend via Codex OAuth/subscription
 
 ```json
 {
@@ -73,13 +73,15 @@ This reads Codex-style `auth.json` token data:
 
 If the access token is near expiry, `strap` refreshes it using OpenAI's OAuth refresh endpoint and Codex's client id, then writes the updated auth file back with mode `0600`. This mirrors the relevant Codex behavior. It is an auth-store mutation, not a session-state mutation.
 
+Codex/ChatGPT OAuth is a separate auth family from normal OpenAI API-key auth. Do not use `codex_chatgpt` credentials with `https://api.openai.com/v1/responses`; that public endpoint expects API-token/project-key credentials. Use Codex/ChatGPT OAuth only with ChatGPT/Codex backend endpoints such as `https://chatgpt.com/backend-api/codex/responses`.
+
 Request headers include:
 
 - `Authorization: Bearer <access_token>`
 - `ChatGPT-Account-ID: <account_id>` when available
 - `X-OpenAI-Fedramp: true` when the token claims require it
 
-### OpenAI via gptel ChatGPT OAuth/subscription
+### ChatGPT/Codex backend via gptel OAuth/subscription
 
 The local gptel fork uses a different working path for ChatGPT subscription access:
 
@@ -103,7 +105,7 @@ The local gptel fork uses a different working path for ChatGPT subscription acce
 }
 ```
 
-This reads gptel's Emacs-lisp plist token cache, refreshes through `https://auth.openai.com/oauth/token`, and calls `chatgpt.com/backend-api/codex/responses`. This is the currently tested subscription/OAuth route.
+This reads gptel's Emacs-lisp plist token cache, refreshes through `https://auth.openai.com/oauth/token`, and calls `chatgpt.com/backend-api/codex/responses`. This is the currently tested subscription/OAuth route. Like Codex OAuth, it is not for public `api.openai.com/v1/responses`; that route is API-key auth only.
 
 For an end-to-end agent loop with native tool calls/results:
 
