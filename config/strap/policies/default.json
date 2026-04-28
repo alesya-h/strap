@@ -6,6 +6,6 @@
     "destructive": "allow",
     "commands": { "allow": ["*"] },
     "read_roots": ["*"],
-    "write_roots": ["work", "workspace"]
+    "write_roots": ["project", "work", "workspace"]
   }
 }

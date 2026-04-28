@@ -23,7 +23,7 @@ The public interface is:
 strap <command> [args...]
 ```
 
-This makes the harness inspectable and editable by both humans and agents. A project can carry local commands, tools, sessions, porcelain, and memory under `.strap/` without requiring central registration.
+This makes the harness inspectable and editable by both humans and agents. A project can carry promoted commands, tools, porcelain, policies, and shared memory under `.strap/`, while user/agent-local sessions, history, scratch work, caches, and temporary generated capabilities live under `.strap-user/`.
 
 ## Current Spine
 
@@ -44,7 +44,8 @@ Everything else should orbit that spine.
 
 - `STRAP_ROOT`: installed harness code.
 - `STRAP_CONFIG`: static harness config.
-- `STRAP_WORK`: project-local mutable `.strap` work state.
+- `STRAP_PROJECT`: project-shared `.strap` artifacts that may be committed with the project.
+- `STRAP_WORK`: user/agent-local mutable `.strap-user` work state.
 - `STRAP_WORKSPACE`: filesystem workspace for tools.
 
 These roots separate code, config, mutable state, and effect targets.

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { strapCommandDirs, strapConfigRoot, strapRoot, strapWorkRoot } from "#strap/core/paths";
+import { strapCommandDirs, strapConfigRoot, strapProjectRoot, strapRoot, strapWorkRoot } from "#strap/core/paths";
 
 const [command, ...args] = process.argv.slice(2);
 
@@ -92,7 +92,7 @@ if (command === "list") {
   if (json) process.stdout.write(`${JSON.stringify(items, null, 2)}\n`);
   else for (const item of items) process.stdout.write(`${item.name}\t${item.description}\n`);
 } else if (command === "roots") {
-  process.stdout.write(`${JSON.stringify({ root: strapRoot(), config: strapConfigRoot(), work: strapWorkRoot(), command_dirs: strapCommandDirs() }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ root: strapRoot(), config: strapConfigRoot(), project: strapProjectRoot(), work: strapWorkRoot(), command_dirs: strapCommandDirs() }, null, 2)}\n`);
 } else if (command === "manifest") {
   const name = args[0];
   const item = commandItems().find((item) => item.name === name);

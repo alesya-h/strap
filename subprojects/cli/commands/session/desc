@@ -1,4 +1,4 @@
-Create and manage project-local strap sessions.
+Create and manage user-local strap sessions.
 
 Usage:
   strap session new "repo analysis"

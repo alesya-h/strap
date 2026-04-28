@@ -22,10 +22,10 @@ export function strapConfigRoot() {
   return path.join(xdg, "strap");
 }
 
-export function findNearestStrapWork(start = process.cwd()) {
+function findNearestDir(name, start = process.cwd()) {
   let current = path.resolve(start);
   while (true) {
-    const candidate = path.join(current, ".strap");
+    const candidate = path.join(current, name);
     if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) return candidate;
     const parent = path.dirname(current);
     if (parent === current) return undefined;
@@ -33,9 +33,22 @@ export function findNearestStrapWork(start = process.cwd()) {
   }
 }
 
+export function findNearestStrapProject(start = process.cwd()) {
+  return findNearestDir(".strap", start);
+}
+
+export function findNearestStrapWork(start = process.cwd()) {
+  return findNearestDir(".strap-user", start);
+}
+
+export function strapProjectRoot() {
+  if (process.env.STRAP_PROJECT) return path.resolve(process.env.STRAP_PROJECT);
+  return findNearestStrapProject(workspaceRoot()) || path.join(workspaceRoot(), ".strap");
+}
+
 export function strapWorkRoot() {
   if (process.env.STRAP_WORK) return path.resolve(process.env.STRAP_WORK);
-  return findNearestStrapWork() || path.join(workspaceRoot(), ".strap");
+  return findNearestStrapWork(workspaceRoot()) || path.join(workspaceRoot(), ".strap-user");
 }
 
 export function strapCommandDirs() {
@@ -43,6 +56,7 @@ export function strapCommandDirs() {
   return [
     ...configured,
     path.join(strapWorkRoot(), "commands"),
+    path.join(strapProjectRoot(), "commands"),
     path.join(strapConfigRoot(), "commands"),
     path.join(strapRoot(), "subprojects", "cli", "commands"),
   ];
@@ -53,6 +67,7 @@ export function strapToolDirs() {
   return [
     ...configured,
     path.join(strapWorkRoot(), "tools"),
+    path.join(strapProjectRoot(), "tools"),
     path.join(strapConfigRoot(), "tools"),
     path.join(strapRoot(), "tools"),
   ];
@@ -63,6 +78,7 @@ export function strapPorcelainDirs() {
   return [
     ...configured,
     path.join(strapWorkRoot(), "porcelain"),
+    path.join(strapProjectRoot(), "porcelain"),
     path.join(strapConfigRoot(), "porcelain"),
     path.join(strapRoot(), "porcelain"),
   ];

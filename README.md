@@ -4,7 +4,7 @@
 
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
-- Separate harness, static config, and project work roots: `STRAP_ROOT`, `STRAP_CONFIG`, and `STRAP_WORK`.
+- Separate harness, static config, project, user-work, and workspace roots: `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Subproject commands for state editing, provider request compilation, agent fork/fold, and pending tool execution.
 - A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
@@ -230,7 +230,7 @@ The active format is the actor/event/scope shape.
 - `docs/vision.md`: vision, design principles, non-goals, strategic priorities.
 - `docs/architecture.md`: roots, command flow, authority, state, loops, tools, providers, sessions, memory, subprojects.
 - `docs/state-format.md`: canonical `strap.state.v0.2` format specification.
-- `docs/organization.md`: repository and `.strap/` organization.
+- `docs/organization.md`: repository, `.strap`, and `.strap-user` organization.
 - `docs/commands.md`: command contract and built-in command reference.
 - `docs/authority.md`: policy decisions, sandbox notes, and current enforcement caveats.
 - `docs/providers.md`: provider config and auth modes.

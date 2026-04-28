@@ -7,7 +7,7 @@
     "commands": {
       "allow": ["commands", "help", "paths", "policy", "session", "state", "state-bb", "zk"]
     },
-    "read_roots": ["root", "config", "work", "workspace"],
+    "read_roots": ["root", "config", "project", "work", "workspace"],
     "write_roots": ["work"]
   }
 }

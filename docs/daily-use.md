@@ -1,6 +1,6 @@
 # Daily Use
 
-A minimal project-local workflow:
+A minimal project workflow:
 
 If you use the ChatGPT/Codex backend provider, authenticate once first:
 
@@ -40,7 +40,7 @@ strap zk list
 strap zk tags
 ```
 
-Add project-local commands:
+Add user-local temporary commands:
 
 ```bash
 strap commands new repo-check

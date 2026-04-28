@@ -19,6 +19,7 @@ Commands receive:
 
 - `STRAP_ROOT`
 - `STRAP_CONFIG`
+- `STRAP_PROJECT`
 - `STRAP_WORK`
 - `STRAP_WORKSPACE`
 - `STRAP_CMD_NAME`
@@ -36,7 +37,7 @@ Commands receive:
 }
 ```
 
-Create a project-local command:
+Create a user-local temporary command under `.strap-user/commands`:
 
 ```bash
 strap commands new my-command
@@ -77,10 +78,10 @@ strap inner my-command helper-name arg1 arg2
 | `porcelain` | List and run model-editable Nushell porcelain modules. |
 | `run-calls` | Execute pending tool calls in canonical state. |
 | `sandbox` | Run a command through a bubblewrap sandbox profile. |
-| `session` | Create, inspect, update, recall memory into, and remember project-local sessions. |
+| `session` | Create, inspect, update, recall memory into, and remember user-local project sessions. |
 | `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
 | `state-bb` | Run the Babashka pure-state prototype. |
-| `work` | Initialize or inspect the project-local `.strap` work directory. |
+| `work` | Initialize or inspect `.strap` project artifacts and `.strap-user` local work. |
 | `zk` | Use the shared SQLite/FTS5/sqlite-vec zettelkasten. |
 
 Run `strap help <command>` for command-local usage text.

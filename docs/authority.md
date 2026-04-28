@@ -13,7 +13,7 @@ Decision inputs:
 - command name
 - command annotations from `command.json`
 - action: `execute`, `read`, or `write`
-- root classification: `root`, `config`, `work`, `workspace`, or `outside`
+- root classification: `root`, `config`, `project`, `work`, `workspace`, or `outside`
 
 Inspect policy decisions:
 
@@ -21,7 +21,7 @@ Inspect policy decisions:
 strap policy list
 strap policy show readonly
 strap policy decide --policy readonly --action execute --command zk
-strap policy decide --policy readonly --action write --path .strap/state.json
+strap policy decide --policy readonly --action write --path .strap-user/state.json
 ```
 
 Commands receive the decision as JSON in `STRAP_AUTHORITY_DECISION`.
@@ -45,7 +45,7 @@ Policies are JSON files with a `rules` object. Current fields include:
     "execute": "sandbox",
     "destructive": "deny",
     "commands": {"allow": ["commands", "paths", "policy"]},
-    "read_roots": ["root", "config", "work", "workspace"],
+    "read_roots": ["root", "config", "project", "work", "workspace"],
     "write_roots": ["work"]
   }
 }
@@ -77,4 +77,4 @@ Until that audit is complete, treat policies as an active first-pass boundary pl
 
 ## Readonly Goal
 
-The intended hardening target is an end-to-end `readonly` mode that can inspect, search, recall, and explain without mutating outside allowed roots. This should include commands, tools, MCP/jsmcp, memory, auth files, and sandbox behavior.
+The intended hardening target is an end-to-end `readonly` mode that can inspect, search, recall, and explain without mutating outside allowed roots. This should include commands, tools, MCP/jsmcp, memory, auth files, project/work root separation, and sandbox behavior.

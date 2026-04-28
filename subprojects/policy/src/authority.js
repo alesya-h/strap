@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { resolveInWorkspace, strapConfigRoot, strapRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
+import { resolveInWorkspace, strapConfigRoot, strapProjectRoot, strapRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
 
 export function loadPolicy(name = process.env.STRAP_POLICY || "default") {
   const file = path.join(strapConfigRoot(), "policies", `${name}.json`);
@@ -11,9 +11,10 @@ export function loadPolicy(name = process.env.STRAP_POLICY || "default") {
 export function rootForPath(filePath) {
   const resolved = path.resolve(filePath || ".");
   const roots = [
-    ["root", strapRoot()],
     ["config", strapConfigRoot()],
+    ["project", strapProjectRoot()],
     ["work", strapWorkRoot()],
+    ["root", strapRoot()],
     ["workspace", workspaceRoot()],
   ];
   for (const [name, root] of roots) {

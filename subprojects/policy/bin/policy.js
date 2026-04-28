@@ -25,7 +25,8 @@ if (command === "list") {
 } else if (command === "decide") {
   const options = parseOptions([name, ...args].filter(Boolean));
   const policy = loadPolicy(options.policy || process.env.STRAP_POLICY || "default");
-  process.stdout.write(`${JSON.stringify(decide({ policy, ...options }), null, 2)}\n`);
+  const { policy: _policyName, ...decisionOptions } = options;
+  process.stdout.write(`${JSON.stringify(decide({ policy, ...decisionOptions }), null, 2)}\n`);
 } else {
   console.error("Usage: strap policy <list|show|decide> [args]");
   process.exit(2);

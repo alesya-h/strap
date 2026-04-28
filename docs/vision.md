@@ -29,7 +29,7 @@ The primary extension API is a command directory discovered from project, config
 
 ### Keep roots explicit
 
-`STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_WORK`, and `STRAP_WORKSPACE` separate installed harness code, static config, mutable project-local state, and the filesystem workspace where tools operate.
+`STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE` separate installed harness code, static config, project-shared artifacts, user/agent-local mutable state, and the filesystem workspace where tools operate.
 
 This makes mutability and authority discussable.
 

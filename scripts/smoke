@@ -3,7 +3,8 @@ set -euo pipefail
 
 strap=./bin/strap
 export STRAP_WORK=/tmp/strap-work-smoke
-rm -rf "$STRAP_WORK"
+export STRAP_PROJECT=/tmp/strap-project-smoke
+rm -rf "$STRAP_WORK" "$STRAP_PROJECT"
 
 $strap state init > /tmp/strap-smoke.json
 $strap state add-user 'hello' < /tmp/strap-smoke.json > /tmp/strap-smoke-2.json

@@ -11,7 +11,7 @@
 - `jsmcp/`: bridge to installed `jsmcp client`.
 - `porcelain/`: runner for model-editable Nushell porcelain modules.
 - `zettel/`: SQLite/FTS5/sqlite-vec zettelkasten and embedding helper.
-- `sessions/`: project-local `.strap` work and session CLIs.
+- `sessions/`: `.strap` project artifact and `.strap-user` local work/session CLIs.
 - `policy/`: authority decision model and policy CLI.
 - `state-bb/`: Babashka pure-state prototype.
 

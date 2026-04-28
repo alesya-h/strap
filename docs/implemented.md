@@ -6,7 +6,7 @@ This document records what `strap` currently implements.
 
 - Provider-agnostic canonical state format using actors, events, and scopes: `strap.state.v0.2`.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
-- Root/config/work path model via `STRAP_ROOT`, `STRAP_CONFIG`, and `STRAP_WORK`.
+- Root/config/project/work/workspace path model via `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Immutable JSON filter CLIs for state transforms and harness operations.
 - Basic scope operations for opening/collapsing context regions.
 - Basic agent fork/fold commands.
@@ -25,7 +25,7 @@ This document records what `strap` currently implements.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
 - `strap auth`: manage local provider auth credentials.
-- `strap work`: initialize and inspect project-local `.strap` work directories.
+- `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
 - `strap session`: create, update, recall memory into, remember, show, save, list, and trace sessions.
 - `strap policy`: list and inspect static policy configs.
 - Command execution receives an authority decision before spawning.

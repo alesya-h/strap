@@ -108,12 +108,20 @@ Current state: capability separation is now partly implemented, but authority cl
 
 ## Persistence And Session Management
 
-- State files are explicit JSON documents, and `strap session` provides a project-local session store under `$STRAP_WORK/sessions`.
+- State files are explicit JSON documents, and `strap session` provides a user-local session store under `$STRAP_WORK/sessions`.
 - Session directories include `meta.json`, `state.json`, `trace.jsonl`, `provider-requests/`, and `tool-results/`.
 - No index of sessions, branches, summaries, and zettelkasten references.
 - No garbage collection/pruning story for old runs.
 
-Current state: persistence is unix-explicit via files, `tee`, redirection, `save`, and project-local session files.
+Current state: persistence is unix-explicit via files, `tee`, redirection, `save`, and user-local session files under `.strap-user`.
+
+## Project/User Work Split
+
+- `.strap` now represents project-shared harness artifacts.
+- `.strap-user` now represents user/agent-local runtime state.
+- No `strap promote` command yet for moving generated commands/tools/porcelain from `.strap-user` into `.strap`.
+- No jj-backed `.strap-user/history` integration yet.
+- Zettelkasten source of truth is still SQLite, not markdown files plus derived SQLite index.
 
 ## Testing Gaps
 

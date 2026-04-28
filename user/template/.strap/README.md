@@ -1,13 +1,10 @@
-# Project-local Strap Work Directory
+# Project Strap Directory
 
-This directory is the mutable per-project harness workspace.
+This directory contains project-shared harness artifacts. It may be committed with the project.
 
-- `commands/`: project-specific `strap <command>` directories.
-- `sessions/`: state files, traces, provider requests, and tool results.
+- `commands/`: promoted project `strap <command>` directories.
 - `tools/`: project-local script tools.
 - `porcelain/`: project-local Nushell porcelain.
-- `zettel/`: project-local zettelkasten database.
-- `logs/`: runtime logs.
-- `cache/`: disposable cache.
-- `branches/`: branch/fork working state.
+- `zettel/`: shared project memory source.
 - `config/`: project-specific config overrides.
+- `policies/`: project-specific policy files.

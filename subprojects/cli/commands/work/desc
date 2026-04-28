@@ -1,4 +1,4 @@
-Initialize or inspect the project-local strap work directory.
+Initialize or inspect project-shared and user-local strap work directories.
 
 Usage:
   strap work init

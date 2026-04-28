@@ -19,7 +19,7 @@ export STRAP_ZK_SQLITE_VEC_LOAD=/nix/store/.../lib/vec0.so
 The default DB path is:
 
 1. `STRAP_ZK_DB`, when set;
-2. `$STRAP_WORK/zettel/zettel.sqlite`, when `STRAP_WORK` is set by the command runner;
+2. `$STRAP_WORK/zettel/zettel.sqlite`, when `STRAP_WORK` is set by the command runner; this defaults to `.strap-user/zettel/zettel.sqlite`;
 3. `~/.config/nushell/strap/zettel.sqlite` as a Nushell fallback.
 
 ## Embeddings
@@ -40,6 +40,8 @@ export STRAP_ZK_CHATGPT_PROVIDER=config/strap/providers/chatgpt.json
 ```
 
 This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap auth chatgpt login` or import an existing Codex token with `strap auth chatgpt import-codex`.
+
+Current source of truth is the SQLite DB. A future direction is markdown notes under `.strap/zettel` and `.strap-user/zettel`, with SQLite as a derived FTS/vector index.
 
 For offline tests, use the deterministic hash embedding provider:
 

@@ -18,7 +18,8 @@ The runner resolves command directories, builds a standard environment, asks the
 | --- | --- | --- |
 | `STRAP_ROOT` | Installed harness code | repository root in development |
 | `STRAP_CONFIG` | Static harness config | `config/strap` when present, otherwise XDG config |
-| `STRAP_WORK` | Project-local mutable state | nearest `.strap`, otherwise `$STRAP_WORKSPACE/.strap` |
+| `STRAP_PROJECT` | Project-shared harness artifacts | nearest `.strap`, otherwise `$STRAP_WORKSPACE/.strap` |
+| `STRAP_WORK` | User/agent-local mutable state | nearest `.strap-user`, otherwise `$STRAP_WORKSPACE/.strap-user` |
 | `STRAP_WORKSPACE` | Filesystem workspace for tools | current working directory |
 
 Use `strap paths` or `strap commands roots` to inspect resolution.
@@ -30,6 +31,7 @@ Commands are searched in this order:
 ```text
 STRAP_COMMAND_PATH
 $STRAP_WORK/commands
+$STRAP_PROJECT/commands
 $STRAP_CONFIG/commands
 $STRAP_ROOT/subprojects/cli/commands
 ```
@@ -80,6 +82,7 @@ Path decisions for `read` and `write` classify paths as:
 
 - `root`
 - `config`
+- `project`
 - `work`
 - `workspace`
 - `outside`
@@ -129,6 +132,7 @@ Script tools are executable files discovered from:
 ```text
 STRAP_SCRIPT_TOOLS
 $STRAP_WORK/tools
+$STRAP_PROJECT/tools
 $STRAP_CONFIG/tools
 $STRAP_ROOT/tools
 ```
@@ -162,9 +166,9 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 
 ## Sessions, Work, And Memory
 
-`strap work init` creates the project-local `.strap` layout.
+`strap work init` creates both project-shared `.strap` and user-local `.strap-user` layouts.
 
-`strap session` stores sessions under `$STRAP_WORK/sessions/` with:
+`strap session` stores sessions under `$STRAP_WORK/sessions/`, which defaults to `.strap-user/sessions/`, with:
 
 - `meta.json`
 - `state.json`
@@ -174,7 +178,7 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 
 `strap session recall <query>` searches the zettelkasten and appends visible memory context to state. `strap session remember [tags]` writes useful state into zettelkasten memory.
 
-`strap zk` stores shared memory in SQLite with FTS5 and sqlite-vec. It supports text, vector, hybrid, related, backlinks, tags, links, create/update/delete/list, reindex, and `remember-state`.
+`strap zk` currently stores memory in SQLite with FTS5 and sqlite-vec. By default the DB lives under `$STRAP_WORK/zettel`, which is `.strap-user/zettel`. Shared project memory can live under `$STRAP_PROJECT/zettel`; a future markdown-source-plus-SQLite-index model is a likely direction.
 
 ## Subprojects
 

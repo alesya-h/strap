@@ -1,12 +1,13 @@
 # Repository Organization
 
-`strap` now uses three roots and a filesystem command surface.
+`strap` now uses explicit roots and a filesystem command surface.
 
 ## Roots
 
 - `STRAP_ROOT`: installed harness code root. In development this is the repository root.
 - `STRAP_CONFIG`: static harness config. Defaults to `config/strap` in this repo when present.
-- `STRAP_WORK`: mutable project work directory. Defaults to the nearest `.strap`, or `./.strap` if none exists.
+- `STRAP_PROJECT`: project-shared harness artifacts. Defaults to nearest `.strap`, or `$STRAP_WORKSPACE/.strap`.
+- `STRAP_WORK`: user/agent-local mutable work directory. Defaults to nearest `.strap-user`, or `$STRAP_WORKSPACE/.strap-user`.
 
 `STRAP_WORKSPACE` remains the filesystem workspace that tools operate in. It defaults to the current working directory.
 
@@ -44,6 +45,7 @@ Resolution order lets project/user commands override built-ins:
 ```text
 STRAP_COMMAND_PATH
 $STRAP_WORK/commands
+$STRAP_PROJECT/commands
 $STRAP_CONFIG/commands
 $STRAP_ROOT/subprojects/cli/commands
 ```
@@ -81,24 +83,42 @@ config/strap/
 
 For a personal install, mirror this at `~/.config/strap` or set `STRAP_CONFIG`.
 
-## Project Work
+## Project And User Work
 
-Project-local mutable state should live in:
+Project-shared artifacts live in:
 
 ```text
 my-project/.strap/
   commands/
-  sessions/
   tools/
   porcelain/
   zettel/
+  config/
+  policies/
+```
+
+This directory may be committed with the project. It is where generated capabilities should be promoted when they become part of the project.
+
+User/agent-local runtime state lives in:
+
+```text
+my-project/.strap-user/
+  history/
+  sessions/
   logs/
   cache/
   branches/
+  scratch/
+  commands/
+  tools/
+  porcelain/
+  zettel/
   config/
 ```
 
-`user/template/.strap` is a checked-in template for this shape.
+This directory should be ignored by the project VCS. It is where sessions, caches, logs, jj-backed state history, private memory, and temporary generated commands/tools/porcelain belong.
+
+`user/template/.strap` and `user/template/.strap-user` are checked-in templates for this split.
 
 Initialize it in a project with:
 

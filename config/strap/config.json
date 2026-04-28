@@ -2,16 +2,19 @@
   "version": "strap.config.v0.1",
   "command_roots": [
     "$STRAP_WORK/commands",
+    "$STRAP_PROJECT/commands",
     "$STRAP_CONFIG/commands",
     "$STRAP_ROOT/subprojects/cli/commands"
   ],
   "tool_roots": [
     "$STRAP_WORK/tools",
+    "$STRAP_PROJECT/tools",
     "$STRAP_CONFIG/tools",
     "$STRAP_ROOT/tools"
   ],
   "porcelain_roots": [
     "$STRAP_WORK/porcelain",
+    "$STRAP_PROJECT/porcelain",
     "$STRAP_CONFIG/porcelain",
     "$STRAP_ROOT/porcelain"
   ],
