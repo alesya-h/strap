@@ -129,6 +129,7 @@ There are two loop surfaces:
 
 - `strap loop`: Node loop for provider/tool orchestration.
 - `strap loop-nu`: editable Nushell reference loop for strategy experimentation and unix-y readability.
+- `strap one-shot`: Node one-shot runner that builds a temporary child state from optional state/context input and returns the first final assistant answer without mutating sessions.
 
 The Node loop is the dependable runtime. The Nu loop is a reference/editable strategy surface and should not silently diverge from the behavior the project wants to preserve.
 

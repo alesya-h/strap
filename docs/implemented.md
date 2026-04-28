@@ -23,6 +23,7 @@ This document records what `strap` currently implements.
 - `strap llm`: compile state into provider requests and call configured providers.
 - `strap loop`: run model/tool loops over canonical state.
 - `strap loop-nu`: run the editable Nushell reference loop through the command runner.
+- `strap one-shot`: run a temporary child agent until its first final answer.
 - `strap run-calls`: execute pending tool requests in canonical state.
 - `strap agent`: fork/fold agent state.
 - `strap mcp`: run bundled stdio MCP servers.

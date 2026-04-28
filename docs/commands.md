@@ -76,6 +76,7 @@ strap inner my-command helper-name arg1 arg2
 | `loop` | Run the Node model/tool loop. |
 | `loop-nu` | Run the editable Nushell reference loop. |
 | `mcp` | Run bundled stdio MCP servers. |
+| `one-shot` | Run an agent once until its first final answer. |
 | `paths` | Print resolved root/config/project/work/workspace paths. |
 | `policy` | List, show, and evaluate policy decisions. |
 | `porcelain` | List and run model-editable Nushell porcelain modules. |

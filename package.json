@@ -11,6 +11,7 @@
     "#strap/mcp/*": "./subprojects/mcp/src/*.js",
     "#strap/jsmcp/*": "./subprojects/jsmcp/src/*.js",
     "#strap/porcelain/*": "./subprojects/porcelain/src/*.js",
+    "#strap/loop/*": "./subprojects/loop/src/*.js",
     "#strap/policy/*": "./subprojects/policy/src/*.js"
   },
   "bin": {

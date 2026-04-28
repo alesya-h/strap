@@ -61,6 +61,15 @@ strap session show \
 
 See `docs/daily-use.md`, `docs/commands.md`, `docs/authority.md`, and `docs/architecture.md`.
 
+Run a one-shot agent over quoted context without mutating a session:
+
+```nu
+open state.json
+| strap state extract --from bm_a --to bm_b
+| strap context quote
+| strap one-shot run "Summarize only architectural decisions and unresolved risks" --provider config/strap/providers/chatgpt.json --tools none
+```
+
 ## Nushell
 
 `nu/strap.nu` wraps the Node filters as native structured pipeline commands:

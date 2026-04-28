@@ -1,0 +1,6 @@
+{
+  "name": "one-shot",
+  "readOnly": false,
+  "destructive": false,
+  "openWorld": true
+}
