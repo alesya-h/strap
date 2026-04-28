@@ -138,6 +138,24 @@ strap skills import-opencode ~/.config/opencode/skills
 
 ## Nushell Plumbing
 
+The grouped Nu module lives in `nu/strap/mod.nu` and is normally imported as:
+
+```nu
+use '/path/to/strap/nu/strap'
+
+strap state init
+| strap agents apply chat-concise
+| strap skills apply concise
+```
+
+If installed on `NU_LIB_DIR`, use `use strap`.
+
+For a development shell:
+
+```bash
+NU_LIB_DIRS="$(strap nu lib-dir)" nu
+```
+
 Nu plumbing lives in `nu/plumbing.nu` and supports block-based composition:
 
 ```nu
@@ -152,6 +170,8 @@ Discover installed module paths with:
 
 ```bash
 strap nu modules
+strap nu lib-dir
+strap nu use-line strap
 strap nu path plumbing
 strap nu use-line plumbing
 ```

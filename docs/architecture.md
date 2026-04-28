@@ -153,7 +153,9 @@ Provider request payloads are compiled projections. Provider continuation IDs or
 
 ## Nu Plumbing
 
-Nu is the preferred implementation surface for local structured data plumbing. The stable module is `nu/plumbing.nu`; it owns pure state transforms, event/bookmark/context inspection, and higher-order combinators that accept blocks.
+Nu is the preferred implementation surface for local structured data plumbing. The grouped module is `nu/strap/mod.nu`, imported as `use '/path/to/strap/nu/strap'` or `use strap` when `strap nu lib-dir` is in `NU_LIB_DIRS`, and exposes commands such as `strap state init`, `strap session new`, `strap agents list`, and `strap skills list`.
+
+The stable plumbing module is `nu/plumbing.nu`; it owns pure state transforms, event/bookmark/context inspection, and higher-order combinators that accept blocks.
 
 Examples:
 
@@ -167,7 +169,7 @@ open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
 
 The intended boundary is: Nu owns local dataflow and orchestration; Node owns provider HTTP/streaming, OAuth, MCP/jsmcp, long-running servers, SDK-heavy integrations, and process/thread edges; Babashka is available for pure algorithms when Nu becomes awkward.
 
-`strap nu modules`, `strap nu path plumbing`, and `strap nu use-line plumbing` expose installed module paths/import lines for agents and humans.
+`strap nu modules`, `strap nu lib-dir`, `strap nu use-line strap`, `strap nu path plumbing`, and `strap nu use-line plumbing` expose installed module paths/import lines for agents and humans.
 
 ## Execution Loops
 

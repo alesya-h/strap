@@ -4,7 +4,8 @@ set -euo pipefail
 module_path() {
   case "${1:-}" in
     plumbing) printf '%s\n' "$STRAP_ROOT/nu/plumbing.nu" ;;
-    wrappers|strap) printf '%s\n' "$STRAP_ROOT/nu/strap.nu" ;;
+    strap) printf '%s\n' "$STRAP_ROOT/nu/strap" ;;
+    wrappers|legacy) printf '%s\n' "$STRAP_ROOT/nu/strap.nu" ;;
     loop) printf '%s\n' "$STRAP_ROOT/porcelain/loop.nu" ;;
     basic) printf '%s\n' "$STRAP_ROOT/porcelain/basic.nu" ;;
     *) printf 'Usage: strap nu path <plumbing|wrappers|loop|basic>\n' >&2; exit 2 ;;
@@ -13,11 +14,17 @@ module_path() {
 
 case "${1:-}" in
   modules)
-    node -e 'const root=process.env.STRAP_ROOT; console.log(JSON.stringify([{name:"plumbing",kind:"plumbing",path:`${root}/nu/plumbing.nu`},{name:"wrappers",kind:"adapter",path:`${root}/nu/strap.nu`},{name:"loop",kind:"porcelain",path:`${root}/porcelain/loop.nu`},{name:"basic",kind:"porcelain",path:`${root}/porcelain/basic.nu`}], null, 2))'
+    node -e 'const root=process.env.STRAP_ROOT; console.log(JSON.stringify([{name:"strap",kind:"module",path:`${root}/nu/strap`},{name:"plumbing",kind:"plumbing",path:`${root}/nu/plumbing.nu`},{name:"wrappers",kind:"adapter",path:`${root}/nu/strap.nu`},{name:"loop",kind:"porcelain",path:`${root}/porcelain/loop.nu`},{name:"basic",kind:"porcelain",path:`${root}/porcelain/basic.nu`}], null, 2))'
     ;;
   path)
     shift
     module_path "${1:-}"
+    ;;
+  lib-dir)
+    printf '%s\n' "$STRAP_ROOT/nu"
+    ;;
+  env-line)
+    printf "\$env.NU_LIB_DIRS = (\$env.NU_LIB_DIRS | prepend '%s')\n" "$STRAP_ROOT/nu"
     ;;
   source-line)
     shift
@@ -26,11 +33,16 @@ case "${1:-}" in
     ;;
   use-line)
     shift
-    path="$(module_path "${1:-plumbing}")"
-    printf "use '%s' *\n" "$path"
+    module="${1:-strap}"
+    path="$(module_path "$module")"
+    if [ "$module" = "strap" ]; then
+      printf "use '%s'\n" "$path"
+    else
+      printf "use '%s' *\n" "$path"
+    fi
     ;;
   *)
-    printf 'Usage: strap nu <modules|path|use-line|source-line> [module]\n' >&2
+    printf 'Usage: strap nu <modules|path|lib-dir|env-line|use-line|source-line> [module]\n' >&2
     exit 2
     ;;
 esac

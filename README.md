@@ -92,6 +92,28 @@ strap skills import-opencode ~/.config/opencode/skills
 
 ## Nushell
 
+Use the grouped Nu module for the normal Nu-facing surface:
+
+```nu
+use '/path/to/strap/nu/strap'
+
+strap state init
+| strap agents apply chat-concise
+| strap skills apply concise
+```
+
+If the module is installed on `NU_LIB_DIR`, the import can be shortened:
+
+```nu
+use strap
+```
+
+For development shells, expose it with:
+
+```bash
+NU_LIB_DIRS="$(strap nu lib-dir)" nu
+```
+
 `nu/plumbing.nu` is the preferred local data plumbing layer. It provides pure state transforms plus closure-based combinators; Node remains the adapter layer for provider, OAuth, MCP, jsmcp, and other protocol edges.
 
 ```nu
@@ -108,7 +130,7 @@ open state.json
   }
 ```
 
-`strap nu modules` prints the installed Nu modules, `strap nu path plumbing` prints the plumbing module path, and `strap nu use-line plumbing` prints an import line suitable for copy-free script generation.
+`strap nu modules` prints the installed Nu modules, `strap nu lib-dir` prints the directory to add to `NU_LIB_DIRS`, `strap nu use-line strap` prints the grouped module import, `strap nu path plumbing` prints the plumbing module path, and `strap nu use-line plumbing` prints a plumbing-only import line.
 
 `nu/strap.nu` wraps the Node filters as native structured pipeline commands when an effectful adapter is needed:
 

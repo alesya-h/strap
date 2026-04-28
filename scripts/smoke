@@ -33,7 +33,12 @@ nu --commands 'use nu/plumbing.nu *; open /tmp/strap-smoke-bm-2.json | with-even
 nu --commands 'use nu/plumbing.nu *; let state = (open /tmp/strap-smoke-bm-2.json); let ids = ($state | bookmarks | get id); $state | with-extract ($ids | first) ($ids | last) {|ctx| $ctx.events | get text } | save -f /tmp/strap-nu-with-extract.json'
 $strap nu modules > /tmp/strap-nu-modules.json
 $strap nu path plumbing > /tmp/strap-nu-path.txt
+$strap nu lib-dir > /tmp/strap-nu-lib-dir.txt
+$strap nu env-line > /tmp/strap-nu-env-line.txt
 $strap nu use-line plumbing > /tmp/strap-nu-use-line.txt
+$strap nu use-line strap > /tmp/strap-nu-strap-use-line.txt
+STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap state init | strap agents apply chat-concise | strap skills apply concise | get actors.assistant.skills | save -f /tmp/strap-nu-module-skills.json"
+NU_LIB_DIRS="$($strap nu lib-dir)" STRAP_BIN=./bin/strap nu --commands 'use strap; strap init | strap add-user "hello from use strap" | strap events | get text | save -f /tmp/strap-nu-use-strap.json'
 $strap commands list --json > /tmp/strap-commands.json
 $strap commands validate --json > /tmp/strap-commands-validate.json
 $strap agents list > /tmp/strap-agents-list.json

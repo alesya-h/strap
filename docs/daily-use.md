@@ -92,13 +92,29 @@ strap state-bb init | strap state-bb add-user "hello"
 Use Nu plumbing for local structured state work:
 
 ```nu
+use '/path/to/strap/nu/strap'
+
+strap state init
+| strap agents apply chat-concise
+| strap skills apply concise
+```
+
+If `strap nu lib-dir` is in `NU_LIB_DIRS`, use the shorter import:
+
+```nu
+use strap
+```
+
+Use the lower-level plumbing module for block combinators:
+
+```nu
 use '/path/to/strap/nu/plumbing.nu' *
 
 open state.json | with-events {|events| $events | where from == user }
 open state.json | map-events {|event| { from: $event.from, text: $event.text } }
 ```
 
-Find the installed module path with `strap nu path plumbing`, or print a ready import with `strap nu use-line plumbing`.
+Find ready imports with `strap nu use-line strap` and `strap nu use-line plumbing`.
 
 Inspect authority decisions during development:
 
