@@ -3,10 +3,13 @@ Inspect Nushell plumbing modules.
 Usage:
   strap nu modules
   strap nu path plumbing
+  strap nu use-line plumbing
   strap nu source-line plumbing
 
 The `plumbing` module contains Nu-first immutable state and context commands, including closure-based combinators such as `with-events`, `map-events`, `where-events`, and `with-extract`.
 
 Example:
-  source '/path/to/strap/nu/plumbing.nu'
+  use '/path/to/strap/nu/plumbing.nu' *
   open state.json | with-events {|events| $events | where from == user }
+
+Prefer `use-line`; `source-line` is retained for quick interactive experiments and compatibility.

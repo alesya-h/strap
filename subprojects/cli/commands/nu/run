@@ -24,8 +24,13 @@ case "${1:-}" in
     path="$(module_path "${1:-plumbing}")"
     printf "source '%s'\n" "$path"
     ;;
+  use-line)
+    shift
+    path="$(module_path "${1:-plumbing}")"
+    printf "use '%s' *\n" "$path"
+    ;;
   *)
-    printf 'Usage: strap nu <modules|path|source-line> [module]\n' >&2
+    printf 'Usage: strap nu <modules|path|use-line|source-line> [module]\n' >&2
     exit 2
     ;;
 esac

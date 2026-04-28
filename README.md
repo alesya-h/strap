@@ -95,7 +95,7 @@ strap skills import-opencode ~/.config/opencode/skills
 `nu/plumbing.nu` is the preferred local data plumbing layer. It provides pure state transforms plus closure-based combinators; Node remains the adapter layer for provider, OAuth, MCP, jsmcp, and other protocol edges.
 
 ```nu
-source '/path/to/strap/nu/plumbing.nu'
+use '/path/to/strap/nu/plumbing.nu' *
 
 open state.json
 | with-events {|events| $events | where from == user }
@@ -108,7 +108,7 @@ open state.json
   }
 ```
 
-`strap nu modules` prints the installed Nu modules and `strap nu path plumbing` prints the plumbing module path.
+`strap nu modules` prints the installed Nu modules, `strap nu path plumbing` prints the plumbing module path, and `strap nu use-line plumbing` prints an import line suitable for copy-free script generation.
 
 `nu/strap.nu` wraps the Node filters as native structured pipeline commands when an effectful adapter is needed:
 

@@ -158,7 +158,7 @@ Nu is the preferred implementation surface for local structured data plumbing. T
 Examples:
 
 ```nu
-source '/path/to/strap/nu/plumbing.nu'
+use '/path/to/strap/nu/plumbing.nu' *
 
 open state.json | with-events {|events| $events | where from == user }
 open state.json | map-events {|event| { from: $event.from, text: $event.text } }
@@ -167,7 +167,7 @@ open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
 
 The intended boundary is: Nu owns local dataflow and orchestration; Node owns provider HTTP/streaming, OAuth, MCP/jsmcp, long-running servers, SDK-heavy integrations, and process/thread edges; Babashka is available for pure algorithms when Nu becomes awkward.
 
-`strap nu modules` and `strap nu path plumbing` expose installed module paths for agents and humans.
+`strap nu modules`, `strap nu path plumbing`, and `strap nu use-line plumbing` expose installed module paths/import lines for agents and humans.
 
 ## Execution Loops
 

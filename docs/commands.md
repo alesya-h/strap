@@ -141,7 +141,7 @@ strap skills import-opencode ~/.config/opencode/skills
 Nu plumbing lives in `nu/plumbing.nu` and supports block-based composition:
 
 ```nu
-source '/path/to/strap/nu/plumbing.nu'
+use '/path/to/strap/nu/plumbing.nu' *
 
 open state.json | with-events {|events| $events | where from == user }
 open state.json | map-events {|event| $event.text }
@@ -153,6 +153,7 @@ Discover installed module paths with:
 ```bash
 strap nu modules
 strap nu path plumbing
+strap nu use-line plumbing
 ```
 
 ## Bookmark Addressability
