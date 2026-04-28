@@ -84,6 +84,17 @@ export function strapPorcelainDirs() {
   ];
 }
 
+export function strapAgentDirs() {
+  const configured = (process.env.STRAP_AGENT_PATH || "").split(path.delimiter).filter(Boolean);
+  return [
+    ...configured,
+    path.join(strapWorkRoot(), "agents"),
+    path.join(strapProjectRoot(), "agents"),
+    path.join(strapConfigRoot(), "agents"),
+    path.join(strapRoot(), "agents"),
+  ];
+}
+
 export function resolveInWorkspace(inputPath, root = workspaceRoot()) {
   const resolved = path.resolve(root, inputPath || ".");
   if (process.env.STRAP_ALLOW_OUTSIDE_WORKSPACE === "1") return resolved;

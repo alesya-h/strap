@@ -1,7 +1,7 @@
 Run an agent once until its first final answer.
 
 Usage:
-  strap one-shot run "Summarize this" --provider config/strap/providers/chatgpt.json --tools none < context.json
+  strap one-shot run "Summarize this" --provider config/strap/providers/chatgpt.json --agent chat-concise --tools none < context.json
   strap one-shot run "Inspect built state" --dry-run < context.json
 
 `one-shot` does not mutate session state. It reads optional state/context/quoted-context JSON from stdin and outputs a `strap.one-shot.result.v0.1` JSON object.

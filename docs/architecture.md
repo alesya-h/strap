@@ -37,7 +37,7 @@ Commands, script tools, and porcelain modules share a layered artifact model:
 
 The user layer shadows lower layers. `strap artifact workon <type> <name>` copies a lower-layer artifact into the user layer, `strap artifact promote <type> <name>` writes the user-layer artifact to the project layer and clears the overlay, and `strap artifact discard <type> <name>` removes the user-layer overlay.
 
-Supported artifact types are currently `command`, `tool`, and `porcelain`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
+Supported artifact types are currently `command`, `tool`, `porcelain`, and `agent`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
 
 ## Command Discovery
 
@@ -75,6 +75,20 @@ strap commands list --json
 strap commands manifest auth
 strap commands validate --json
 ```
+
+## Agents
+
+Agent profiles are markdown files discovered from:
+
+```text
+STRAP_AGENT_PATH
+$STRAP_WORK/agents
+$STRAP_PROJECT/agents
+$STRAP_CONFIG/agents
+$STRAP_ROOT/agents
+```
+
+Profiles support OpenCode-style frontmatter with fields like `description`, `permission`, and `color`, followed by instruction text. `strap agents apply <name>` writes the selected profile into a canonical-state actor, usually `actors.assistant`, so provider compilation uses it as the actor frame. `strap agents import-opencode ~/.config/opencode/agents` copies existing OpenCode profiles into the user overlay.
 
 ## Authority Flow
 

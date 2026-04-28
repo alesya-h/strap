@@ -18,6 +18,12 @@
     "$STRAP_CONFIG/porcelain",
     "$STRAP_ROOT/porcelain"
   ],
+  "agent_roots": [
+    "$STRAP_WORK/agents",
+    "$STRAP_PROJECT/agents",
+    "$STRAP_CONFIG/agents",
+    "$STRAP_ROOT/agents"
+  ],
   "defaults": {
     "provider": "chatgpt",
     "tool_group": "all",

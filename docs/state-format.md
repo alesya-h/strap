@@ -69,6 +69,8 @@ Fields:
 | `peers.*.inferred` | string | no | Inferred relationship notes. |
 | `peers.*.contract` | string | no | Behavioral contract toward that peer. |
 
+Agent profiles applied by `strap agents apply <name>` may also set `agent`, `agent_profile`, and `permission` on an actor. The actor's `self.private` field receives the profile instruction body, so provider compilation includes it in the actor frame.
+
 When compiling provider requests, the selected actor frame is rendered into provider instructions/system content.
 
 ## Scope nodes

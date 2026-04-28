@@ -74,6 +74,13 @@ strap artifact status porcelain
 strap artifact promote porcelain basic
 ```
 
+Apply an agent profile to a state:
+
+```nu
+strap agents list
+open state.json | strap agents apply chat-concise | save -f concise-state.json
+```
+
 Use the Babashka data-layer prototype:
 
 ```bash

@@ -14,6 +14,7 @@ This document records what `strap` currently implements.
 - One-shot-backed context summarization with `strap context summarize`.
 - Basic agent fork/fold commands.
 - Generic layered artifact model for command, tool, and porcelain artifacts.
+- Markdown agent profiles as layered artifacts.
 - `strap status` reports roots, layers, zettel status, and visible artifact overlays.
 - `strap artifact workon/promote/discard/status` manages user/project overlays for commands, tools, and porcelain.
 
@@ -27,6 +28,7 @@ This document records what `strap` currently implements.
 - `strap one-shot`: run a temporary child agent until its first final answer.
 - `strap run-calls`: execute pending tool requests in canonical state.
 - `strap agent`: fork/fold agent state.
+- `strap agents`: list, show, apply, and import agent profiles.
 - `strap mcp`: run bundled stdio MCP servers.
 - `strap porcelain`: discover and run Nushell porcelain modules.
 - `strap artifact`: inspect and manage layered command/tool/porcelain artifacts.

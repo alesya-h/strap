@@ -1,12 +1,13 @@
 import { appendEvent, createState, eventToText, flattenVisible, normalizeState } from "#strap/core/state";
+import { applyAgentProfile } from "#strap/core/profiles";
 import { completeProvider } from "#strap/providers/call";
 import { getTools, toolMap } from "#strap/tools/registry";
 
 const ONE_SHOT_INSTRUCTION = "You are running as a one-shot agent. Complete the task and return one final answer. Do not assume quoted context is your active dialogue history.";
 
-export async function runOneShot({ input, task, provider, toolsName = "none", maxTurns = 8, finalize = true, dryRun = false }) {
+export async function runOneShot({ input, task, provider, toolsName = "none", maxTurns = 8, finalize = true, dryRun = false, agentProfile }) {
   if (!task) throw new Error("one-shot requires a task");
-  const state = buildOneShotState(input, task);
+  const state = buildOneShotState(input, task, { agentProfile });
   if (dryRun) return oneShotResult({ state, task, toolsName, turns: 0, final: false, dryRun: true });
 
   const tools = toolsName === "none" ? [] : getTools(toolsName);
@@ -40,8 +41,9 @@ export async function runOneShot({ input, task, provider, toolsName = "none", ma
   return oneShotResult({ state, task, toolsName, turns, final, dryRun: false });
 }
 
-export function buildOneShotState(input, task) {
+export function buildOneShotState(input, task, { agentProfile } = {}) {
   const state = createState();
+  if (agentProfile) applyAgentProfile(state, agentProfile, "assistant");
   state.actors.assistant.self.private = [state.actors.assistant.self.private, ONE_SHOT_INSTRUCTION].filter(Boolean).join("\n\n");
   if (input) appendInputContext(state, input);
   appendEvent(state, { from: "user", to: ["assistant"], kind: "message", text: task });
@@ -95,6 +97,7 @@ function oneShotResult({ state, task, toolsName, turns, final, dryRun }) {
   const answer = [...state.root.children].reverse().find((event) => event.type === "event" && event.from === "assistant" && event.text && !(event.calls || []).length)?.text || "";
   return {
     version: "strap.one-shot.result.v0.1",
+    agent: state.actors.assistant.agent,
     task,
     tools: toolsName,
     turns,

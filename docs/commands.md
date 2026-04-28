@@ -65,6 +65,7 @@ strap inner my-command helper-name arg1 arg2
 | Command | Purpose |
 | --- | --- |
 | `agent` | Fork and fold agent state. |
+| `agents` | List, show, apply, and import markdown agent profiles. |
 | `artifact` | Inspect and manage layered command/tool/porcelain artifacts. |
 | `auth` | Authenticate local provider credentials, currently ChatGPT OAuth. |
 | `carapace` | Install and serve shell completion integration. |
@@ -98,12 +99,26 @@ Commands, script tools, and porcelain modules can be inspected and moved through
 ```bash
 strap status
 strap artifact status command
+strap artifact status agent
 strap artifact workon porcelain basic
 strap artifact promote porcelain basic
 strap artifact discard porcelain basic
 ```
 
 `workon` creates a user-layer working copy, `promote` writes that copy into the project layer and clears the overlay, and `discard` removes the user-layer copy.
+
+## Agent Profiles
+
+Agent profiles are markdown files with optional frontmatter:
+
+```nu
+strap agents list
+strap agents show chat-concise
+open state.json | strap agents apply chat-concise | save -f next.json
+strap agents import-opencode ~/.config/opencode/agents
+```
+
+`apply` updates the selected actor, defaulting to `assistant`, with the profile description, instructions, and permission metadata.
 
 ## Bookmark Addressability
 

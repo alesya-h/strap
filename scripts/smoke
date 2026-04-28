@@ -17,8 +17,8 @@ bm_end="$(node -e 'const s=require("/tmp/strap-smoke-bm-2.json"); console.log(s.
 $strap state fold --from "$bm_start" --to "$bm_end" --summary 'smoke folded hello/world' < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-folded-range.json
 $strap state extract --from "$bm_start" --to "$bm_end" < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-context.json
 $strap context quote < /tmp/strap-smoke-context.json > /tmp/strap-smoke-quote.json
-$strap one-shot run 'Summarize quoted smoke context' --dry-run --tools none < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-one-shot.json
-$strap context summarize 'Summarize quoted smoke context' --dry-run < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-context-summary.json
+$strap one-shot run 'Summarize quoted smoke context' --agent chat-concise --dry-run --tools none < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-one-shot.json
+$strap context summarize 'Summarize quoted smoke context' --agent chat-concise --dry-run < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-context-summary.json
 $strap state tree --hidden < /tmp/strap-smoke-folded-range.json > /tmp/strap-smoke-tree.txt
 $strap llm compile-openai --model test-model < /tmp/strap-smoke-2.json > /tmp/strap-openai.json
 $strap llm compile --provider config/strap/providers/openai-api-key.json < /tmp/strap-smoke-2.json > /tmp/strap-provider-openai.json
@@ -31,8 +31,12 @@ $strap state init | $strap porcelain run basic ask 'hello from porcelain' > /tmp
 $strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-has-calls.json
 $strap commands list --json > /tmp/strap-commands.json
 $strap commands validate --json > /tmp/strap-commands-validate.json
+$strap agents list > /tmp/strap-agents-list.json
+$strap agents show chat-concise > /tmp/strap-agents-show.json
+$strap state init | $strap agents apply chat-concise > /tmp/strap-agents-apply.json
 $strap status > /tmp/strap-status.json
 $strap artifact status command > /tmp/strap-artifact-command-status.json
+$strap artifact status agent > /tmp/strap-artifact-agent-status.json
 $strap artifact workon porcelain basic > /tmp/strap-artifact-workon.json
 $strap artifact discard porcelain basic > /tmp/strap-artifact-discard.json
 $strap work init > /tmp/strap-work-init.json

@@ -36,6 +36,16 @@ const TYPES = {
     discover: discoverPorcelainArtifacts,
     destination: (root, artifact) => path.join(root, artifact.entryName),
   },
+  agent: {
+    roots: () => ({
+      user: path.join(strapWorkRoot(), "agents"),
+      project: path.join(strapProjectRoot(), "agents"),
+      config: path.join(strapConfigRoot(), "agents"),
+      root: path.join(strapRoot(), "agents"),
+    }),
+    discover: discoverAgentArtifacts,
+    destination: (root, artifact) => path.join(root, artifact.entryName),
+  },
 };
 
 export function artifactTypes() {
@@ -149,6 +159,14 @@ function discoverPorcelainArtifacts(root, layer) {
     .filter((entry) => entry.isFile() && entry.name.endsWith(".nu"))
     .map((entry) => path.join(root, entry.name))
     .map((file) => ({ type: "porcelain", name: path.basename(file, ".nu"), layer, kind: "file", entryName: path.basename(file), root, path: file, files: [file] }));
+}
+
+function discoverAgentArtifacts(root, layer) {
+  if (!isDirectory(root)) return [];
+  return fs.readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+    .map((entry) => path.join(root, entry.name))
+    .map((file) => ({ type: "agent", name: path.basename(file, ".md"), layer, kind: "file", entryName: path.basename(file), root, path: file, files: [file] }));
 }
 
 function describeArtifact(artifact, all, includePaths) {
