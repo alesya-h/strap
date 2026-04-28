@@ -11,6 +11,7 @@ This document records what `strap` currently implements.
 - Basic scope operations for opening/collapsing context regions.
 - Bookmark-based state extraction into `strap.context.v0.1`.
 - Quoted context rendering with `strap context quote`.
+- One-shot-backed context summarization with `strap context summarize`.
 - Basic agent fork/fold commands.
 - Generic layered artifact model for command, tool, and porcelain artifacts.
 - `strap status` reports roots, layers, zettel status, and visible artifact overlays.

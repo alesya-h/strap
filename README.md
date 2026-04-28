@@ -67,7 +67,7 @@ Run a one-shot agent over quoted context without mutating a session:
 open state.json
 | strap state extract --from bm_a --to bm_b
 | strap context quote
-| strap one-shot run "Summarize only architectural decisions and unresolved risks" --provider config/strap/providers/chatgpt.json --tools none
+| strap context summarize "Summarize only architectural decisions and unresolved risks" --provider config/strap/providers/chatgpt.json --tools none
 ```
 
 ## Nushell

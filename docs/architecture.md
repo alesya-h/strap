@@ -119,7 +119,7 @@ State is provider-agnostic and structured as:
 
 Addressability is optional. `strap state bookmark add` attaches inline bookmarks to visible nodes by unique text match, and `strap state fold --from <bookmark> --to <bookmark>` folds a sibling range into a collapsed scope. This keeps the base state hand-editable while still giving agents stable handles when needed.
 
-`strap state extract --from <bookmark> --to <bookmark>` emits `strap.context.v0.1` for a visible sibling range without mutating state. `strap context quote` renders that extracted context as quoted evidence so a later one-shot agent or summarizer does not treat itself as one of the participants.
+`strap state extract --from <bookmark> --to <bookmark>` emits `strap.context.v0.1` for a visible sibling range without mutating state. `strap context quote` renders that extracted context as quoted evidence so a later one-shot agent or summarizer does not treat itself as one of the participants. `strap context summarize <framing>` wraps `strap one-shot` and emits `strap.context-summary.v0.1`.
 
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 

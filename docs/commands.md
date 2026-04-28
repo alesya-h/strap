@@ -69,7 +69,7 @@ strap inner my-command helper-name arg1 arg2
 | `auth` | Authenticate local provider credentials, currently ChatGPT OAuth. |
 | `carapace` | Install and serve shell completion integration. |
 | `commands` | List, inspect, validate, and scaffold command directories. |
-| `context` | Transform extracted context, including quoted conversation rendering. |
+| `context` | Transform extracted context, including quoting and summarization. |
 | `edit` | Edit or create command files. |
 | `history` | Manage jj-backed user-local strap history. |
 | `llm` | Compile, call, or complete provider requests from canonical state. |

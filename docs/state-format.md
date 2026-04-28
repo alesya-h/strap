@@ -204,7 +204,7 @@ By default, folding refuses bookmarks that are already inside collapsed hidden c
 }
 ```
 
-`nodes` preserves the selected state nodes. `events` is the visible flattened event stream for those nodes. `strap context quote` converts this into `strap.quoted-context.v0.1`, marking the conversation as evidence rather than active dialogue history.
+`nodes` preserves the selected state nodes. `events` is the visible flattened event stream for those nodes. `strap context quote` converts this into `strap.quoted-context.v0.1`, marking the conversation as evidence rather than active dialogue history. `strap context summarize <framing>` consumes either context form and emits `strap.context-summary.v0.1` with `framing`, `summary`, `source`, and the underlying one-shot result.
 
 ## Standard event kinds
 
