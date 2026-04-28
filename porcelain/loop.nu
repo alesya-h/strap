@@ -52,7 +52,7 @@ export def add-budget-exhausted [turns: int] {
     kind: "tool_budget_exhausted"
     text: $"Tool budget exhausted after ($turns) turn\(s\). Answer now using the gathered context. Do not request more tools."
   }
-  $state | update root.children { |children| $children | append $event }
+  $state | update root.children { append $event }
 }
 
 export def add-tool-budget-exhausted [calls: int] {
@@ -64,7 +64,7 @@ export def add-tool-budget-exhausted [calls: int] {
     kind: "tool_budget_exhausted"
     text: $"Tool call budget exhausted after ($calls) requested call\(s\). Answer now using the gathered context. Do not request more tools."
   }
-  $state | update root.children { |children| $children | append $event }
+  $state | update root.children { append $event }
 }
 
 export def trace-turn [turn: int, calls: int, phase: string] {

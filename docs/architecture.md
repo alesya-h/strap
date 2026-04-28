@@ -151,6 +151,24 @@ Addressability is optional. `strap state bookmark add` attaches inline bookmarks
 
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 
+## Nu Plumbing
+
+Nu is the preferred implementation surface for local structured data plumbing. The stable module is `nu/plumbing.nu`; it owns pure state transforms, event/bookmark/context inspection, and higher-order combinators that accept blocks.
+
+Examples:
+
+```nu
+source '/path/to/strap/nu/plumbing.nu'
+
+open state.json | with-events {|events| $events | where from == user }
+open state.json | map-events {|event| { from: $event.from, text: $event.text } }
+open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
+```
+
+The intended boundary is: Nu owns local dataflow and orchestration; Node owns provider HTTP/streaming, OAuth, MCP/jsmcp, long-running servers, SDK-heavy integrations, and process/thread edges; Babashka is available for pure algorithms when Nu becomes awkward.
+
+`strap nu modules` and `strap nu path plumbing` expose installed module paths for agents and humans.
+
 ## Execution Loops
 
 There are two loop surfaces:

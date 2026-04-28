@@ -77,6 +77,7 @@ strap inner my-command helper-name arg1 arg2
 | `loop` | Run the Node model/tool loop. |
 | `loop-nu` | Run the editable Nushell reference loop. |
 | `mcp` | Run bundled stdio MCP servers. |
+| `nu` | Inspect Nushell plumbing module paths. |
 | `one-shot` | Run an agent once until its first final answer. |
 | `paths` | Print resolved root/config/project/work/workspace paths. |
 | `policy` | List, show, and evaluate policy decisions. |
@@ -134,6 +135,25 @@ strap skills import-opencode ~/.config/opencode/skills
 ```
 
 `apply` attaches the skill to the selected actor, defaulting to `assistant`, without replacing the active agent profile.
+
+## Nushell Plumbing
+
+Nu plumbing lives in `nu/plumbing.nu` and supports block-based composition:
+
+```nu
+source '/path/to/strap/nu/plumbing.nu'
+
+open state.json | with-events {|events| $events | where from == user }
+open state.json | map-events {|event| $event.text }
+open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
+```
+
+Discover installed module paths with:
+
+```bash
+strap nu modules
+strap nu path plumbing
+```
 
 ## Bookmark Addressability
 

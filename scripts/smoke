@@ -29,6 +29,10 @@ $strap agent fold --child /tmp/strap-child.json --summary 'child result' < /tmp/
 $strap porcelain list > /tmp/strap-porcelain-list.json
 $strap state init | $strap porcelain run basic ask 'hello from porcelain' > /tmp/strap-porcelain-state.json
 $strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-has-calls.json
+nu --commands 'source nu/plumbing.nu; open /tmp/strap-smoke-bm-2.json | with-events {|events| $events | where from == user | length } | save -f /tmp/strap-nu-with-events.json'
+nu --commands 'source nu/plumbing.nu; let state = (open /tmp/strap-smoke-bm-2.json); let ids = ($state | bookmarks | get id); $state | with-extract ($ids | first) ($ids | last) {|ctx| $ctx.events | get text } | save -f /tmp/strap-nu-with-extract.json'
+$strap nu modules > /tmp/strap-nu-modules.json
+$strap nu path plumbing > /tmp/strap-nu-path.txt
 $strap commands list --json > /tmp/strap-commands.json
 $strap commands validate --json > /tmp/strap-commands-validate.json
 $strap agents list > /tmp/strap-agents-list.json

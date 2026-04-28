@@ -6,7 +6,7 @@
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
 - Separate harness, static config, project, user-work, and workspace roots: `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Subproject commands for state editing, provider request compilation, agent fork/fold, and pending tool execution.
-- A git-like plumbing/porcelain split for model-authored Nu workflows.
+- Nu-first structured plumbing with a git-like plumbing/porcelain split for model-authored workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from overlayed user/project/config/root tool dirs.
 - A shared markdown-source zettelkasten CLI and script tool for agent memory, with inline wikilinks and a derived SQLite/sqlite-vec index.
@@ -92,7 +92,25 @@ strap skills import-opencode ~/.config/opencode/skills
 
 ## Nushell
 
-`nu/strap.nu` wraps the Node filters as native structured pipeline commands:
+`nu/plumbing.nu` is the preferred local data plumbing layer. It provides pure state transforms plus closure-based combinators; Node remains the adapter layer for provider, OAuth, MCP, jsmcp, and other protocol edges.
+
+```nu
+source '/path/to/strap/nu/plumbing.nu'
+
+open state.json
+| with-events {|events| $events | where from == user }
+```
+
+```nu
+open state.json
+| with-extract bm_start bm_end {|ctx|
+    $ctx.events | get text
+  }
+```
+
+`strap nu modules` prints the installed Nu modules and `strap nu path plumbing` prints the plumbing module path.
+
+`nu/strap.nu` wraps the Node filters as native structured pipeline commands when an effectful adapter is needed:
 
 ```nu
 use nu/strap.nu *

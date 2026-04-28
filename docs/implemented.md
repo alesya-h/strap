@@ -8,6 +8,7 @@ This document records what `strap` currently implements.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
 - Root/config/project/work/workspace path model via `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Immutable JSON filter CLIs for state transforms and harness operations.
+- Nu-first local plumbing with closure-based event and context combinators.
 - Basic scope operations for opening/collapsing context regions.
 - Bookmark-based state extraction into `strap.context.v0.1`.
 - Quoted context rendering with `strap context quote`.
@@ -32,6 +33,7 @@ This document records what `strap` currently implements.
 - `strap agents`: list, show, apply, and import agent profiles.
 - `strap skills`: list, show, apply, and import skill instruction bundles.
 - `strap mcp`: run bundled stdio MCP servers.
+- `strap nu`: inspect installed Nushell plumbing module paths.
 - `strap porcelain`: discover and run Nushell porcelain modules.
 - `strap artifact`: inspect and manage layered command/tool/porcelain/agent/skill artifacts.
 - `strap status`: inspect active roots, layers, and overlay status.

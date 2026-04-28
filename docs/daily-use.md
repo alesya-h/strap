@@ -89,6 +89,17 @@ strap state-bb init
 strap state-bb init | strap state-bb add-user "hello"
 ```
 
+Use Nu plumbing for local structured state work:
+
+```nu
+source '/path/to/strap/nu/plumbing.nu'
+
+open state.json | with-events {|events| $events | where from == user }
+open state.json | map-events {|event| { from: $event.from, text: $event.text } }
+```
+
+Find the installed module path with `strap nu path plumbing`.
+
 Inspect authority decisions during development:
 
 ```bash

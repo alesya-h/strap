@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+module_path() {
+  case "${1:-}" in
+    plumbing) printf '%s\n' "$STRAP_ROOT/nu/plumbing.nu" ;;
+    wrappers|strap) printf '%s\n' "$STRAP_ROOT/nu/strap.nu" ;;
+    loop) printf '%s\n' "$STRAP_ROOT/porcelain/loop.nu" ;;
+    basic) printf '%s\n' "$STRAP_ROOT/porcelain/basic.nu" ;;
+    *) printf 'Usage: strap nu path <plumbing|wrappers|loop|basic>\n' >&2; exit 2 ;;
+  esac
+}
+
+case "${1:-}" in
+  modules)
+    node -e 'const root=process.env.STRAP_ROOT; console.log(JSON.stringify([{name:"plumbing",kind:"plumbing",path:`${root}/nu/plumbing.nu`},{name:"wrappers",kind:"adapter",path:`${root}/nu/strap.nu`},{name:"loop",kind:"porcelain",path:`${root}/porcelain/loop.nu`},{name:"basic",kind:"porcelain",path:`${root}/porcelain/basic.nu`}], null, 2))'
+    ;;
+  path)
+    shift
+    module_path "${1:-}"
+    ;;
+  source-line)
+    shift
+    path="$(module_path "${1:-plumbing}")"
+    printf "source '%s'\n" "$path"
+    ;;
+  *)
+    printf 'Usage: strap nu <modules|path|source-line> [module]\n' >&2
+    exit 2
+    ;;
+esac
