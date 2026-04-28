@@ -77,8 +77,8 @@ Current state: provenance can be recorded manually, but it is not enforced or sy
 
 - No background indexer/outbox yet.
 - No multi-chunk note splitting yet.
-- Delete/list/tags/backlinks/link commands exist.
-- No graph traversal commands beyond typed links, backlinks, and related search.
+- Delete/list/tags/search commands exist.
+- No first-class graph/link commands yet.
 - No backlink-rich result expansion.
 - No alias-weighted search/reranking.
 - No conflict/merge policy for concurrent semantic edits.
@@ -120,8 +120,8 @@ Current state: persistence is unix-explicit via files, `tee`, redirection, `save
 - `.strap` now represents project-shared harness artifacts.
 - `.strap-user` now represents user/agent-local runtime state.
 - No `strap promote` command yet for moving generated commands/tools/porcelain from `.strap-user` into `.strap`.
-- No jj-backed `.strap-user/history` integration yet.
-- Zettelkasten source of truth is still SQLite, not markdown files plus derived SQLite index.
+- Basic jj-backed `.strap-user` history exists through `strap history`, but higher-level session branching/fold-back workflows are not built yet.
+- Markdown-source zettelkasten commands exist, but SQLite remains the mature/search path and there is no migration policy, chunking model, or conflict policy yet.
 
 ## Testing Gaps
 

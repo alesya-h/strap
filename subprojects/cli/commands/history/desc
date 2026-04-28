@@ -1,0 +1,11 @@
+Manage jj-backed user-local strap history.
+
+Usage:
+  strap history init
+  strap history status
+  strap history snapshot --message "after session setup"
+  strap history log
+  strap history new
+  strap history restore <rev>
+
+History is stored in STRAP_WORK, which defaults to .strap-user.

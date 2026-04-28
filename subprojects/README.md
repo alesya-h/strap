@@ -10,7 +10,7 @@
 - `mcp/`: bundled stdio MCP servers.
 - `jsmcp/`: bridge to installed `jsmcp client`.
 - `porcelain/`: runner for model-editable Nushell porcelain modules.
-- `zettel/`: SQLite/FTS5/sqlite-vec zettelkasten and embedding helper.
+- `zettel/`: markdown-source zettelkasten, derived SQLite/FTS/vector index, and embedding helper.
 - `sessions/`: `.strap` project artifact and `.strap-user` local work/session CLIs.
 - `policy/`: authority decision model and policy CLI.
 - `state-bb/`: Babashka pure-state prototype.

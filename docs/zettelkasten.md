@@ -1,6 +1,6 @@
 # Zettelkasten
 
-`strap zk` is a Nushell CLI for a shared agent/human zettelkasten backed by SQLite, FTS5, and `sqlite-vec`. It uses the `sqlite3` CLI so NixOS sqlite extension loading works without requiring Node SQLite bindings to see `sqlite-vec`.
+`strap zk` is a shared agent/human zettelkasten. Markdown files are the source of truth; SQLite, FTS5, and `sqlite-vec` provide a derived text/vector index. The index uses the `sqlite3` CLI so NixOS sqlite extension loading works without requiring Node SQLite bindings to see `sqlite-vec`.
 
 ## Setup
 
@@ -16,7 +16,7 @@ If your extension has a different path or name:
 export STRAP_ZK_SQLITE_VEC_LOAD=/nix/store/.../lib/vec0.so
 ```
 
-The default DB path is:
+The default derived index path is:
 
 1. `STRAP_ZK_DB`, when set;
 2. `$STRAP_WORK/zettel/zettel.sqlite`, when `STRAP_WORK` is set by the command runner; this defaults to `.strap-user/zettel/zettel.sqlite`;
@@ -41,7 +41,32 @@ export STRAP_ZK_CHATGPT_PROVIDER=config/strap/providers/chatgpt.json
 
 This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap auth chatgpt login` or import an existing Codex token with `strap auth chatgpt import-codex`.
 
-Current source of truth is the SQLite DB. A future direction is markdown notes under `.strap/zettel` and `.strap-user/zettel`, with SQLite as a derived FTS/vector index.
+Project-shared notes live under `.strap/zettel`; user/private notes live under `.strap-user/zettel`.
+
+```bash
+strap zk create --scope user --title "Local preference" --body "User prefers CLI examples." --tags user,preference
+strap zk create --scope project --title "Authority model" --body "Commands receive authority decisions." --tags strap,architecture
+strap zk list --scope all
+strap zk search "authority"
+STRAP_ZK_EMBED_PROVIDER=hash strap zk reindex --scope all
+```
+
+The markdown format uses simple frontmatter:
+
+```markdown
+---
+id: "zk_..."
+title: "Authority model"
+tags: ["strap", "architecture"]
+aliases: []
+author: "agent"
+scope: "project"
+created_at: "2026-04-28T00:00:00.000Z"
+updated_at: "2026-04-28T00:00:00.000Z"
+---
+
+Commands receive authority decisions.
+```
 
 For offline tests, use the deterministic hash embedding provider:
 
@@ -71,22 +96,24 @@ It must output:
 
 ```bash
 strap zk create \
+  --scope user \
   --title 'Provider state is not canonical' \
   --body 'Canonical state should preserve semantic conversation state, not provider request IDs.' \
   --tags strap,providers,state
 
+strap zk search 'canonical state'
 strap zk search-hybrid 'provider leakage'
 strap zk search-vector 'semantic memory retrieval'
 strap zk search-text 'canonical state'
-strap zk related zk_note_id
-strap zk backlinks zk_note_id
 strap zk list
 strap zk tags
 strap zk delete zk_note_id
-strap zk link zk_a zk_b --type refines
+strap zk reindex --scope all
 ```
 
-`create` and `update` embed and index automatically. The implementation avoids holding write transactions while calling embedding providers.
+`create`, `update`, and `delete` operate on markdown files. `search-hybrid`, `search-vector`, `search-text`, and `reindex` rebuild the derived SQLite index from markdown before querying.
+
+The lower-level SQLite index commands remain available under explicit `index-*` names for debugging, for example `strap zk index-search-hybrid "query"`.
 
 Remember the latest assistant message from a state:
 

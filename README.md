@@ -10,6 +10,8 @@
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
 - A shared SQLite/sqlite-vec zettelkasten CLI and script tool for agent memory.
+- Markdown-source zettelkasten commands with SQLite reindexing as a derived cache.
+- jj-backed user-local state history under `.strap-user`.
 - jsmcp bridge tools for programmable access to configured MCP servers.
 - Provider config files for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
@@ -122,10 +124,11 @@ The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` doe
 
 ## Zettelkasten
 
-`strap zk` is a Nushell CLI backed by `sqlite3`, FTS5, and `sqlite-vec`. It creates notes, auto-indexes embeddings, and supports text, vector, hybrid, and related-note search.
+`strap zk` stores notes as markdown under `.strap/zettel` or `.strap-user/zettel`. SQLite, FTS5, and `sqlite-vec` are used as a derived index for text/vector/hybrid search.
 
 ```bash
 STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
+  --scope user \
   --title 'Local agent memory' \
   --body 'Agents can store and recall semantically related notes.' \
   --tags strap,memory

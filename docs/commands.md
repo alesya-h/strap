@@ -69,11 +69,12 @@ strap inner my-command helper-name arg1 arg2
 | `carapace` | Install and serve shell completion integration. |
 | `commands` | List, inspect, validate, and scaffold command directories. |
 | `edit` | Edit or create command files. |
+| `history` | Manage jj-backed user-local strap history. |
 | `llm` | Compile, call, or complete provider requests from canonical state. |
 | `loop` | Run the Node model/tool loop. |
 | `loop-nu` | Run the editable Nushell reference loop. |
 | `mcp` | Run bundled stdio MCP servers. |
-| `paths` | Print resolved root/config/work/workspace paths. |
+| `paths` | Print resolved root/config/project/work/workspace paths. |
 | `policy` | List, show, and evaluate policy decisions. |
 | `porcelain` | List and run model-editable Nushell porcelain modules. |
 | `run-calls` | Execute pending tool calls in canonical state. |
@@ -82,7 +83,7 @@ strap inner my-command helper-name arg1 arg2
 | `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
 | `state-bb` | Run the Babashka pure-state prototype. |
 | `work` | Initialize or inspect `.strap` project artifacts and `.strap-user` local work. |
-| `zk` | Use the shared SQLite/FTS5/sqlite-vec zettelkasten. |
+| `zk` | Use the shared markdown-source zettelkasten with a derived SQLite/FTS/vector index. |
 
 Run `strap help <command>` for command-local usage text.
 

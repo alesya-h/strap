@@ -178,7 +178,9 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 
 `strap session recall <query>` searches the zettelkasten and appends visible memory context to state. `strap session remember [tags]` writes useful state into zettelkasten memory.
 
-`strap zk` currently stores memory in SQLite with FTS5 and sqlite-vec. By default the DB lives under `$STRAP_WORK/zettel`, which is `.strap-user/zettel`. Shared project memory can live under `$STRAP_PROJECT/zettel`; a future markdown-source-plus-SQLite-index model is a likely direction.
+`strap zk` stores markdown notes under `.strap-user/zettel` for user/private memory or `.strap/zettel` for project-shared memory. SQLite/FTS/vector data under `$STRAP_WORK/zettel` is a derived cache rebuilt by `strap zk reindex` and on hybrid/vector searches.
+
+`strap history` wraps a separate jj repo in `$STRAP_WORK`, which defaults to `.strap-user`. It tracks user-local sessions, temporary commands/tools/porcelain, private markdown memory, and other agent state without touching the project workspace history.
 
 ## Subprojects
 

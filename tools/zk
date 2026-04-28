@@ -1,5 +1,5 @@
 #!/usr/bin/env nu
 def main [] {
   let root = ($env.STRAP_ROOT? | default (pwd))
-  ^cat | ^nu ([ $root subprojects zettel bin zk.nu ] | path join) tool
+  ^cat | ^node ([ $root subprojects zettel bin zk-md.js ] | path join) tool
 }

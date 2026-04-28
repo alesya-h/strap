@@ -28,6 +28,7 @@ $strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-h
 $strap commands list --json > /tmp/strap-commands.json
 $strap commands validate --json > /tmp/strap-commands-validate.json
 $strap work init > /tmp/strap-work-init.json
+$strap history init > /tmp/strap-history-init.json
 $strap session new 'smoke session' > /tmp/strap-session-new.json
 $strap session ask 'remember this smoke question' > /tmp/strap-session-ask.json
 STRAP_ZK_EMBED_PROVIDER=hash $strap session recall 'offline indexing' > /tmp/strap-session-recall.json
@@ -36,12 +37,19 @@ STRAP_ZK_EMBED_PROVIDER=hash $strap session remember session,smoke > /tmp/strap-
 $strap policy list > /tmp/strap-policy-list.json
 $strap policy decide --policy readonly --action execute --command zk > /tmp/strap-policy-decide.json
 $strap state-bb init > /tmp/strap-state-bb.json
+$strap history snapshot --message 'smoke session state' > /tmp/strap-history-snapshot.json
 
 node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("json_echo"); if(!tool) throw new Error("missing json_echo"); const result=await tool.execute({value:"ok"}); if(!result.content[0].text.includes("ok")) throw new Error(result.content[0].text); })'
 
 rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --db /tmp/strap-zk-smoke.sqlite --title 'Local hash memory' --body 'Offline smoke indexing works without network.' --tags smoke > /tmp/strap-zk-create.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope user --title 'Local hash memory' --body 'Offline smoke indexing works without network.' --tags smoke > /tmp/strap-zk-create.json
 STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-zk-smoke.sqlite 'offline indexing' > /tmp/strap-zk-search.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk list --db /tmp/strap-zk-smoke.sqlite > /tmp/strap-zk-list.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk tags --db /tmp/strap-zk-smoke.sqlite > /tmp/strap-zk-tags.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk list --scope all > /tmp/strap-zk-list.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk tags > /tmp/strap-zk-tags.json
 STRAP_ZK_EMBED_PROVIDER=hash node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("zk"); if(!tool) throw new Error("missing zk"); const result=await tool.execute({action:"search_hybrid",db:"/tmp/strap-zk-smoke.sqlite",query:"offline indexing",limit:2}); if(!result.content[0].text.includes("Local hash memory")) throw new Error(result.content[0].text); })'
+
+rm -f /tmp/strap-md-zk-smoke.sqlite /tmp/strap-md-zk-smoke.sqlite-shm /tmp/strap-md-zk-smoke.sqlite-wal
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope user --title 'Markdown smoke memory' --body 'Markdown zettel source can rebuild the sqlite index.' --tags smoke,markdown > /tmp/strap-zk-md-create.json
+$strap zk search 'Markdown zettel' > /tmp/strap-zk-md-search.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk reindex --scope user --db /tmp/strap-md-zk-smoke.sqlite > /tmp/strap-zk-md-reindex.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-md-zk-smoke.sqlite 'rebuild sqlite index' > /tmp/strap-zk-md-index-search.json

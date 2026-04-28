@@ -1,5 +1,8 @@
-Use the shared SQLite/sqlite-vec zettelkasten.
+Use the shared markdown-source zettelkasten with a derived SQLite/FTS/vector index.
 
 Usage:
-  strap zk create --title "Note" --body "Body" --tags strap,memory
+  strap zk create --scope user --title "Note" --body "Body" --tags strap,memory
+  strap zk list --scope all
+  strap zk search "semantic"
   strap zk search-hybrid "semantic recall"
+  strap zk reindex --scope all

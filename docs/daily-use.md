@@ -40,6 +40,21 @@ strap zk list
 strap zk tags
 ```
 
+Snapshot user-local agent state with jj:
+
+```bash
+strap history init
+strap history snapshot --message "after initial repo analysis"
+strap history log
+```
+
+Create memory and rebuild the derived SQLite index:
+
+```bash
+strap zk create --scope user --title "Session note" --body "Useful local observation." --tags session
+STRAP_ZK_EMBED_PROVIDER=hash strap zk reindex --scope all
+```
+
 Add user-local temporary commands:
 
 ```bash

@@ -54,7 +54,7 @@ function usage() {
 }
 
 function runZk(args, input = undefined) {
-  const child = spawnSync("nu", [path.join(strapRoot(), "subprojects", "zettel", "bin", "zk.nu"), ...args], {
+  const child = spawnSync(path.join(strapRoot(), "bin", "strap"), ["zk", ...args], {
     input,
     encoding: "utf8",
     env: process.env,

@@ -1,11 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+case "${1:-}" in
+  index-init) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" init "$@" ;;
+  index-create) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" create "$@" ;;
+  index-update) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" update "$@" ;;
+  index-delete) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" delete "$@" ;;
+  index-list) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" list "$@" ;;
+  index-tags) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" tags "$@" ;;
+  index-get) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" get "$@" ;;
+  index-search-text) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" search-text "$@" ;;
+  index-search-vector) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" search-vector "$@" ;;
+  index-search-hybrid) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" search-hybrid "$@" ;;
+  index-related) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" related "$@" ;;
+  index-backlinks) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" backlinks "$@" ;;
+  index-link) shift; exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" link "$@" ;;
+esac
+
 if [ "${1:-}" = "remember-state" ] && [ ! -t 0 ]; then
   tmp="$(mktemp -t strap-zk-state.XXXXXX.json)"
   cat > "$tmp"
   trap 'rm -f "$tmp"' EXIT
-  exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" "$@" --file "$tmp"
+  exec node "$STRAP_ROOT/subprojects/zettel/bin/zk-md.js" "$@" --file "$tmp"
 fi
 
-exec nu "$STRAP_ROOT/subprojects/zettel/bin/zk.nu" "$@"
+case "${1:-}" in
+  create|list|get|update|delete|tags|search|search-text|search-vector|search-hybrid|reindex|remember-state|tool)
+    exec node "$STRAP_ROOT/subprojects/zettel/bin/zk-md.js" "$@"
+    ;;
+esac
+
+echo "Usage: strap zk <create|list|get|update|delete|tags|search|search-hybrid|reindex|remember-state>" >&2
+exit 2

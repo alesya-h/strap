@@ -25,6 +25,7 @@ This document records what `strap` currently implements.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
 - `strap auth`: manage local provider auth credentials.
+- `strap history`: manage jj-backed user-local state history under `.strap-user`.
 - `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
 - `strap session`: create, update, recall memory into, remember, show, save, list, and trace sessions.
 - `strap policy`: list and inspect static policy configs.
@@ -76,16 +77,15 @@ This document records what `strap` currently implements.
 ## Zettelkasten
 
 - `strap zk` is a Nushell CLI around the `sqlite3` CLI, so NixOS sqlite extension loading works.
-- SQLite WAL mode and 5 second busy timeout are used for multi-agent concurrency.
+- Markdown-source notes under `.strap/zettel` and `.strap-user/zettel`.
+- SQLite WAL mode and 5 second busy timeout are used for the derived index.
 - FTS5 text search.
 - sqlite-vec vector search.
 - Hybrid text/vector search.
-- Related-note search.
-- List, delete, tags, and backlink commands.
+- List, delete, tags, and search commands.
 - Remember latest assistant output from a state as a note.
-- Typed links between notes.
 - Tags and aliases stored on notes.
-- Automatic synchronous indexing on create/update.
+- `search-hybrid` and `reindex` rebuild the derived SQLite FTS/vector index from markdown notes.
 - Embedding providers:
   - OpenAI API key.
   - ChatGPT subscription OAuth via `strap auth chatgpt` token cache.
