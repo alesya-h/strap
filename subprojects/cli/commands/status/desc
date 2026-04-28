@@ -1,0 +1,5 @@
+Show Strap roots, layers, and overlayed artifact status.
+
+Usage:
+  strap status
+  strap status --paths

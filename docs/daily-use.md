@@ -33,6 +33,7 @@ strap session remember session,summary
 Inspect the work area:
 
 ```bash
+strap status
 strap work path
 strap session list
 strap session trace
@@ -63,6 +64,14 @@ strap commands new repo-check
 strap edit repo-check
 strap commands list --json
 strap commands validate --json
+```
+
+Work on and promote overlayed artifacts:
+
+```bash
+strap artifact workon porcelain basic
+strap artifact status porcelain
+strap artifact promote porcelain basic
 ```
 
 Use the Babashka data-layer prototype:

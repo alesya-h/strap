@@ -119,9 +119,9 @@ Current state: persistence is unix-explicit via files, `tee`, redirection, `save
 
 - `.strap` now represents project-shared harness artifacts.
 - `.strap-user` now represents user/agent-local runtime state.
-- No `strap promote` command yet for moving generated commands/tools/porcelain from `.strap-user` into `.strap`.
+- `strap artifact promote` can move command/tool/porcelain overlays from `.strap-user` into `.strap`, but promotion does not yet enforce diffs, provenance, validation hooks, or policy review.
 - Basic jj-backed `.strap-user` history exists through `strap history`, but higher-level session branching/fold-back workflows are not built yet.
-- Markdown-source zettelkasten commands exist, but SQLite remains the mature/search path and there is no migration policy, chunking model, or conflict policy yet.
+- Markdown-source zettelkasten commands exist with overlay promotion and backlinks, but there is no migration policy, chunking model, or conflict policy yet.
 
 ## Testing Gaps
 

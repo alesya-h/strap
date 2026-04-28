@@ -12,13 +12,17 @@ export function porcelainDirs() {
 
 export async function listPorcelain() {
   const found = [];
+  const seen = new Set();
   for (const dir of porcelainDirs()) {
     if (!fsSync.existsSync(dir)) continue;
     const entries = await fs.readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isFile() || !entry.name.endsWith(".nu")) continue;
+      const name = path.basename(entry.name, ".nu");
+      if (seen.has(name)) continue;
+      seen.add(name);
       const filePath = path.join(dir, entry.name);
-      found.push({ name: path.basename(entry.name, ".nu"), path: filePath });
+      found.push({ name, path: filePath });
     }
   }
   return found;

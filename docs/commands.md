@@ -65,6 +65,7 @@ strap inner my-command helper-name arg1 arg2
 | Command | Purpose |
 | --- | --- |
 | `agent` | Fork and fold agent state. |
+| `artifact` | Inspect and manage layered command/tool/porcelain artifacts. |
 | `auth` | Authenticate local provider credentials, currently ChatGPT OAuth. |
 | `carapace` | Install and serve shell completion integration. |
 | `commands` | List, inspect, validate, and scaffold command directories. |
@@ -82,10 +83,25 @@ strap inner my-command helper-name arg1 arg2
 | `session` | Create, inspect, update, recall memory into, and remember user-local project sessions. |
 | `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
 | `state-bb` | Run the Babashka pure-state prototype. |
+| `status` | Show roots, layers, and overlayed artifact status. |
 | `work` | Initialize or inspect `.strap` project artifacts and `.strap-user` local work. |
 | `zk` | Use the shared markdown-source zettelkasten with a derived SQLite/FTS/vector index. |
 
 Run `strap help <command>` for command-local usage text.
+
+## Layered Artifacts
+
+Commands, script tools, and porcelain modules can be inspected and moved through the user/project overlay lifecycle:
+
+```bash
+strap status
+strap artifact status command
+strap artifact workon porcelain basic
+strap artifact promote porcelain basic
+strap artifact discard porcelain basic
+```
+
+`workon` creates a user-layer working copy, `promote` writes that copy into the project layer and clears the overlay, and `discard` removes the user-layer copy.
 
 ## Bookmark Addressability
 

@@ -24,6 +24,21 @@ The runner resolves command directories, builds a standard environment, asks the
 
 Use `strap paths` or `strap commands roots` to inspect resolution.
 
+`strap status` reports the active roots, layers, and visible artifact overlays. `strap artifact status --paths` exposes the physical files when debugging is needed.
+
+## Layered Artifacts
+
+Commands, script tools, and porcelain modules share a layered artifact model:
+
+- `user`: mutable user/agent overlay under `.strap-user`.
+- `project`: shared project artifacts under `.strap`.
+- `config`: static/global config artifacts.
+- `root`: installed harness defaults.
+
+The user layer shadows lower layers. `strap artifact workon <type> <name>` copies a lower-layer artifact into the user layer, `strap artifact promote <type> <name>` writes the user-layer artifact to the project layer and clears the overlay, and `strap artifact discard <type> <name>` removes the user-layer overlay.
+
+Supported artifact types are currently `command`, `tool`, and `porcelain`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
+
 ## Command Discovery
 
 Commands are searched in this order:

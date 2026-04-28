@@ -116,8 +116,11 @@ function runScript(filePath, input, spec) {
 }
 
 export function scriptTools() {
-  return discoverScriptFiles().map((filePath) => {
+  const seen = new Set();
+  return discoverScriptFiles().flatMap((filePath) => {
     const spec = normalizeSpec(loadSpec(filePath), filePath);
+    if (seen.has(spec.name)) return [];
+    seen.add(spec.name);
     return {
       name: spec.name,
       description: spec.description,

@@ -27,6 +27,10 @@ $strap state init | $strap porcelain run basic ask 'hello from porcelain' > /tmp
 $strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-has-calls.json
 $strap commands list --json > /tmp/strap-commands.json
 $strap commands validate --json > /tmp/strap-commands-validate.json
+$strap status > /tmp/strap-status.json
+$strap artifact status command > /tmp/strap-artifact-command-status.json
+$strap artifact workon porcelain basic > /tmp/strap-artifact-workon.json
+$strap artifact discard porcelain basic > /tmp/strap-artifact-discard.json
 $strap work init > /tmp/strap-work-init.json
 $strap history init > /tmp/strap-history-init.json
 $strap session new 'smoke session' > /tmp/strap-session-new.json

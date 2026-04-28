@@ -1,0 +1,11 @@
+Manage layered Strap artifacts.
+
+Usage:
+  strap artifact types
+  strap artifact roots
+  strap artifact status [command|tool|porcelain] [--paths]
+  strap artifact workon command my-command
+  strap artifact promote tool my_tool
+  strap artifact discard porcelain draft
+
+The user layer shadows project/config/root layers. `promote` writes the user-layer artifact into the project layer, then clears the user overlay.

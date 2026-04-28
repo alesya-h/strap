@@ -8,9 +8,9 @@
 - Subproject commands for state editing, provider request compilation, agent fork/fold, and pending tool execution.
 - A git-like plumbing/porcelain split for model-authored Nu workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
-- Executable script tools discovered from `tools/` or `STRAP_SCRIPT_TOOLS`.
-- A shared SQLite/sqlite-vec zettelkasten CLI and script tool for agent memory.
-- Markdown-source zettelkasten commands with SQLite reindexing as a derived cache.
+- Executable script tools discovered from overlayed user/project/config/root tool dirs.
+- A shared markdown-source zettelkasten CLI and script tool for agent memory, with inline wikilinks and a derived SQLite/sqlite-vec index.
+- A generic layered artifact model for command, tool, and porcelain workon/promote/discard flows.
 - jj-backed user-local state history under `.strap-user`.
 - jsmcp bridge tools for programmable access to configured MCP servers.
 - Provider config files for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
@@ -45,7 +45,7 @@ strap state init \
 | strap state display-last-message
 ```
 
-Use `strap help`, `strap -a`, and `strap paths` to inspect the command surface and resolved roots. See `docs/organization.md`.
+Use `strap help`, `strap -a`, `strap paths`, and `strap status` to inspect the command surface, resolved roots, and active overlays. See `docs/organization.md`.
 
 Project-local daily workflow:
 
@@ -82,6 +82,8 @@ Porcelain modules in `porcelain/*.nu` are meant to be cheap for a model to write
 
 ```bash
 strap porcelain list
+strap artifact workon porcelain basic
+strap artifact promote porcelain basic
 
 strap state init \
 | strap porcelain run basic ask "List files" \

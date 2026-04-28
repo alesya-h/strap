@@ -10,6 +10,9 @@ This document records what `strap` currently implements.
 - Immutable JSON filter CLIs for state transforms and harness operations.
 - Basic scope operations for opening/collapsing context regions.
 - Basic agent fork/fold commands.
+- Generic layered artifact model for command, tool, and porcelain artifacts.
+- `strap status` reports roots, layers, zettel status, and visible artifact overlays.
+- `strap artifact workon/promote/discard/status` manages user/project overlays for commands, tools, and porcelain.
 
 ## CLIs
 
@@ -22,6 +25,8 @@ This document records what `strap` currently implements.
 - `strap agent`: fork/fold agent state.
 - `strap mcp`: run bundled stdio MCP servers.
 - `strap porcelain`: discover and run Nushell porcelain modules.
+- `strap artifact`: inspect and manage layered command/tool/porcelain artifacts.
+- `strap status`: inspect active roots, layers, and overlay status.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
 - `strap auth`: manage local provider auth credentials.
