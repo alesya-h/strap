@@ -10,4 +10,3 @@ This directory contains project-shared harness artifacts. It may be committed wi
 - `models/`: project-shared model profile overlays.
 - `zettel/`: shared project memory source.
 - `config/`: project-specific config overrides.
-- `policies/`: project-specific policy files.

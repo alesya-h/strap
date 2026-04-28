@@ -18,13 +18,11 @@ node --check subprojects/zettel/bin/*.js
 node --check subprojects/jsmcp/src/*.js
 node --check subprojects/cli/bin/*.js
 node --check subprojects/sessions/bin/*.js
-node --check subprojects/policy/bin/*.js
-node --check subprojects/policy/src/*.js
 
 nu --commands 'use nu/strap; use nu/plumbing.nu *; source subprojects/zettel/bin/zk.nu; source tools/zk; use porcelain/loop.nu *'
 
 bash -n subprojects/cli/commands/*/run subprojects/cli/commands/carapace/inner/*
-jq empty package.json config/strap/config.json config/strap/models/*.json config/strap/tool-groups/*.json config/strap/zettel/config.json config/strap/policies/*.json
+jq empty package.json config/strap/config.json config/strap/models/*.json config/strap/tool-groups/*.json config/strap/zettel/config.json
 if bb -cp subprojects/state-bb/src -m strap.state --help >/tmp/strap-bb-help.txt 2>&1; then
   :
 else

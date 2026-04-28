@@ -87,10 +87,10 @@ The safety model should live around it:
 - make real effects reachable only through jsmcp/MCP capability servers
 - use overlays/tmpfs for speculative filesystem work
 - give each branch least-privilege tool servers
-- optionally add eBPF/seccomp/network policy outside the harness
+- optionally add eBPF/seccomp/network restrictions outside the harness
 - use restricted MCP/jsmcp profiles for restricted runs
 
-In other words: let the model mutate porcelain freely, but ensure the process has no ambient authority worth stealing.
+In other words: let the model mutate porcelain freely, but ensure the process has no ambient filesystem or process power worth stealing.
 
 ## Design Rules
 

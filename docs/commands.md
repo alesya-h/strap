@@ -23,7 +23,6 @@ Commands receive:
 - `STRAP_WORKSPACE`
 - `STRAP_CMD_NAME`
 - `STRAP_CMD_DIR`
-- `STRAP_AUTHORITY_DECISION`
 
 Command safety is not described by command-owned metadata. Use launch profiles, sandboxing, and restricted tool/jsmcp configuration for restricted modes.
 
@@ -70,7 +69,6 @@ strap inner my-command helper-name arg1 arg2
 | `nu` | Inspect Nushell plumbing module paths. |
 | `one-shot` | Run an agent once until its first final answer. |
 | `paths` | Print resolved root/config/project/work/workspace paths. |
-| `policy` | List, show, and evaluate policy decisions. |
 | `porcelain` | List and run model-editable Nushell porcelain modules. |
 | `provider` | Run provider-specific operations and authentication. |
 | `run-calls` | Execute pending tool calls in canonical state. |

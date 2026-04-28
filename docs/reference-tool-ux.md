@@ -34,7 +34,7 @@ Adopted here:
 
 Deferred for later:
 
-- Interactive permission prompts and persistent policy rules.
+- Interactive permission prompts and persistent permission rules.
 - Tool-search/deferred exposure once the tool count is high enough to justify it.
 - Persistent process sessions and stdin continuation.
 - LSP, browser automation, and external service toolsets.

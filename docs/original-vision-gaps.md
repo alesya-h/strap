@@ -7,7 +7,7 @@ This document records the main pieces from the original `strap` vision that are 
 - Bubblewrap runner exists as `strap sandbox run --profile readonly -- command args...`, but integration is still shallow.
 - No overlayfs/tmpfs speculative workspace runner yet.
 - No per-branch least-privilege environment.
-- No eBPF/seccomp/network policy layer.
+- No eBPF/seccomp/network restriction layer.
 - No formal propose/test/approve/install workflow for generated capabilities.
 
 Current state: generated porcelain can be written and run cheaply, and a basic bwrap command exists. Restricted modes should be enforced by the launch environment rather than command-owned metadata.
@@ -26,8 +26,8 @@ Current state: the tree-shaped state model exists, but branch/context operations
 ## Deterministic Budgeting And Redaction
 
 - No token-budget planner over canonical state.
-- No deterministic pruning policy.
-- No automatic summarization policy.
+- No deterministic pruning strategy.
+- No automatic summarization strategy.
 - No redaction layer for secrets or private actor state.
 - No ZDR/replay-oriented proof that provider payloads contain only intended state.
 
@@ -56,9 +56,9 @@ Current state: tool execution is structured, but tool-environment auditability i
 
 - `strap loop` works, but remains a starter loop.
 - `strap loop-nu` has a total tool-call budget; `strap loop` has basic turn limits and finalization.
-- Missing per-turn and per-session stop policy controls beyond basic limits.
+- Missing per-turn and per-session stop controls beyond basic limits.
 - Missing rich trace output to stderr or structured trace state.
-- Missing retry/backoff policy.
+- Missing retry/backoff strategy.
 - Missing named tool allowlist presets.
 - Missing resumable loop metadata.
 
@@ -69,7 +69,7 @@ Current state: loops are usable for simple work, not yet a mature control plane.
 - Trace helper exists, but provenance is not automatic.
 - Generated porcelain/tool files are not tied to actor, source branch, validation command, or approval event by default.
 - There is no durable installed-capability registry.
-- There is no policy distinguishing temporary porcelain from approved installed capabilities.
+- There is no lifecycle distinction between temporary porcelain and approved installed capabilities.
 
 Current state: provenance can be recorded manually, but it is not enforced or systematized.
 
@@ -81,7 +81,7 @@ Current state: provenance can be recorded manually, but it is not enforced or sy
 - Inline wikilinks and backlinks exist, but graph traversal is still minimal.
 - No backlink-rich result expansion beyond direct backlink/ambiguous mention reporting.
 - No alias-weighted search/reranking.
-- No conflict/merge policy for concurrent semantic edits.
+- No conflict/merge story for concurrent semantic edits.
 - No native MCP server for the zettelkasten.
 - Memory writes are explicit through `strap zk` or the `zk` tool; there is no automatic note creation from full traces or completed tasks.
 
@@ -97,11 +97,11 @@ Current state: semantic memory is useful and shared, but it is an MVP.
 
 Current state: the system is CLI-usable, but not polished as a daily product.
 
-## Security And Capability Policy
+## Security And Capabilities
 
-- Tool groups and first-pass policies exist, but not per-agent/per-branch capabilities.
+- Tool groups exist, but not per-agent/per-branch capabilities.
 - jsmcp exposes whatever configured servers allow.
-- A first-pass launch policy engine exists for command execution and explicit read/write decisions. It is not complete enforcement for read-only, networkless, repo-only, or memory-only agents.
+- There is no built-in access-control engine for read-only, networkless, repo-only, or memory-only agents.
 - No approval boundary for high-risk tools beyond the surrounding host/client behavior.
 
 Current state: capability separation is partly implemented, but restricted modes depend on operational isolation across tools, MCP/jsmcp, memory, auth, and self-modification.
@@ -119,9 +119,9 @@ Current state: persistence is unix-explicit via files, `tee`, redirection, `save
 
 - `.strap` now represents project-shared harness artifacts.
 - `.strap-user` now represents user/agent-local runtime state.
-- `strap artifact promote` can move command/tool/porcelain overlays from `.strap-user` into `.strap`, but promotion does not yet enforce diffs, provenance, validation hooks, or policy review.
+- `strap artifact promote` can move command/tool/porcelain overlays from `.strap-user` into `.strap`, but promotion does not yet enforce diffs, provenance, validation hooks, or review.
 - Basic jj-backed `.strap-user` history exists through `strap history`, but higher-level session branching/fold-back workflows are not built yet.
-- Markdown-source zettelkasten commands exist with overlay promotion and backlinks, but there is no migration policy, chunking model, or conflict policy yet.
+- Markdown-source zettelkasten commands exist with overlay promotion and backlinks, but there is no migration strategy, chunking model, or conflict story yet.
 
 ## Testing Gaps
 

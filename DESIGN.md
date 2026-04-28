@@ -22,7 +22,7 @@ The public interface is:
 strap <command> [args...]
 ```
 
-This makes the harness inspectable and editable by both humans and agents. A project can carry promoted commands, tools, porcelain, policies, and shared memory under `.strap/`, while user/agent-local sessions, history, scratch work, caches, and temporary generated capabilities live under `.strap-user/`.
+This makes the harness inspectable and editable by both humans and agents. A project can carry promoted commands, tools, porcelain, and shared memory under `.strap/`, while user/agent-local sessions, history, scratch work, caches, and temporary generated capabilities live under `.strap-user/`.
 
 ## Current Spine
 

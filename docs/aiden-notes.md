@@ -66,7 +66,7 @@ In strap terms:
    - tests or smoke examples
 2. The proposal lives in a scope or child agent branch.
 3. The harness runs validation in a sandbox.
-4. A human or policy gate approves installation.
+4. A human approval gate approves installation.
 5. Once installed, the tool appears through `STRAP_SCRIPT_TOOLS`, `tools/`, or a future tool registry.
 6. The canonical state records the installation event and provenance.
 

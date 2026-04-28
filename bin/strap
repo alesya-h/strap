@@ -3,7 +3,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { strapCommandDirs, strapConfigRoot, strapProjectRoot, strapRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
-import { decide, loadPolicy } from "#strap/policy/authority";
 
 const [command, ...args] = process.argv.slice(2);
 
@@ -88,9 +87,6 @@ function commandCwd(dir, env) {
 
 async function runExecutable(file, name, dir, args) {
   const env = envFor(name, dir);
-  const auth = decide({ policy: loadPolicy(env.STRAP_POLICY || "default"), action: "execute", command: name });
-  if (auth.decision === "deny") die(`Policy denied ${name}: ${auth.reason}`);
-  env.STRAP_AUTHORITY_DECISION = JSON.stringify(auth);
   const cwd = await commandCwd(dir, env);
   const child = spawn(file, args, { cwd, env, stdio: "inherit" });
   child.on("error", (error) => die(error.message));

@@ -36,7 +36,6 @@ export use ./artifact.nu
 export use ./commands.nu
 export use ./paths.nu
 export use ./status.nu
-export use ./policy.nu
 export use ./provider.nu
 
 export def "model use" [name: string] {

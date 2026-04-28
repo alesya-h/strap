@@ -54,6 +54,6 @@ Then execute a search:
 
 This successfully returned Kagi search results through `strap run-calls --tools jsmcp`.
 
-## Authority Note
+## Isolation Note
 
 The jsmcp bridge exposes whatever configured jsmcp servers allow. Treat it as a powerful effect surface unless the run uses a restricted jsmcp profile and an isolated launch environment.

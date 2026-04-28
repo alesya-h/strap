@@ -46,8 +46,6 @@ This document records what `strap` currently implements.
 - `strap history`: manage jj-backed user-local state history under `.strap-user`.
 - `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
 - `strap session`: create, copy, update, show, save, list, and trace sessions.
-- `strap policy`: list and inspect launch-policy configs.
-- Command execution receives a launch-policy decision before spawning.
 - `strap sandbox`: run commands through bubblewrap profiles.
 - `strap state-bb`: Babashka prototype for pure state transforms.
 
@@ -124,7 +122,6 @@ This document records what `strap` currently implements.
 - `docs/state-format.md`: canonical `strap.state.v0.2` format specification.
 - `docs/organization.md`: root/config/work organization and command-directory contract.
 - `docs/commands.md`: command authoring, validation, and built-in command reference.
-- `docs/authority.md`: launch policy, sandbox notes, and isolation caveats.
 - `docs/providers.md`: model profile and auth notes.
 - `docs/jsmcp.md`: jsmcp bridge and Kagi smoke test notes.
 - `docs/self-modifying-porcelain.md`: porcelain/plumbing self-modification model.

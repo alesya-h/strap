@@ -116,13 +116,6 @@ open state.json | map-events {|event| { from: $event.from, text: $event.text } }
 
 Find ready imports with `strap nu use-line strap` and `strap nu use-line plumbing`.
 
-Inspect launch-policy decisions during development:
-
-```bash
-strap policy decide --policy readonly --action execute --command zk
-strap policy decide --policy readonly --action write --path /etc/passwd
-```
-
 Fold stale context by placing bookmarks on unique text and folding the range:
 
 ```nu

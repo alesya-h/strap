@@ -73,7 +73,6 @@ config/strap/
   config.json
   models/
   tool-groups/
-  policies/
   zettel/
   commands/
   tools/
@@ -96,7 +95,6 @@ my-project/.strap/
   porcelain/
   zettel/
   config/
-  policies/
 ```
 
 This directory may be committed with the project. It is where generated capabilities should be promoted when they become part of the project.

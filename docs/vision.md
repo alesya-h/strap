@@ -58,7 +58,7 @@ Memory is useful only when it is inspectable and attributable. Agents should use
 - Treating command metadata as a security boundary.
 - Hidden self-extension mechanisms.
 - Treating ChatGPT OAuth as the product center; it is just one provider auth path.
-- Treating the current policy/sandbox layer as complete security.
+- Treating the current sandbox layer as complete security.
 
 ## Current Strategic Priority
 
@@ -73,6 +73,6 @@ Everything else should orbit this center:
 ```text
 commands are discoverable capabilities
 roots and traces make them legible
-isolation profiles constrain ambient authority
+isolation profiles constrain ambient filesystem and process power
 traces explain what happened
 ```

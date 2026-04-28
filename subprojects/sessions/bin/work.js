@@ -4,7 +4,7 @@ import path from "node:path";
 import { strapProjectRoot, strapWorkRoot } from "#strap/core/paths";
 
 const [command = "init"] = process.argv.slice(2);
-const projectDirs = ["agents", "skills", "models", "commands", "tools", "porcelain", "zettel", "config", "policies"];
+const projectDirs = ["agents", "skills", "models", "commands", "tools", "porcelain", "zettel", "config"];
 const workDirs = ["agents", "skills", "models", "history", "sessions", "logs", "cache", "branches", "scratch", "commands", "tools", "porcelain", "zettel", "config"];
 
 if (command === "init") {
@@ -16,7 +16,7 @@ if (command === "init") {
   for (const dir of workDirs) fs.mkdirSync(path.join(work, dir), { recursive: true });
   const projectReadme = path.join(project, "README.md");
   if (!fs.existsSync(projectReadme)) {
-    fs.writeFileSync(projectReadme, `# Strap Project\n\nProject-shared harness artifacts. This directory may be committed with the project.\n\n- agents/\n- skills/\n- models/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n- policies/\n`);
+    fs.writeFileSync(projectReadme, `# Strap Project\n\nProject-shared harness artifacts. This directory may be committed with the project.\n\n- agents/\n- skills/\n- models/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n`);
   }
   const workReadme = path.join(work, "README.md");
   if (!fs.existsSync(workReadme)) {
