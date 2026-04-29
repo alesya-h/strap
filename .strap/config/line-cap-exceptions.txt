@@ -1,9 +1,1 @@
 # Existing oversized source files. These are refactor debt, not precedent.
-bin/strap
-subprojects/cli/commands/zk/run
-subprojects/cli/commands/zk/inner/index
-subprojects/cli/commands/state/run
-subprojects/cli/commands/provider-openai/main.nu
-subprojects/cli/commands/provider-openrouter/main.nu
-subprojects/cli/commands/provider-anthropic/main.nu
-subprojects/cli/commands/provider-chatgpt/src/provider/auth.clj

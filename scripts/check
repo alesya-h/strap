@@ -7,7 +7,7 @@ check_line_cap() {
   local exceptions_file=.strap/config/line-cap-exceptions.txt
   local failed=0
   local line_count
-  local files=(bin/strap scripts/check scripts/smoke subprojects/cli/commands/**/*)
+  local files=(bin/strap bin/strap-runner/**/* scripts/check scripts/smoke subprojects/cli/commands/**/*)
 
   for file in "${files[@]}"; do
     [ -f "$file" ] || continue
@@ -41,6 +41,7 @@ check_line_cap
 
 js_files=(
   bin/strap
+  bin/strap-runner/*.js
   subprojects/mcp/servers/*.js
   subprojects/core/bin/*.js
   subprojects/core/src/*.js

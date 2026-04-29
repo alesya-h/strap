@@ -1,296 +1,93 @@
 #!/usr/bin/env nu
 
-def take-option [args: list<string>, name: string, default: string = ""] {
-  let matches = ($args | enumerate | where item == $name)
-  if ($matches | is-empty) { return { value: $default, args: $args } }
-  let index = ($matches | first | get index)
-  let value = (if (($args | length) > ($index + 1)) { $args | get ($index + 1) } else { $default })
-  let next = ($args | enumerate | where {|entry| $entry.index != $index and $entry.index != ($index + 1) } | get item)
-  { value: $value, args: $next }
-}
-
-def take-flag [args: list<string>, name: string] {
-  { present: ($name in $args), args: ($args | where {|item| $item != $name }) }
-}
-
-def read-state [file: string] {
-  if $file == "-" { open --raw /dev/stdin | from json } else { open $file }
-}
-
-def write-json [] {
-  $in | to json --indent 2 | print
-}
-
-def init-state [] {
-  {
-    version: "strap.state.v0.2"
-    actors: {
-      user: {
-        kind: "human"
-        self: { public: "The user driving the work." }
-        peers: { assistant: { contract: "Collaborate directly, preserve user intent, ask only when blocked." } }
-      }
-      assistant: {
-        kind: "agent"
-        self: {
-          public: "A pragmatic software agent operating a unix-ish harness."
-          private: "Keep provider-specific state out of canonical state; compile requests from this file."
-        }
-        peers: {
-          user: { contract: "Solve the task end-to-end when feasible; keep updates concise." }
-          harness: { contract: "Use tool calls as structured actor communication." }
-        }
-      }
-      harness: {
-        kind: "runtime"
-        self: { public: "The local execution harness, MCP bridge, and provider adapter." }
-        peers: { assistant: { contract: "Execute approved calls, report visible output, keep retained hidden state available." } }
-      }
-    }
-    root: { type: "scope", label: "root", status: "open", participants: ["user", "assistant", "harness"], children: [] }
-  }
-}
-
-def append-event [event: record] {
-  let state = $in
-  $state | update root.children { append ({ type: "event" } | merge $event) }
-}
-
-def node-search-text [node: record] {
-  [($node.text? | default "") ($node.summary? | default "") ($node.label? | default "")] | where {|item| $item != "" } | str join "\n"
-}
-
-def bookmark-id [bookmark: any] {
-  if (($bookmark | describe) == "string") { $bookmark } else { $bookmark.id? | default null }
-}
-
-def bookmark-ids [node: record] {
-  $node.bookmarks? | default [] | each {|bookmark| bookmark-id $bookmark } | where {|id| $id != null }
-}
-
-def describe-node [node: record] {
-  {
-    type: ($node.type? | default null)
-    kind: ($node.kind? | default null)
-    from: ($node.from? | default null)
-    to: ($node.to? | default null)
-    label: ($node.label? | default null)
-    status: ($node.status? | default null)
-    excerpt: ((node-search-text $node) | str substring 0..160)
-  }
-}
-
-def walk-node [node: record, path: string, hidden: bool, include_hidden: bool] {
-  let current = [($node | merge { _path: $path, _hidden: $hidden })]
-  if (($node.type? | default "") != "scope") { return $current }
-  let children = ($node.children? | default [] | enumerate | reduce --fold [] {|entry, acc| $acc | append (walk-node $entry.item $"($path).children[($entry.index)]" $hidden $include_hidden) })
-  let hidden_children = if $include_hidden {
-    $node.hidden?.children? | default [] | enumerate | reduce --fold [] {|entry, acc| $acc | append (walk-node $entry.item $"($path).hidden.children[($entry.index)]" true $include_hidden) }
-  } else { [] }
-  $current | append $children | append $hidden_children
-}
-
-def walk-state [state: record, include_hidden: bool] {
-  $state.root.children | enumerate | reduce --fold [] {|entry, acc| $acc | append (walk-node $entry.item $"root.children[($entry.index)]" false $include_hidden) }
-}
-
-def locate-text [text: string, include_hidden: bool] {
-  let state = $in
-  let matches = (walk-state $state $include_hidden | where {|match| (node-search-text $match) | str contains $text })
-  if (($matches | length) == 0) { error make { msg: $"No unique text match found: ($text)" } }
-  if (($matches | length) > 1) { error make { msg: $"Ambiguous text match \((($matches | length)) matches\): ($text)" } }
-  $matches | first
-}
-
-def locate-bookmark-root [state: record, id: string] {
-  let matches = ($state.root.children | enumerate | where {|entry| (bookmark-ids $entry.item) | any {|bookmark| $bookmark == $id } })
-  if (($matches | length) == 0) { error make { msg: $"Bookmark not found: ($id)" } }
-  if (($matches | length) > 1) { error make { msg: $"Duplicate bookmark found: ($id)" } }
-  $matches | first
-}
-
-def list-bookmarks [include_hidden: bool] {
-  let state = $in
-  walk-state $state $include_hidden | reduce --fold [] {|match, acc|
-    $acc | append (
-      $match.bookmarks? | default [] | each {|bookmark|
-        let id = (bookmark-id $bookmark)
-        let base = if (($bookmark | describe) == "string") { { id: $id } } else { $bookmark }
-        $base | merge { path: $match._path, hidden: $match._hidden, node: (describe-node $match) }
-      }
-    )
-  }
-}
-
-def add-bookmark-root [text: string, bookmark: record] {
-  let state = $in
-  let matches = ($state.root.children | enumerate | where {|entry| (node-search-text $entry.item) | str contains $text })
-  if (($matches | length) == 0) { error make { msg: $"No unique text match found: ($text)" } }
-  if (($matches | length) > 1) { error make { msg: $"Ambiguous text match \((($matches | length)) matches\): ($text)" } }
-  let match = ($matches | first)
-  let node = ($match.item | upsert bookmarks (($match.item.bookmarks? | default []) | append $bookmark))
-  print -e $"bookmark ($bookmark.id) added at root.children[($match.index)]"
-  $state | update root.children { update $match.index $node }
-}
-
-def remove-bookmark-root [id: string] {
-  let state = $in
-  mut removed = 0
-  mut children = []
-  for node in $state.root.children {
-    let before = ($node.bookmarks? | default [])
-    let after = ($before | where {|bookmark| (bookmark-id $bookmark) != $id })
-    if (($before | length) != ($after | length)) { $removed = $removed + (($before | length) - ($after | length)) }
-    let next = if ($after | is-empty) { $node | reject --optional bookmarks } else { $node | upsert bookmarks $after }
-    $children = ($children | append $next)
-  }
-  if $removed == 0 { error make { msg: $"Bookmark not found: ($id)" } }
-  $state | update root.children $children
-}
-
-def participants [node: record] {
-  [($node.from? | default null) ...($node.to? | default []) ...($node.participants? | default [])] | where {|item| $item != null } | uniq
-}
-
-def extract-root-range [from: string, to: string] {
-  let state = $in
-  let start = (locate-bookmark-root $state $from)
-  let end = (locate-bookmark-root $state $to)
-  let first = ([$start.index $end.index] | math min)
-  let last = ([$start.index $end.index] | math max)
-  let children = ($state.root.children | slice $first..$last)
-  {
-    version: "strap.context.v0.1"
-    source: { state_version: $state.version, from: $from, to: $to, path_from: $"root.children[($start.index)]", path_to: $"root.children[($end.index)]" }
-    nodes: $children
-    events: $children
-  }
-}
-
-def fold-root-range [from: string, to: string, summary: string, label: string] {
-  let state = $in
-  let start = (locate-bookmark-root $state $from)
-  let end = (locate-bookmark-root $state $to)
-  let first = ([$start.index $end.index] | math min)
-  let last = ([$start.index $end.index] | math max)
-  let children = ($state.root.children | slice $first..$last)
-  let before = if $first == 0 { [] } else { $state.root.children | slice 0..<($first) }
-  let after = if ($last + 1) >= ($state.root.children | length) { [] } else { $state.root.children | slice ($last + 1).. }
-  let scope = { type: "scope", label: $label, status: "collapsed", participants: ($children | reduce --fold [] {|node, acc| $acc | append (participants $node) } | uniq), summary: $summary, children: [], hidden: { children: $children } }
-  $state | update root.children ($before | append $scope | append $after)
-}
-
-def render-node [node: record, indent: string, include_hidden: bool] {
-  let marks = (bookmark-ids $node | each {|id| $" @($id)" } | str join "")
-  let text = ((node-search-text $node) | str substring 0..80)
-  let line = if (($node.type? | default "") == "event") {
-    $"($indent)- event ($node.from? | default '?') -> (($node.to? | default ['all']) | str join ','); ($node.kind? | default 'message')($marks): ($text)"
-  } else {
-    $"($indent)- scope ($node.label? | default 'scope') [($node.status? | default 'open')]($marks): (($node.summary? | default '') | str substring 0..80)"
-  }
-  let children = if (($node.type? | default "") == "scope") and (($node.status? | default "open") != "collapsed") {
-    $node.children? | default [] | reduce --fold [] {|child, acc| $acc | append (render-node $child $"($indent)  " $include_hidden) }
-  } else { [] }
-  let hidden = if $include_hidden and (($node.hidden?.children? | default [] | length) > 0) {
-    [$"($indent)  hidden:"] | append ($node.hidden.children | reduce --fold [] {|child, acc| $acc | append (render-node $child $"($indent)    " $include_hidden) })
-  } else { [] }
-  [$line] | append $children | append $hidden
-}
-
-def render-tree [include_hidden: bool] {
-  let state = $in
-  (["root"] | append ($state.root.children | reduce --fold [] {|node, acc| $acc | append (render-node $node "  " $include_hidden) })) | str join "\n"
-}
+use lib/bookmark.nu
+use lib/common.nu
+use lib/init.nu
+use lib/range.nu
+use lib/render.nu
+use lib/walk.nu
 
 def usage [] {
   print -e "Usage: strap state <init|add-user|add-assistant|push|pop|bookmark|extract|fold|locate|show|tree|display-last-message> [args] < state.json > next.json"
   exit 2
 }
 
+def pop-scope [file: string, words: list<string>] {
+  let state = (common read-state $file)
+  let summary_text = ($words | str join " ")
+  let indexed = ($state.root.children | enumerate)
+  let open = ($indexed | where {|entry| $entry.item.type == "scope" and $entry.item.status == "open" } | last)
+  if ($open | is-empty) { error make { msg: "No open scope found" } }
+  let collapsed = ($open.item | merge { status: "collapsed", summary: $summary_text, hidden: { children: $open.item.children }, children: [] })
+  $state | update root.children { update $open.index $collapsed } | common write-json
+}
+
+def bookmark-command [sub: string, args: list<string>, file: string, text: string, created_by: string, id: string, hidden: bool, label: string] {
+  match $sub {
+    "add" => {
+      let text_value = if $text == "" { $args | str join " " } else { $text }
+      let id_value = if $id == "" { $"bm_((date now | format date '%s'))_((random uuid) | str substring 0..3)" } else { $id }
+      if $text_value == "" { error make { msg: "Usage: strap state bookmark add --text <unique substring> [--label label]" } }
+      let bookmark_value = ({ id: $id_value, created_by: $created_by, created_at: (date now | into string) } | if $label == "folded conversation segment" { $in } else { $in | insert label $label })
+      common read-state $file | bookmark add-root $text_value $bookmark_value | common write-json
+    }
+    "list" => { common read-state $file | bookmark list $hidden | common write-json }
+    "remove" => {
+      let target_id = ($args | first | default "")
+      if $target_id == "" { error make { msg: "Usage: strap state bookmark remove <bookmark>" } }
+      common read-state $file | bookmark remove-root $target_id | common write-json
+    }
+    _ => { error make { msg: "Usage: strap state bookmark <add|list|remove> [args]" } }
+  }
+}
+
+def show-command [file: string, sub: string, text: string, bookmark_id: string] {
+  if $text != "" {
+    common read-state $file | walk locate-text $text true | common write-json
+  } else {
+    let selector = if $bookmark_id == "" { $sub | default "" } else { $bookmark_id }
+    if $selector == "" { error make { msg: "Usage: strap state show <bookmark> | --text <unique substring>" } }
+    let bookmarks = (walk walk-state (common read-state $file) true | where {|match| (walk bookmark-ids $match) | any {|id| $id == $selector } })
+    if (($bookmarks | length) != 1) { error make { msg: $"Bookmark not found or duplicate: ($selector)" } }
+    $bookmarks | first | common write-json
+  }
+}
+
 def main [
-  command?: string
-  sub?: string
-  ...args: string
-  --file: string = "-"
-  --from: string = ""
-  --to: string = ""
-  --summary: string = ""
-  --label: string = "folded conversation segment"
-  --text: string = ""
-  --created-by: string = "assistant"
-  --id: string = ""
-  --hidden
-  --bookmark: string = ""
+  command?: string, sub?: string, ...args: string, --file: string = "-", --from: string = "", --to: string = "",
+  --summary: string = "", --label: string = "folded conversation segment", --text: string = "",
+  --created-by: string = "assistant", --id: string = "", --hidden, --bookmark: string = ""
 ] {
   if ($command | is-empty) { usage }
   let words = ([($sub | default "")] | append $args | where {|item| $item != "" })
 
   match $command {
-    "init" => { init-state | write-json }
-    "add-user" => { read-state $file | append-event { from: "user", to: ["assistant"], kind: "message", text: ($words | str join " ") } | write-json }
-    "add-assistant" => { read-state $file | append-event { from: "assistant", to: ["user"], kind: "message", text: ($words | str join " ") } | write-json }
-    "push" => { read-state $file | update root.children { append { type: "scope", label: (($words | str join " ") | default "scope"), status: "open", participants: ["assistant", "harness"], children: [] } } | write-json }
-    "pop" => {
-      let state = (read-state $file)
-      let summary_text = ($words | str join " ")
-      let indexed = ($state.root.children | enumerate)
-      let open = ($indexed | where {|entry| $entry.item.type == "scope" and $entry.item.status == "open" } | last)
-      if ($open | is-empty) { error make { msg: "No open scope found" } }
-      let collapsed = ($open.item | merge { status: "collapsed", summary: $summary_text, hidden: { children: $open.item.children }, children: [] })
-      $state | update root.children { update $open.index $collapsed } | write-json
-    }
-    "bookmark" => {
-      match $sub {
-        "add" => {
-          let text_value = if $text == "" { $args | str join " " } else { $text }
-          let id_value = if $id == "" { $"bm_((date now | format date '%s'))_((random uuid) | str substring 0..3)" } else { $id }
-          if $text_value == "" { error make { msg: "Usage: strap state bookmark add --text <unique substring> [--label label]" } }
-          let bookmark_value = ({ id: $id_value, created_by: $created_by, created_at: (date now | into string) } | if $label == "folded conversation segment" { $in } else { $in | insert label $label })
-          read-state $file | add-bookmark-root $text_value $bookmark_value | write-json
-        }
-        "list" => {
-          read-state $file | list-bookmarks $hidden | write-json
-        }
-        "remove" => {
-          let target_id = ($args | first | default "")
-          if $target_id == "" { error make { msg: "Usage: strap state bookmark remove <bookmark>" } }
-          read-state $file | remove-bookmark-root $target_id | write-json
-        }
-        _ => { error make { msg: "Usage: strap state bookmark <add|list|remove> [args]" } }
-      }
-    }
+    "init" => { init state | common write-json }
+    "add-user" => { common read-state $file | common append-event { from: "user", to: ["assistant"], kind: "message", text: ($words | str join " ") } | common write-json }
+    "add-assistant" => { common read-state $file | common append-event { from: "assistant", to: ["user"], kind: "message", text: ($words | str join " ") } | common write-json }
+    "push" => { common read-state $file | update root.children { append { type: "scope", label: (($words | str join " ") | default "scope"), status: "open", participants: ["assistant", "harness"], children: [] } } | common write-json }
+    "pop" => { pop-scope $file $words }
+    "bookmark" => { bookmark-command $sub $args $file $text $created_by $id $hidden $label }
     "extract" => {
       let to_value = if $to == "" { $from } else { $to }
       if $from == "" or $to_value == "" { error make { msg: "Usage: strap state extract --from <bookmark> [--to <bookmark>]" } }
-      read-state $file | extract-root-range $from $to_value | write-json
+      common read-state $file | range extract-root $from $to_value | common write-json
     }
     "fold" => {
       let summary_value = if $summary == "" { $words | str join " " } else { $summary }
       if $from == "" or $to == "" or $summary_value == "" { error make { msg: "Usage: strap state fold --from <bookmark> --to <bookmark> --summary <text>" } }
-      read-state $file | fold-root-range $from $to $summary_value $label | write-json
+      common read-state $file | range fold-root $from $to $summary_value $label | common write-json
     }
     "locate" => {
       let text_value = if $text == "" { $words | str join " " } else { $text }
       if $text_value == "" { error make { msg: "Usage: strap state locate --text <unique substring>" } }
-      let match = (read-state $file | locate-text $text_value true)
-      { path: $match._path, hidden: $match._hidden, node: (describe-node $match), bookmarks: (bookmark-ids $match) } | write-json
+      let match = (common read-state $file | walk locate-text $text_value true)
+      { path: $match._path, hidden: $match._hidden, node: (walk describe-node $match), bookmarks: (walk bookmark-ids $match) } | common write-json
     }
-    "show" => {
-      if $text != "" {
-        read-state $file | locate-text $text true | write-json
-      } else {
-        let selector = if $bookmark == "" { $sub | default "" } else { $bookmark }
-        if $selector == "" { error make { msg: "Usage: strap state show <bookmark> | --text <unique substring>" } }
-        let bookmarks = (walk-state (read-state $file) true | where {|match| (bookmark-ids $match) | any {|id| $id == $selector } })
-        if (($bookmarks | length) != 1) { error make { msg: $"Bookmark not found or duplicate: ($selector)" } }
-        $bookmarks | first | write-json
-      }
-    }
-    "tree" => {
-      print (read-state $file | render-tree $hidden)
-    }
+    "show" => { show-command $file ($sub | default "") $text $bookmark }
+    "tree" => { print (common read-state $file | render tree $hidden) }
     "display-last-message" => {
-      let events = (read-state $file | get root.children | where type == "event" and from == "assistant" and text != "")
+      let events = (common read-state $file | get root.children | where type == "event" and from == "assistant" and text != "")
       if not ($events | is-empty) { print ($events | last | get text) }
     }
     _ => { usage }

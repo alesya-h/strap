@@ -3,6 +3,7 @@
             [babashka.process :as process]
             [cheshire.core :as json]
             [provider.auth :as auth]
+            [provider.auth-actions :as auth-actions]
             [provider.model :as model]
             [provider.state :as state]))
 
@@ -96,12 +97,12 @@
   (let [[timeout xs] (take-opt xs "--timeout-seconds" "300")
         no-open (some #{"--no-open"} xs)]
     (write-json
-      (auth/login {:token_file token-file
-                   :open (not no-open)
-                   :timeout_seconds (Long/parseLong timeout)
-                   :onUserCode (fn [{:keys [userCode url]}]
-                                 (binding [*out* *err*]
-                                   (println (str "Open " url " and enter code: " userCode))))}))))
+      (auth-actions/login {:token_file token-file
+                           :open (not no-open)
+                           :timeout_seconds (Long/parseLong timeout)
+                           :onUserCode (fn [{:keys [userCode url]}]
+                                         (binding [*out* *err*]
+                                           (println (str "Open " url " and enter code: " userCode))))}))))
 
 (defn command-auth [argv]
   (let [action (first argv)
@@ -113,7 +114,7 @@
 
       "import-codex"
       (let [[auth-file _] (take-opt xs "--auth-file" nil)]
-        (write-json (auth/import-codex {:auth_file auth-file :token_file token-file})))
+        (write-json (auth-actions/import-codex {:auth_file auth-file :token_file token-file})))
 
       "refresh"
       (let [token (auth/load-token {:token_file token-file :refresh false})
