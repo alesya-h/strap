@@ -30,11 +30,11 @@ export def pop [summary: string] {
 }
 
 export def compile [--model: string = "current", --tools: string = "all"] {
-  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) compile --model $model --tools $tools | from json
+  $in | to json | ^(strap-file [bin strap]) llm compile --model $model --tools $tools | from json
 }
 
 export def complete [--model: string = "current", --tools: string = "all"] {
-  $in | to json | ^node (strap-file [subprojects providers bin llm.js]) complete --model $model --tools $tools | from json
+  $in | to json | ^(strap-file [bin strap]) llm complete --model $model --tools $tools | from json
 }
 
 export def process-tools [--tools: string = "all"] {

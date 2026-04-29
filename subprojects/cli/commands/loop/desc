@@ -1,6 +1,5 @@
-Run the current Node agent/tool loop.
+Run the Nushell agent/tool loop.
 
 Usage:
   strap loop --model current --tools all --max-turns 6
-
-The Nu reference loop lives in porcelain for now and should become a sibling command as it matures.
+  strap loop --model current --tools all --max-turns 6 --max-tool-calls 64

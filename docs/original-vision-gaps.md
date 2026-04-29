@@ -95,7 +95,7 @@ Current state: tool execution is structured, but tool-environment auditability i
 ## Agent Loop Control Plane
 
 - `strap loop` works, but remains a starter loop.
-- `strap loop-nu` has a total tool-call budget; `strap loop` has basic turn limits and finalization.
+- `strap loop` has a total tool-call budget, turn limits, and finalization.
 - Missing per-turn and per-session stop controls beyond basic limits.
 - Missing rich trace output to stderr or structured trace state.
 - Missing retry/backoff strategy.

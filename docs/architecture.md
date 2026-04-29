@@ -168,13 +168,12 @@ Implementation files are intentionally small. The hard cap is 150 lines per sour
 
 ## Execution Loops
 
-There are two loop surfaces:
+There is one loop surface:
 
-- `strap loop`: Node loop for provider/tool orchestration.
-- `strap loop-nu`: editable Nushell reference loop for strategy experimentation and unix-y readability.
+- `strap loop`: Nushell loop for provider/tool orchestration.
 - `strap one-shot`: Node one-shot runner that builds a temporary child state from optional state/context input and returns the first final assistant answer without mutating sessions.
 
-The Node loop is the dependable runtime. The Nu loop is a reference/editable strategy surface and should not silently diverge from the behavior the project wants to preserve.
+The loop composes through public commands: `strap llm complete` for provider interaction and `strap run-calls` for tool execution.
 
 ## Tools And MCP
 
@@ -278,8 +277,8 @@ Code is grouped by capability:
 
 - `cli`: command runner support and built-in command directories.
 - `core`: paths, canonical state, CLI I/O, agent fork/fold helpers.
-- `providers`: legacy provider modules still used by the current Node loop until that slice is extracted.
-- `loop`: Node model/tool loop.
+- `providers`: legacy provider modules retained until the remaining dead-code cleanup slice.
+- `loop`: legacy location; the active loop is the Nu capsule under `subprojects/cli/commands/loop`.
 - `tools`: tool registry and built-in tools.
 - `mcp`: bundled stdio MCP servers.
 - `jsmcp`: bridge to installed `jsmcp`.

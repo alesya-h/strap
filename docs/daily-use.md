@@ -16,7 +16,7 @@ strap work init
 strap session new "repo analysis"
 strap session ask "Analyze this repo"
 strap session show \
-| strap loop-nu --tools all --max-turns 6 \
+| strap loop --tools all --max-turns 6 \
 | tee session.json \
 | strap session save
 ```

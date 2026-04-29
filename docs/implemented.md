@@ -26,8 +26,7 @@ This document records what `strap` currently implements.
 - `strap`: main command runner, with commands discovered from project, config, and built-in command directories.
 - `strap state`: initialize, append user/assistant messages, push/pop scopes, display last message.
 - `strap llm`: compile state into model-profile requests and call configured providers.
-- `strap loop`: run model/tool loops over canonical state.
-- `strap loop-nu`: run the editable Nushell reference loop through the command runner.
+- `strap loop`: run the Nushell model/tool loop over canonical state.
 - `strap one-shot`: run a temporary child agent until its first final answer.
 - `strap run-calls`: execute pending tool requests in canonical state.
 - `strap agent`: fork/fold agent state.

@@ -1,6 +1,6 @@
 # Model Profiles
 
-`strap llm`, `strap loop`, `strap loop-nu`, `strap one-shot`, and `strap context summarize` use model profiles. A profile is the model plus its provider street address: provider adapter, API family, endpoint, auth, headers, and default parameters.
+`strap llm`, `strap loop`, `strap one-shot`, and `strap context summarize` use model profiles. A profile is the model plus its provider street address: provider adapter, API family, endpoint, auth, headers, and default parameters.
 
 Runtime commands default to `--model current`, so this is enough:
 

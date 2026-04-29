@@ -15,7 +15,6 @@ The flexible design goal is: a model can write new porcelain, run it against a f
 nu/plumbing.nu          stable Nushell state primitives
 nu/strap.nu             ergonomic wrappers around strap subproject commands
 porcelain/basic.nu      starter model-editable state helpers
-porcelain/loop.nu       editable reference completion/tool loop
 porcelain/self.nu       starter self-modification trace helpers
 strap porcelain ...     generic runner for Nu porcelain modules
 ```

@@ -1,6 +1,0 @@
-Run the editable Nushell reference agent/tool loop.
-
-Usage:
-  strap loop-nu --model current --tools all --max-turns 6 --max-tool-calls 64
-
-This loop intentionally keeps control flow in Nu and delegates provider/tool effects to stable plumbing commands. It is meant to be readable and easy for agents to modify.

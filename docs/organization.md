@@ -153,6 +153,5 @@ Use:
 strap state init
 strap llm complete
 strap loop --tools all
-strap loop-nu --tools all
 strap zk search-hybrid "semantic recall"
 ```

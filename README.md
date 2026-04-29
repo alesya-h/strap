@@ -64,7 +64,7 @@ strap work init
 strap session new "repo analysis"
 strap session ask "Analyze this repo"
 strap session show \
-| strap loop-nu --tools all --max-turns 6 \
+| strap loop --tools all --max-turns 6 \
 | tee session.json \
 | strap session save
 ```
@@ -256,16 +256,6 @@ strap provider chatgpt auth import-codex
 strap state init \
 | strap state add-user "Analyze this repo" \
 | strap loop --tools all --max-turns 6 \
-| tee session.json \
-| strap state display-last-message
-```
-
-There is also an editable Nushell reference loop:
-
-```bash
-strap state init \
-| strap state add-user "Analyze this repo" \
-| strap loop-nu --tools all --max-turns 6 \
 | tee session.json \
 | strap state display-last-message
 ```

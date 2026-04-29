@@ -1,115 +1,15 @@
-#!/usr/bin/env node
-import fs from "node:fs";
-import path from "node:path";
-import os from "node:os";
-import { spawn } from "node:child_process";
+#!/usr/bin/env nu
 
-const [command, ...args] = process.argv.slice(2);
+def strap-bin [] { $env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap) }
 
-if (!["compile", "call", "complete"].includes(command || "")) usage();
-
-const modelName = takeOption(args, "--model", "current");
-const model = loadModelConfig(modelName);
-const strap = path.join(strapRoot(), "bin", "strap");
-const child = spawn(strap, ["provider", model.provider, command, "--model", modelName, ...args], { stdio: "inherit", env: process.env });
-child.on("error", (error) => {
-  process.stderr.write(`${error.message}\n`);
-  process.exit(1);
-});
-child.on("close", (code, signal) => {
-  if (signal) process.kill(process.pid, signal);
-  else process.exit(code ?? 1);
-});
-
-function usage() {
-  process.stderr.write("Usage: strap llm <compile|complete|call> [--model current|name|path.json] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json\n");
-  process.exit(2);
+def usage [] {
+  print -e "Usage: strap llm <compile|call|complete> [--model current|name|path.json] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json"
+  exit 2
 }
 
-function takeOption(values, name, defaultValue = undefined) {
-  const index = values.indexOf(name);
-  if (index === -1) return defaultValue;
-  const value = values[index + 1];
-  values.splice(index, value === undefined ? 1 : 2);
-  return value === undefined ? defaultValue : value;
-}
-
-function workspaceRoot() {
-  return path.resolve(process.env.STRAP_WORKSPACE || process.cwd());
-}
-
-function strapRoot() {
-  return path.resolve(process.env.STRAP_ROOT || path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../.."));
-}
-
-function strapGlobalRoot() {
-  if (process.env.STRAP_GLOBAL) return path.resolve(process.env.STRAP_GLOBAL);
-  return path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config"), "strap");
-}
-
-function findNearestDir(name, start = process.cwd()) {
-  let current = path.resolve(start);
-  while (true) {
-    const candidate = path.join(current, name);
-    if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) return candidate;
-    const parent = path.dirname(current);
-    if (parent === current) return undefined;
-    current = parent;
-  }
-}
-
-function strapProjectRoot() {
-  if (process.env.STRAP_PROJECT) return path.resolve(process.env.STRAP_PROJECT);
-  return findNearestDir(".strap", workspaceRoot()) || path.join(workspaceRoot(), ".strap");
-}
-
-function strapWorkRoot() {
-  if (process.env.STRAP_WORK) return path.resolve(process.env.STRAP_WORK);
-  return findNearestDir(".strap-user", workspaceRoot()) || path.join(workspaceRoot(), ".strap-user");
-}
-
-function strapSessionOverlayRoot() {
-  return process.env.STRAP_SESSION ? path.join(path.resolve(process.env.STRAP_SESSION), "overlay") : undefined;
-}
-
-function maybeJoin(root, name) {
-  return root ? [path.join(root, name)] : [];
-}
-
-function modelRoots() {
-  const configured = (process.env.STRAP_MODEL_PATH || "").split(path.delimiter).filter(Boolean);
-  return [
-    ...configured,
-    ...maybeJoin(strapSessionOverlayRoot(), "models"),
-    path.join(strapWorkRoot(), "models"),
-    path.join(strapProjectRoot(), "models"),
-    path.join(strapGlobalRoot(), "models"),
-    path.join(strapRoot(), "config", "strap", "models"),
-  ];
-}
-
-function loadModelConfig(nameOrPath) {
-  const file = resolveModelFile(nameOrPath || "current");
-  const config = JSON.parse(fs.readFileSync(file, "utf8"));
-  if (!config.provider) throw new Error("Model config requires provider");
-  return config;
-}
-
-function resolveModelFile(nameOrPath) {
-  const expanded = expandHome(nameOrPath);
-  if (expanded.endsWith(".json") || expanded.includes("/")) {
-    const direct = path.resolve(expanded);
-    if (fs.existsSync(direct)) return direct;
-  }
-  const fileName = nameOrPath.endsWith(".json") ? nameOrPath : `${nameOrPath}.json`;
-  for (const root of modelRoots()) {
-    const file = path.join(root, fileName);
-    if (fs.existsSync(file)) return file;
-  }
-  throw new Error(`Model profile not found: ${nameOrPath}`);
-}
-
-function expandHome(filePath) {
-  if (!filePath?.startsWith("~")) return filePath;
-  return path.join(os.homedir(), filePath.slice(1));
+def main [command?: string, --model: string = "current", --tools: string = "all"] {
+  if not (($command | default "") in [compile call complete]) { usage }
+  let config = (run-external (strap-bin) model show $model | from json)
+  let provider = $config.provider
+  ^cat | run-external (strap-bin) provider $provider $command "--model" $model "--tools" $tools
 }

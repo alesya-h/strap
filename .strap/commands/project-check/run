@@ -14,6 +14,7 @@ check_line_cap() {
 
   for file in "${files[@]}"; do
     [ -f "$file" ] || continue
+    case "$file" in *.json) continue ;; esac
     line_count=$(wc -l < "$file")
     if [ "$line_count" -le "$limit" ]; then continue; fi
     if [ -f "$exceptions_file" ] && grep -Fxq -- "$file" "$exceptions_file"; then continue; fi
@@ -65,7 +66,7 @@ js_files=(
 )
 for file in "${js_files[@]}"; do node --check "$file"; done
 
-for file in subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js; do
+for file in subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
   if [ -e "$file" ]; then
     printf 'Replaced legacy JS file should not exist: %s\n' "$file" >&2
     exit 1
@@ -76,7 +77,7 @@ if grep -R -n '#strap/tools/registry' subprojects/cli/commands/provider-* >&2; t
   exit 1
 fi
 
-nu --commands 'use nu/strap; use nu/plumbing.nu *; source tools/zk; use porcelain/loop.nu *'
+nu --commands 'use nu/strap; use nu/plumbing.nu *; source tools/zk'
 
 command_files=(subprojects/cli/commands/*/run subprojects/cli/commands/*/inner/* .strap/commands/*/run .strap-user/commands/*/run)
 for file in "${command_files[@]}"; do

@@ -55,7 +55,7 @@ A capsule command must not use:
 
 `strap project-check` enforces the import/direct-JS parts of this rule for project and user command overlays, excluding the `project-*` validation commands themselves.
 
-File size is part of the capsule contract. A source file, `run` script, or helper file has a hard cap of 150 lines; prefer smaller files, usually 50-100 lines. If a file approaches the cap, split it into command-local modules under that command directory instead of adding more branches to one large script. `strap project-check` enforces the cap for command capsules; the temporary exceptions in `.strap/config/line-cap-exceptions.txt` are existing refactor debt and should shrink over time, not grow.
+File size is part of the capsule contract. A source file, `run` script, or helper file has a hard cap of 150 lines; prefer smaller files, usually 50-100 lines. If a file approaches the cap, split it into command-local modules under that command directory instead of adding more branches to one large script. JSON data files are exempt from this line cap because readability matters more than vertical compactness there. `strap project-check` enforces the cap for command capsules; the temporary exceptions in `.strap/config/line-cap-exceptions.txt` are existing refactor debt and should shrink over time, not grow.
 
 JSON files should be checked in as readable, pretty-printed documents, not minified one-line blobs. If a JSON file becomes too large to read comfortably, split it by responsibility rather than squashing it.
 
@@ -118,8 +118,7 @@ strap with-session my-session -- history log
 | `edit` | Edit or create command files. |
 | `history` | Manage jj-backed current-session history. |
 | `llm` | Compile, call, or complete model-profile requests from canonical state. |
-| `loop` | Run the Node model/tool loop. |
-| `loop-nu` | Run the editable Nushell reference loop. |
+| `loop` | Run the Nushell model/tool loop. |
 | `mcp` | Run bundled stdio MCP servers. |
 | `model` | List, show, select, and fork model profiles. |
 | `nu` | Inspect Nushell plumbing module paths. |

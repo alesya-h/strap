@@ -1,2 +1,14 @@
 #!/usr/bin/env bash
-exec node "$STRAP_ROOT/subprojects/loop/bin/node-loop.js" "$@"
+set -euo pipefail
+
+args=()
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --finalize)
+      if [ "${2:-true}" = "false" ]; then args+=(--no-finalize); fi
+      shift 2 ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+
+exec nu "$STRAP_CMD_DIR/main.nu" "${args[@]}"
