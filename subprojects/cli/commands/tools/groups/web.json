@@ -1,0 +1,55 @@
+[
+  {
+    "name": "web_fetch",
+    "description": "Fetch a URL and return text with response metadata. Conversion is intentionally minimal; downstream tools can transform it.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Fully-qualified URL"
+        },
+        "format": {
+          "type": "string",
+          "description": "Requested output format hint: text, html, or markdown"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Timeout in milliseconds",
+          "minimum": 1
+        },
+        "max_output_bytes": {
+          "type": "integer",
+          "description": "Maximum bytes returned to the model",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "web_search",
+    "description": "Search the web using a lightweight public HTML search page and return parsed result titles/URLs when available.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum parsed results",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

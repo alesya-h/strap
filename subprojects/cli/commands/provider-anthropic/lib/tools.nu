@@ -1,10 +1,5 @@
 export def load [group: string] {
   if $group == "none" { return [] }
-  let js = ([
-    "import { getTools, publicToolSpec } from '#strap/tools/registry'; "
-    "console.log(JSON.stringify(getTools("
-    ($group | to json --raw)
-    ").map(publicToolSpec)));"
-  ] | str join "")
-  ^node --input-type=module -e $js | from json
+  let resolved_group = if $group == "" { "all" } else { $group }
+  run-external ($env.STRAP_BIN? | default "strap") tools list "--group" $resolved_group "--json" | from json
 }

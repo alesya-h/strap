@@ -62,7 +62,7 @@ In strap terms:
 
 1. A model proposes a new capability as a script tool:
    - executable script
-   - sidecar JSON schema/description/annotations
+   - sidecar JSON schema and description
    - tests or smoke examples
 2. The proposal lives in a scope or child agent branch.
 3. The harness runs validation in a sandbox.

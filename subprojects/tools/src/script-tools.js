@@ -58,7 +58,6 @@ function loadSpec(filePath) {
     name: safeName(filePath),
     description: `Run script tool ${path.basename(filePath)}. It receives JSON input on stdin and writes output to stdout.`,
     inputSchema: DEFAULT_SCHEMA,
-    annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
   };
 }
 
@@ -67,9 +66,9 @@ function normalizeSpec(spec, filePath) {
     name: spec.name || safeName(filePath),
     description: spec.description || `Run script tool ${path.basename(filePath)}.`,
     inputSchema: spec.inputSchema || spec.input_schema || spec.parameters || DEFAULT_SCHEMA,
-    readOnly: Boolean(spec.readOnly ?? spec.read_only ?? spec.annotations?.readOnlyHint),
-    destructive: Boolean(spec.destructive ?? spec.annotations?.destructiveHint),
-    openWorld: Boolean(spec.openWorld ?? spec.open_world ?? spec.annotations?.openWorldHint),
+    readOnly: Boolean(spec.readOnly ?? spec.read_only),
+    destructive: Boolean(spec.destructive),
+    openWorld: Boolean(spec.openWorld ?? spec.open_world),
     timeoutMs: Number(spec.timeoutMs || spec.timeout_ms || 120000),
     maxOutputBytes: Number(spec.maxOutputBytes || spec.max_output_bytes || 60000),
   };

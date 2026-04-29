@@ -1,0 +1,99 @@
+[
+  {
+    "name": "jsmcp_list_servers",
+    "description": "List jsmcp MCP server namespaces and startup status. Call this before using other jsmcp tools.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Timeout in milliseconds",
+          "minimum": 1
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "jsmcp_list_tools",
+    "description": "List allowed tools for a jsmcp server namespace.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "server": {
+          "type": "string",
+          "description": "jsmcp server namespace"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Timeout in milliseconds",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "server"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "jsmcp_execute_code",
+    "description": "Execute JavaScript against jsmcp server namespaces after listing servers/tools.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "JavaScript async function body to execute"
+        },
+        "data": {
+          "type": "object",
+          "description": "Optional data exposed to code as global data",
+          "additionalProperties": true
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Timeout in milliseconds",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "jsmcp_fetch_logs",
+    "description": "Fetch and clear logs emitted by jsmcp_execute_code console methods.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Timeout in milliseconds",
+          "minimum": 1
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "jsmcp_clear_logs",
+    "description": "Clear logs emitted by jsmcp_execute_code console methods.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Timeout in milliseconds",
+          "minimum": 1
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+]

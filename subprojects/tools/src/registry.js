@@ -28,10 +28,5 @@ export function publicToolSpec(tool) {
     name: tool.name,
     description: tool.description,
     inputSchema: tool.inputSchema,
-    annotations: {
-      readOnlyHint: Boolean(tool.readOnly),
-      destructiveHint: Boolean(tool.destructive),
-      openWorldHint: Boolean(tool.openWorld),
-    },
   };
 }

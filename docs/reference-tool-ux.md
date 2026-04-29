@@ -13,12 +13,7 @@ The useful common shape is a declarative tool contract:
 {
   "name": "read_file",
   "description": "Read a file with line-numbered pagination",
-  "inputSchema": { "type": "object", "properties": {} },
-  "annotations": {
-    "readOnlyHint": true,
-    "destructiveHint": false,
-    "openWorldHint": false
-  }
+  "inputSchema": { "type": "object", "properties": {} }
 }
 ```
 
@@ -55,7 +50,7 @@ The useful idea is that a tool can be authored outside the harness as a small sh
 For `strap`, the safer version is:
 
 - executable scripts live in `tools/` or directories listed in `STRAP_SCRIPT_TOOLS`
-- sidecar JSON supplies `name`, `description`, `inputSchema`, and annotations
+- sidecar JSON supplies `name`, `description`, and `inputSchema`
 - input is JSON on stdin, not string interpolation into a shell command
 - output is stdout plus metadata
 - scripts are exposed through the `scripts` tool group and `subprojects/mcp/servers/scripts.js`

@@ -2,6 +2,12 @@
 
 The public extension API is a command directory.
 
+## DEFAULT COMMAND LANGUAGE POLICY
+
+**DEFAULT TO NUSHELL. USE BABASHKA/CLOJURE WHEN NU GETS AWKWARD. USE JAVASCRIPT ONLY WHEN THE COMMAND NEEDS AN NPM SDK, A NODE-ONLY PACKAGE, OR A NODE-SPECIFIC RUNTIME SURFACE.**
+
+Do not choose JavaScript just because JSON objects are convenient there. Use Nu for command orchestration, JSON, REST, filesystem discovery, and process composition. Use Babashka/Clojure when the logic wants richer data transformations or local state handling. Use command-local JavaScript only for SDK/package/runtime requirements that Nu or Babashka cannot reasonably cover.
+
 ```text
 my-command/
   run                 executable public command
@@ -50,6 +56,8 @@ A capsule command must not use:
 `strap project-check` enforces the import/direct-JS parts of this rule for project and user command overlays, excluding the `project-*` validation commands themselves.
 
 File size is part of the capsule contract. A source file, `run` script, or helper file has a hard cap of 150 lines; prefer smaller files, usually 50-100 lines. If a file approaches the cap, split it into command-local modules under that command directory instead of adding more branches to one large script. `strap project-check` enforces the cap for command capsules; the temporary exceptions in `.strap/config/line-cap-exceptions.txt` are existing refactor debt and should shrink over time, not grow.
+
+JSON files should be checked in as readable, pretty-printed documents, not minified one-line blobs. If a JSON file becomes too large to read comfortably, split it by responsibility rather than squashing it.
 
 ## Public, Hidden, And Inner Commands
 

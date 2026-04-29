@@ -27,12 +27,9 @@
 (defn load-tools [group]
   (if (= group "none")
     []
-    (let [script (str "import { getTools, publicToolSpec } from '#strap/tools/registry'; "
-                      "console.log(JSON.stringify(getTools("
-                      (json/generate-string (or group "all"))
-                      ").map(publicToolSpec)));")
-          result (process/shell {:out :string :err :string :continue true :dir (model/root)}
-                                "node" "--input-type=module" "-e" script)]
+    (let [strap-bin (or (System/getenv "STRAP_BIN") "strap")
+           result (process/shell {:out :string :err :string :continue true :dir (model/root)}
+                                 strap-bin "tools" "list" "--group" (or group "all") "--json")]
       (when-not (zero? (:exit result))
         (throw (ex-info (or (:err result) (:out result)) {})))
       (json/parse-string (:out result) true))))

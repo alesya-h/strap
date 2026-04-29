@@ -2,6 +2,12 @@
 
 This document describes the current architecture of `strap` as implemented in this repository.
 
+## DEFAULT IMPLEMENTATION LANGUAGE POLICY
+
+**DEFAULT TO NUSHELL. USE BABASHKA/CLOJURE WHEN NU GETS AWKWARD. USE JAVASCRIPT ONLY WHEN THE COMMAND NEEDS AN NPM SDK, A NODE-ONLY PACKAGE, OR A NODE-SPECIFIC RUNTIME SURFACE.**
+
+REST calls, JSON shaping, filesystem orchestration, provider request compilation, and command plumbing should be Nu first. Rich local data logic, auth/state transformations, SQLite-style local work, or code that benefits from immutable data structures should use Babashka/Clojure. JavaScript is not the default command language; it is an escape hatch for package/runtime dependency pressure.
+
 ## System Shape
 
 `strap` is a filesystem-discovered command harness.
@@ -172,7 +178,7 @@ The Node loop is the dependable runtime. The Nu loop is a reference/editable str
 
 ## Tools And MCP
 
-Tool groups are exposed through `#strap/tools/registry`:
+Tool schemas are exposed through `strap tools list --group <group> --json`:
 
 - `fs`
 - `process`

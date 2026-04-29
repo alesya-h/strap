@@ -69,6 +69,10 @@ for file in subprojects/core/bin/artifact.js subprojects/core/bin/status.js subp
     exit 1
   fi
 done
+if grep -R -n '#strap/tools/registry' subprojects/cli/commands/provider-* >&2; then
+  printf 'Provider commands must load tools through `strap tools`, not #strap/tools/registry.\n' >&2
+  exit 1
+fi
 
 nu --commands 'use nu/strap; use nu/plumbing.nu *; source tools/zk; use porcelain/loop.nu *'
 

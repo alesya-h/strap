@@ -1,0 +1,116 @@
+[
+  {
+    "name": "agent_fork",
+    "description": "Fork a child state file for tangential or delegated work. The child can later be folded back with a visible summary and hidden retained state.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state_path": {
+          "type": "string",
+          "description": "Parent state JSON path"
+        },
+        "child_state_path": {
+          "type": "string",
+          "description": "Output child state JSON path"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Task or branch prompt for the child"
+        }
+      },
+      "required": [
+        "state_path",
+        "child_state_path"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "agent_fold",
+    "description": "Fold a child state back into its parent as a visible summary plus hidden retained child state.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state_path": {
+          "type": "string",
+          "description": "Parent state JSON path to update"
+        },
+        "child_state_path": {
+          "type": "string",
+          "description": "Child state JSON path to fold"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Visible summary of the child work"
+        }
+      },
+      "required": [
+        "state_path",
+        "child_state_path",
+        "summary"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "context_push",
+    "description": "Open a compactable scope in a state file for exploratory work.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state_path": {
+          "type": "string",
+          "description": "State JSON path"
+        },
+        "label": {
+          "type": "string",
+          "description": "Scope label"
+        }
+      },
+      "required": [
+        "state_path",
+        "label"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "context_pop",
+    "description": "Collapse the most recent open scope into a visible summary while retaining the full subtree as hidden state.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state_path": {
+          "type": "string",
+          "description": "State JSON path"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Visible scope summary"
+        }
+      },
+      "required": [
+        "state_path",
+        "summary"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "state_init",
+    "description": "Create an empty strap v0.2 actor/event/scope state file.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "state_path": {
+          "type": "string",
+          "description": "State JSON path to create"
+        }
+      },
+      "required": [
+        "state_path"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

@@ -1,0 +1,206 @@
+[
+  {
+    "name": "read_file",
+    "description": "Read a workspace file or directory. File output includes line numbers and supports offset/limit pagination.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative path to read"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "1-based starting line for files",
+          "minimum": 1
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum file lines to return",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "list_dir",
+    "description": "List direct children of a workspace directory.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative directory path"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "glob_files",
+    "description": "Find workspace files with ripgrep glob syntax. Prefer this for file discovery.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Glob pattern, for example **/*.js"
+        },
+        "path": {
+          "type": "string",
+          "description": "Directory to search from"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum results",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "grep_files",
+    "description": "Search workspace file contents with ripgrep regex syntax.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Regular expression to search for"
+        },
+        "path": {
+          "type": "string",
+          "description": "Directory to search from"
+        },
+        "include": {
+          "type": "string",
+          "description": "Optional file glob filter, for example *.js"
+        },
+        "context": {
+          "type": "integer",
+          "description": "Context lines before and after matches",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum result lines",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "write_file",
+    "description": "Create or replace a workspace file. Existing files require overwrite=true.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file path"
+        },
+        "content": {
+          "type": "string",
+          "description": "Complete file contents"
+        },
+        "overwrite": {
+          "type": "boolean",
+          "description": "Whether an existing file may be replaced"
+        }
+      },
+      "required": [
+        "path",
+        "content"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "edit_file",
+    "description": "Edit a file by exact string replacement. Use a uniquely identifying old_text unless replace_all=true.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file path"
+        },
+        "old_text": {
+          "type": "string",
+          "description": "Exact text to replace"
+        },
+        "new_text": {
+          "type": "string",
+          "description": "Replacement text"
+        },
+        "replace_all": {
+          "type": "boolean",
+          "description": "Replace all occurrences instead of requiring a unique match"
+        }
+      },
+      "required": [
+        "path",
+        "old_text",
+        "new_text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "multi_edit_file",
+    "description": "Apply a sequence of exact string replacements to one file.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Workspace-relative file path"
+        },
+        "edits": {
+          "type": "array",
+          "description": "Sequential edits",
+          "items": {
+            "type": "object",
+            "properties": {
+              "old_text": {
+                "type": "string",
+                "description": "Exact text to replace"
+              },
+              "new_text": {
+                "type": "string",
+                "description": "Replacement text"
+              },
+              "replace_all": {
+                "type": "boolean",
+                "description": "Replace all occurrences"
+              }
+            },
+            "required": [
+              "old_text",
+              "new_text"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "path",
+        "edits"
+      ],
+      "additionalProperties": false
+    }
+  }
+]
