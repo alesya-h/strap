@@ -36,10 +36,12 @@ command-name/
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion
   compgen             optional shell completion script
-  inner/              private helper scripts
-  hide                hide from default command list
+  inner/              private helper scripts, callable only through `strap inner`
+  hide                hide from default command list while remaining callable
   wd                  optional executable that prints command cwd
 ```
+
+Use public commands for the user/agent surface, hidden commands for implementation commands that still need command identity, and `inner/` only for helpers private to one command. For example, `strap provider` is public while `provider-chatgpt` is hidden; `strap zk` is public while `strap inner zk index ...` is private implementation plumbing.
 
 Resolution order lets project/user commands override built-ins:
 
@@ -63,6 +65,7 @@ strap commands new my-command
 strap help zk
 strap command-dir zk
 strap inner carapace list-commands
+strap commands list --all
 strap edit zk
 strap edit -d zk
 ```

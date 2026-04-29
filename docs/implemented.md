@@ -59,6 +59,7 @@ This document records what `strap` currently implements.
 - ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`, with tokens managed by `strap provider chatgpt auth`.
 - ChatGPT subscription OAuth token also works for embeddings through `https://api.openai.com/v1/embeddings`.
 - `strap provider <name>` dispatches to hidden provider implementation commands such as `provider-chatgpt`.
+- REST-only provider implementations are Nushell capsules; ChatGPT is a Babashka capsule for OAuth/token logic.
 - `strap embed` delegates provider-backed embeddings to `strap provider <name> embed`; the hash provider remains local and deterministic.
 
 ## Tooling

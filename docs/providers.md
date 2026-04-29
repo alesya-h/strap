@@ -47,6 +47,21 @@ Supported `provider` / `api` combinations now:
 - `openrouter` / `chat`
 - `anthropic` / `messages`
 
+## Provider Command Layout
+
+`strap provider` is a public dispatcher, not a provider implementation. It routes to hidden provider commands that own their implementation details:
+
+| Hidden command | Runtime | Role |
+| --- | --- | --- |
+| `provider-openai` | Nushell | OpenAI REST calls and embeddings. |
+| `provider-openrouter` | Nushell | OpenRouter chat-completions REST calls. |
+| `provider-anthropic` | Nushell | Anthropic Messages REST calls. |
+| `provider-chatgpt` | Babashka | ChatGPT/Codex backend calls, embeddings, and OAuth token management. |
+
+The rule is: REST-only providers should be small Nu capsules. Use a provider-local Node package only when that provider needs SDKs or other package dependencies. Do not add a shared provider runner; shared provider code recreates the coupling this command split is meant to remove.
+
+`strap embed` is the provider-neutral facade. It implements deterministic local `hash` embeddings itself and delegates provider-backed embeddings to `strap provider <name> embed`.
+
 ## Auth Modes
 
 ### API key / bearer
@@ -159,4 +174,4 @@ printf '{"texts":["semantic recall"]}' | strap provider chatgpt embed --model te
 printf '{"texts":["semantic recall"]}' | strap provider openai embed --model text-embedding-3-small
 ```
 
-`strap llm` loads the model profile and dispatches through the matching provider operation. `strap provider <name> ...` dispatches to hidden `provider-<name>` implementation commands; `strap embed` is the provider-neutral embedding facade.
+`strap llm` loads the model profile and dispatches through the matching provider command. `strap provider <name> ...` dispatches to hidden `provider-<name>` implementation commands; `strap embed` is the provider-neutral embedding facade.

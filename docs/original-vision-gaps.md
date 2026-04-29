@@ -75,6 +75,15 @@ Validation rule for each slice:
 - Compose through `strap <command>` or, for command-private helpers, `strap inner <command> <helper>`.
 - Run `strap project-check` and `strap project-test` after each slice.
 
+Course corrections from this refactor:
+
+- Moving a monolith into a command directory is not enough. A capsule must have command-local ownership and readable internals, not a hidden shared runner by another name.
+- `inner/` is for helpers that are private to one conceptually self-contained command. It fits `zk` because the index is an implementation detail of the zettelkasten. It does not fit providers, because each provider is its own capability with its own command identity.
+- Hidden commands are the right tool for implementation commands that should remain callable through the command boundary but not appear in the normal user command surface. `provider-chatgpt` is hidden; `strap provider chatgpt ...` is public.
+- REST-only providers should be implemented in Nushell by default. A provider should become a provider-local Node package only when it needs SDKs or package dependencies. ChatGPT uses Babashka because OAuth/token handling is richer local logic but still does not need a Node package.
+- The command directory is the module boundary. If code needs helper files, put them under that command directory and use language-local modules. Keep code readable; capsule isolation is not an excuse for cramped scripts.
+- Public facades such as `strap provider` and `strap embed` should route to provider-owned commands. They should not accumulate provider implementation logic.
+
 ## Historical Tool Context Snapshots
 
 - Current events capture tool calls and results.

@@ -49,6 +49,22 @@ A capsule command must not use:
 
 `strap project-check` enforces the import/direct-JS parts of this rule for project and user command overlays, excluding the `project-*` validation commands themselves.
 
+## Public, Hidden, And Inner Commands
+
+Use the smallest surface that matches the job:
+
+| Surface | How to define it | How to call it | Use when |
+| --- | --- | --- | --- |
+| Public command | command directory with `run` and no `hide` | `strap <command>` | Humans or agents should discover and use it directly. |
+| Hidden command | command directory with `run` and `hide` | `strap <command>` | It needs command identity but should not appear in the normal command list. |
+| Inner helper | executable under `command/inner/` | `strap inner <command> <helper>` | It is private to one command's implementation. |
+
+Examples:
+
+- `strap provider` is public; `provider-chatgpt` is hidden behind `strap provider chatgpt ...`.
+- `strap zk` is public; `strap inner zk index ...` is a private implementation boundary for its derived index.
+- REST-only provider commands are Nu capsules. Provider commands that need richer local auth logic can use Babashka. Use a provider-local Node package only when SDKs or package dependencies are required.
+
 Create a temporary command under the current session overlay, or under `.strap-user/commands` when no session is current:
 
 ```bash

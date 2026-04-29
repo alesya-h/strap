@@ -57,7 +57,7 @@ $STRAP_ROOT/subprojects/cli/commands
 
 The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/global commands can override built-ins.
 
-Project and user commands are intended to be isolated capsules. They compose with other commands through stdin/stdout and `strap <command>`, not by importing repo-local implementation modules. Legacy built-ins under `subprojects/cli/commands` still include Node wrappers over shared JS modules; project overlays should shadow them incrementally with self-contained Nu or command-local implementations.
+Project and user commands are intended to be isolated capsules. They compose with other commands through stdin/stdout and `strap <command>`, not by importing repo-local implementation modules. Some legacy built-ins still wrap shared JS modules, but new or refactored commands should be self-contained Nu, Babashka, shell, or command-local package implementations.
 
 A command directory can contain:
 
@@ -72,6 +72,12 @@ command-name/
   hide                hide from default command listing
   wd                  optional executable that prints command cwd
 ```
+
+There are three command-surface levels:
+
+- **Public commands** are visible in `strap commands list` and form the user/agent surface, for example `strap zk`, `strap provider`, and `strap embed`.
+- **Hidden commands** have a `hide` file. They are still callable as `strap <command>`, but are omitted from the default command list. Use them for implementation commands that need command identity without becoming public UI, for example `provider-chatgpt` behind `strap provider chatgpt ...`.
+- **Inner helpers** live under one command's `inner/` directory and are callable only through `strap inner <command> <helper>`. Use them only for helpers that are private to that command's implementation, such as `strap inner zk index`. Do not execute inner files directly.
 
 Inspect and validate the command surface with:
 
@@ -148,7 +154,7 @@ open state.json | map-events {|event| { from: $event.from, text: $event.text } }
 open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
 ```
 
-The intended boundary is: Nu owns local dataflow and orchestration; Node owns provider HTTP/streaming, OAuth, MCP/jsmcp, long-running servers, SDK-heavy integrations, and process/thread edges; Babashka is available for pure algorithms when Nu becomes awkward.
+The intended boundary is: Nu owns local dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Babashka owns richer local algorithms and state/auth logic that are awkward in Nu but do not need a package ecosystem; Node is reserved for SDK-heavy integrations, long-running servers, MCP/jsmcp, browser/process edges, or provider code that genuinely needs package dependencies.
 
 `strap nu modules`, `strap nu lib-dir`, `strap nu use-line strap`, `strap nu path plumbing`, and `strap nu use-line plumbing` expose installed module paths/import lines for agents and humans.
 
@@ -209,6 +215,15 @@ Current provider adapter families:
 - Anthropic Messages.
 - ChatGPT/Codex backend responses with local ChatGPT OAuth token cache.
 
+Provider commands are split by provider. `strap provider` is a public dispatcher. The provider implementations are hidden commands:
+
+- `provider-openai`: Nushell REST capsule.
+- `provider-openrouter`: Nushell REST capsule.
+- `provider-anthropic`: Nushell REST capsule.
+- `provider-chatgpt`: Babashka capsule for ChatGPT/Codex backend calls and OAuth token management.
+
+`strap embed` is a provider-neutral facade. Local hash embeddings are implemented in `embed`; provider-backed embeddings delegate to `strap provider <name> embed`.
+
 ChatGPT OAuth is managed by:
 
 ```bash
@@ -245,6 +260,8 @@ Memory is explicit: agents and humans use `strap zk` or the `zk` script tool to 
 
 `strap zk` stores markdown notes under `.strap-user/zettel` for user/private memory or `.strap/zettel` for project-shared memory. The user layer is a transparent overlay on the project layer: user notes shadow project notes with the same id, `workon` copies a project note into the user layer, `promote` writes it back, and normal output hides physical `.strap*` paths. Inline `[[wikilinks]]` are the canonical link source; backlinks and ambiguity diagnostics are derived during normal reads/writes. SQLite/FTS/vector data under `$STRAP_WORK/zettel` is a derived cache rebuilt by `strap zk reindex` and on hybrid/vector searches.
 
+The zettelkasten is a self-contained Babashka command capsule because markdown overlays, wikilinks, tombstones, search/index rebuilds, and tool-mode JSON handling are one conceptual subsystem. Its SQLite/FTS/vector index helper is command-private and reached through `strap inner zk index`; it is not part of the public command surface.
+
 `strap history` wraps the current session directory as a jj repo. Project-user overlays and private memory remain under `$STRAP_WORK`, but session-local state and session overlays get per-session history without touching the project workspace history.
 
 ## Subprojects
@@ -253,13 +270,13 @@ Code is grouped by capability:
 
 - `cli`: command runner support and built-in command directories.
 - `core`: paths, canonical state, CLI I/O, agent fork/fold helpers.
-- `providers`: provider request compilation, calls, streaming, auth.
+- `providers`: legacy provider modules still used by the current Node loop until that slice is extracted.
 - `loop`: Node model/tool loop.
 - `tools`: tool registry and built-in tools.
 - `mcp`: bundled stdio MCP servers.
 - `jsmcp`: bridge to installed `jsmcp`.
 - `porcelain`: Nushell porcelain runner.
-- `zettel`: zettelkasten CLI and embedding helper.
+- `zettel`: legacy location; the active `zk` command now lives as a Babashka capsule under `subprojects/cli/commands/zk`.
 - `sessions`: project work and session CLIs.
 - `state-bb`: Babashka pure-state prototype.
 

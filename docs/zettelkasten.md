@@ -2,6 +2,8 @@
 
 `strap zk` is a shared agent/human zettelkasten. Markdown files are the source of truth; SQLite, FTS5, and `sqlite-vec` provide a derived text/vector index. The command is a self-contained Babashka capsule; its index helper is command-private and reached through `strap inner zk index`.
 
+This shape is intentional. The zettelkasten is conceptually one subsystem: markdown overlays, tombstones, wikilinks, backlinks, derived SQLite/FTS/vector indexes, and the agent-facing `zk` tool all need to agree on note identity. Keeping those pieces under the `zk` command directory avoids turning implementation details into public commands or shared libraries.
+
 ## Setup
 
 By default the CLI loads sqlite-vec as `vec0`, which matches the NixOS setup tested here:
@@ -127,6 +129,12 @@ strap zk reindex --scope all
 ```
 
 `create`, `update`, and `delete` operate on markdown files. `search-hybrid`, `search-vector`, `search-text`, and `reindex` rebuild the derived SQLite index from markdown before querying. Lower-level `index-*` commands are debugging adapters around the private `strap inner zk index` helper.
+
+Do not call files under `zk/inner/` directly. Use the runner boundary so the helper receives the same command environment as the rest of Strap:
+
+```bash
+strap inner zk index search-hybrid "semantic recall"
+```
 
 Updating a project note automatically creates a user-layer working copy that shadows the project version. `workon` makes that copy explicitly, `promote` writes the user-layer copy back to the project layer, and `discard` removes the user-layer copy.
 
