@@ -10,3 +10,6 @@ Usage:
   strap zk promote "Project note"
   strap zk search-hybrid "semantic recall"
   strap zk reindex --scope all
+
+Implementation:
+  `strap zk` is a self-contained Babashka capsule. Its SQLite/FTS/vector index is a command-private helper called only through `strap inner zk index`.

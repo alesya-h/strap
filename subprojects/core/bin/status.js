@@ -20,7 +20,7 @@ status.artifacts.zettel = zettelStatus();
 writeJson(status);
 
 function zettelStatus() {
-  const child = spawnSync(process.execPath, [path.join(strapRoot(), "subprojects", "zettel", "bin", "zk-md.js"), "status", ...(includePaths ? ["--paths"] : [])], { encoding: "utf8", env: process.env });
+  const child = spawnSync(path.join(strapRoot(), "bin", "strap"), ["zk", "status", ...(includePaths ? ["--paths"] : [])], { encoding: "utf8", env: process.env });
   if (child.status !== 0) return { error: child.stderr || child.stdout || `zk status exited ${child.status}` };
   return JSON.parse(child.stdout || "[]");
 }

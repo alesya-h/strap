@@ -21,17 +21,19 @@ js_files=(
   subprojects/zettel/bin/*.js
   subprojects/jsmcp/src/*.js
   subprojects/cli/bin/*.js
+  subprojects/cli/commands/*/*.js
   subprojects/sessions/bin/*.js
 )
 for file in "${js_files[@]}"; do node --check "$file"; done
 
-nu --commands 'use nu/strap; use nu/plumbing.nu *; source subprojects/zettel/bin/zk.nu; source tools/zk; use porcelain/loop.nu *'
+nu --commands 'use nu/strap; use nu/plumbing.nu *; source tools/zk; use porcelain/loop.nu *'
 
-command_files=(subprojects/cli/commands/*/run subprojects/cli/commands/carapace/inner/* .strap/commands/*/run .strap-user/commands/*/run)
+command_files=(subprojects/cli/commands/*/run subprojects/cli/commands/*/inner/* .strap/commands/*/run .strap-user/commands/*/run)
 for file in "${command_files[@]}"; do
   read -r shebang < "$file" || shebang=""
   case "$shebang" in
     *bash*) bash -n "$file" ;;
+    *node*) node --check "$file" ;;
     *nu*) nu --ide-check 20 "$file" >/dev/null ;;
   esac
 done
@@ -59,3 +61,16 @@ else
   code=$?
   test "$code" = 2
 fi
+if bb subprojects/cli/commands/zk/run --help >/tmp/strap-zk-bb-help.txt 2>&1; then
+  :
+else
+  code=$?
+  test "$code" = 2
+fi
+if bb subprojects/cli/commands/zk/inner/index --help >/tmp/strap-zk-index-bb-help.txt 2>&1; then
+  :
+else
+  code=$?
+  test "$code" = 2
+fi
+printf '{"texts":["check"]}' | bb subprojects/cli/commands/embed/run --provider hash | jq empty

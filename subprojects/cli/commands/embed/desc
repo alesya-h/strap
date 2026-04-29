@@ -1,0 +1,7 @@
+Embed text through the selected provider.
+
+Usage:
+  printf '{"texts":["hello"]}' | strap embed --provider hash
+  printf '{"texts":["hello"]}' | strap embed --provider chatgpt
+
+`hash` is local and deterministic. Other providers are delegated through `strap provider <name> embed`.

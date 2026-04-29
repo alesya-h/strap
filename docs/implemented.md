@@ -58,6 +58,8 @@ This document records what `strap` currently implements.
 - Public OpenAI `/v1/responses` is API-key only in this harness; Codex/ChatGPT OAuth tokens are not compatible with that endpoint.
 - ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`, with tokens managed by `strap provider chatgpt auth`.
 - ChatGPT subscription OAuth token also works for embeddings through `https://api.openai.com/v1/embeddings`.
+- `strap provider <name>` dispatches to hidden provider implementation commands such as `provider-chatgpt`.
+- `strap embed` delegates provider-backed embeddings to `strap provider <name> embed`; the hash provider remains local and deterministic.
 
 ## Tooling
 
@@ -92,7 +94,7 @@ This document records what `strap` currently implements.
 
 ## Zettelkasten
 
-- `strap zk` is a Nushell CLI around the `sqlite3` CLI, so NixOS sqlite extension loading works.
+- `strap zk` is a self-contained Babashka capsule around markdown notes and a command-private SQLite/FTS/vector index helper.
 - Markdown-source notes under `.strap/zettel` and `.strap-user/zettel`.
 - Transparent user overlay over project zettel notes, with `workon`, `promote`, `discard`, and `status`.
 - Inline `[[wikilink]]` parsing with derived `links` and `backlinks`.

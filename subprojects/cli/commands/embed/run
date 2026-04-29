@@ -1,0 +1,81 @@
+#!/usr/bin/env bb
+(require '[babashka.fs :as fs]
+         '[cheshire.core :as json]
+         '[clojure.java.shell :as sh]
+         '[clojure.string :as str])
+
+(defn parse-args [args]
+  (loop [xs (seq args) opts {} pos []]
+    (if-not xs
+      {:opts opts :pos pos}
+      (let [x (first xs)]
+        (if (str/starts-with? x "--")
+          (let [k (keyword (subs x 2))]
+            (recur (nnext xs) (assoc opts k (second xs)) pos))
+          (recur (next xs) opts (conj pos x)))))))
+
+(defn usage []
+  (binding [*out* *err*]
+    (println "Usage: strap embed [--provider hash|chatgpt|openai|...] < {\"texts\":[...] }"))
+  (System/exit 2))
+
+(defn read-json []
+  (let [raw (slurp *in*)]
+    (if (empty? (str/trim raw)) {} (json/parse-string raw true))))
+
+(defn hash-string [text]
+  (reduce (fn [h ch] (mod (* (bit-xor h (int ch)) 16777619) 4294967296)) 2166136261 text))
+
+(defn hash-embedding [text dimensions]
+  (let [terms (or (seq (re-seq #"[\p{L}\p{N}_-]+" (str/lower-case (str text)))) [])
+        features (if (seq terms)
+                   (mapcat (fn [term]
+                             (cons term (when (> (count term) 3)
+                                          (map #(subs term % (+ % 3)) (range 0 (inc (- (count term) 3)))))))
+                           terms)
+                   [(str text)])
+        values (reduce (fn [v feature]
+                         (let [h (hash-string feature)
+                               idx (mod h dimensions)
+                               sign (if (zero? (bit-and h 0x80000000)) 1.0 -1.0)]
+                           (update v idx + sign)))
+                       (vec (repeat dimensions 0.0))
+                       features)
+        norm (Math/sqrt (reduce + (map #(* % %) values)))
+        norm (if (zero? norm) 1.0 norm)]
+    (mapv #(Double/parseDouble (format "%.6f" (/ % norm))) values)))
+
+(defn strap-bin []
+  (if-let [root (System/getenv "STRAP_ROOT")]
+    (str (fs/path root "bin" "strap"))
+    "strap"))
+
+(defn delegate-provider [provider input]
+  (let [res (sh/sh (strap-bin) "provider" provider "embed" :in input)]
+    (when-not (zero? (:exit res))
+      (throw (ex-info (or (not-empty (:err res)) (not-empty (:out res)) (str "provider " provider " embed failed")) {})))
+    (print (:out res))))
+
+(defn -main [& args]
+  (try
+    (when (some #{"--help" "-h"} args) (usage))
+    (let [{:keys [opts]} (parse-args args)
+          provider (or (:provider opts) (System/getenv "STRAP_EMBED_PROVIDER") (System/getenv "STRAP_ZK_EMBED_PROVIDER") "chatgpt")
+          input-raw (slurp *in*)
+          input (if (empty? (str/trim input-raw)) {} (json/parse-string input-raw true))
+          texts (cond
+                  (vector? (:texts input)) (mapv str (:texts input))
+                  (contains? input :text) [(str (:text input))]
+                  :else [""])]
+      (if (= provider "hash")
+        (let [dimensions (parse-long (or (System/getenv "STRAP_ZK_EMBED_DIMENSIONS") (System/getenv "STRAP_EMBED_DIMENSIONS") "384"))]
+          (println (json/generate-string {:model (str "strap-hash-embedding-v1/" dimensions)
+                                          :dimensions dimensions
+                                          :embeddings (mapv #(hash-embedding % dimensions) texts)})))
+        (delegate-provider provider input-raw)))
+    (catch Throwable error
+      (binding [*out* *err*]
+        (println (or (ex-message error) (.getMessage error))))
+      (System/exit 1))))
+
+(apply -main *command-line-args*)

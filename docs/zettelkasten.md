@@ -1,6 +1,6 @@
 # Zettelkasten
 
-`strap zk` is a shared agent/human zettelkasten. Markdown files are the source of truth; SQLite, FTS5, and `sqlite-vec` provide a derived text/vector index. The index uses the `sqlite3` CLI so NixOS sqlite extension loading works without requiring Node SQLite bindings to see `sqlite-vec`.
+`strap zk` is a shared agent/human zettelkasten. Markdown files are the source of truth; SQLite, FTS5, and `sqlite-vec` provide a derived text/vector index. The command is a self-contained Babashka capsule; its index helper is command-private and reached through `strap inner zk index`.
 
 ## Setup
 
@@ -20,7 +20,7 @@ The default derived index path is:
 
 1. `STRAP_ZK_DB`, when set;
 2. `$STRAP_WORK/zettel/zettel.sqlite`, when `STRAP_WORK` is set by the command runner; this defaults to `.strap-user/zettel/zettel.sqlite`;
-3. `~/.config/nushell/strap/zettel.sqlite` as a Nushell fallback.
+3. `~/.config/strap/zettel.sqlite` as a fallback.
 
 ## Embeddings
 
@@ -39,7 +39,12 @@ export STRAP_ZK_EMBED_PROVIDER=chatgpt
 export STRAP_ZK_CHATGPT_MODEL=current
 ```
 
-This calls `https://api.openai.com/v1/embeddings` with the ChatGPT OAuth token and account header. Create the token with `strap provider chatgpt auth login` or import an existing Codex token with `strap provider chatgpt auth import-codex`.
+Provider-backed embeddings are routed through `strap embed`, which delegates to `strap provider <name> embed`. Create the ChatGPT token with `strap provider chatgpt auth login` or import an existing Codex token with `strap provider chatgpt auth import-codex`.
+
+```bash
+printf '{"texts":["semantic recall"]}' | strap embed --provider chatgpt
+printf '{"texts":["semantic recall"]}' | strap provider chatgpt embed
+```
 
 Project-shared notes live under `.strap/zettel`; user/private notes live under `.strap-user/zettel`. Normal `strap zk` output treats them as one zettelkasten: the user layer is a transparent overlay on top of the project layer, and physical `.strap*` paths are hidden unless `--paths` is requested.
 
@@ -121,7 +126,7 @@ strap zk delete zk_note_id
 strap zk reindex --scope all
 ```
 
-`create`, `update`, and `delete` operate on markdown files. `search-hybrid`, `search-vector`, `search-text`, and `reindex` rebuild the derived SQLite index from markdown before querying.
+`create`, `update`, and `delete` operate on markdown files. `search-hybrid`, `search-vector`, `search-text`, and `reindex` rebuild the derived SQLite index from markdown before querying. Lower-level `index-*` commands are debugging adapters around the private `strap inner zk index` helper.
 
 Updating a project note automatically creates a user-layer working copy that shadows the project version. `workon` makes that copy explicitly, `promote` writes the user-layer copy back to the project layer, and `discard` removes the user-layer copy.
 

@@ -1,2 +1,15 @@
 #!/usr/bin/env bash
-exec node "$STRAP_ROOT/subprojects/providers/bin/provider.js" "$@"
+set -euo pipefail
+
+provider="${1:-}"
+if [ "$provider" = "list" ]; then
+  printf '%s\n' '["anthropic","chatgpt","openai","openrouter"]' | jq .
+  exit 0
+fi
+if [ -z "$provider" ]; then
+  printf '%s\n' 'Usage: strap provider <anthropic|chatgpt|openai|openrouter> <command> [args...]' >&2
+  printf '%s\n' '       strap provider list' >&2
+  exit 2
+fi
+shift
+exec "$STRAP_ROOT/bin/strap" "provider-$provider" "$@"

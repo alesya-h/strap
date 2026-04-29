@@ -9,8 +9,8 @@ my-command/
   spec.yaml           optional carapace completion spec
   carapace-complete   optional dynamic completion script
   compgen             optional shell completion script
-  inner/              private helper scripts
-  hide                hide from default command list
+  inner/              private helper scripts, callable only through `strap inner`
+  hide                hide from default command list while remaining callable
   wd                  optional executable that prints command cwd
 ```
 
@@ -66,7 +66,7 @@ strap commands manifest zk
 strap commands validate --json
 ```
 
-Private helpers go in `inner/` and can be called with:
+Private helpers go in `inner/` and must be called through the runner, never by executing the file path directly:
 
 ```bash
 strap inner my-command helper-name arg1 arg2
@@ -88,6 +88,7 @@ strap with-session my-session -- history log
 | `carapace` | Install and serve shell completion integration. |
 | `commands` | List, inspect, validate, and scaffold command directories. |
 | `context` | Transform extracted context, including quoting and summarization. |
+| `embed` | Embed text through the selected provider. |
 | `edit` | Edit or create command files. |
 | `history` | Manage jj-backed current-session history. |
 | `llm` | Compile, call, or complete model-profile requests from canonical state. |

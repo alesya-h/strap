@@ -216,7 +216,7 @@ STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
   --body 'Agents can store and recall semantically related notes.' \
   --tags strap,memory
 
-strap zk search-hybrid 'semantic recall'
+STRAP_ZK_EMBED_PROVIDER=hash strap zk search-hybrid 'semantic recall'
 strap zk backlinks 'Local agent memory'
 ```
 

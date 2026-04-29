@@ -1,0 +1,4 @@
+Hidden Anthropic provider implementation command.
+
+Usage:
+  strap provider anthropic <compile|call|complete> [args...]

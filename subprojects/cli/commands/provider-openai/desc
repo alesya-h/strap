@@ -1,0 +1,4 @@
+Hidden OpenAI provider implementation command.
+
+Usage:
+  strap provider openai <compile|call|complete|embed> [args...]

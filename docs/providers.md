@@ -155,6 +155,8 @@ strap provider list
 strap provider chatgpt compile --model current < state.json
 strap provider openai compile --model gpt-5.1-openai < state.json
 strap provider anthropic complete --model claude-sonnet-4.5-anthropic < state.json
+printf '{"texts":["semantic recall"]}' | strap provider chatgpt embed --model text-embedding-3-small
+printf '{"texts":["semantic recall"]}' | strap provider openai embed --model text-embedding-3-small
 ```
 
-`strap llm` loads the model profile and dispatches through the matching provider operation.
+`strap llm` loads the model profile and dispatches through the matching provider operation. `strap provider <name> ...` dispatches to hidden `provider-<name>` implementation commands; `strap embed` is the provider-neutral embedding facade.

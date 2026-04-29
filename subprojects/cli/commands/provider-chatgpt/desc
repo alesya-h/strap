@@ -1,0 +1,4 @@
+Hidden ChatGPT provider implementation command.
+
+Usage:
+  strap provider chatgpt <compile|call|complete|embed|auth> [args...]

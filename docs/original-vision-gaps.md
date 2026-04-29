@@ -44,6 +44,37 @@ Current state: provider state is kept out of canonical state, but budgeting/reda
 
 Current state: enough provider support exists for working agent loops, but the original multi-provider projection vision is incomplete.
 
+## Capsule Command Refactor
+
+- The command model is only partially aligned with the original small, replaceable capability vision.
+- Several public commands have been converted into self-contained capsules, but important commands still shell into shared Node entrypoints and libraries under `subprojects/*/src`.
+- `inner/` is now reserved for command-private implementation helpers, callable only through `strap inner <command> <helper>`. It is appropriate for conceptually self-contained commands such as `zk`, not for cross-cutting families such as providers.
+- Hidden commands are available through a `hide` file and should be used for implementation commands that need command identity without entering the visible command surface, for example `provider-chatgpt` behind `strap provider chatgpt ...`.
+
+Completed slices:
+
+- `bin/strap` is self-contained and no longer imports shared `#strap/*` libraries.
+- Several root commands have Nu capsule implementations: `agent`, `agents`, `commands`, `context`, `model`, `nu`, `one-shot`, `paths`, `skills`, `state`, and `work`.
+- `zk` is now a self-contained Babashka capsule over markdown notes, with a command-private Babashka SQLite/FTS/vector helper at `strap inner zk index`.
+- `embed` exists as a public embedding facade. Local hash embeddings are implemented in the command; provider-backed embeddings route to `strap provider <name> embed`.
+- `provider` now dispatches to hidden `provider-*` implementation commands, preserving a clean public surface while allowing provider-local command identity.
+- Hidden provider commands now have provider-owned entrypoints: `provider-chatgpt/run.js`, `provider-openai/run.js`, `provider-openrouter/run.js`, and `provider-anthropic/run.js`. The old provider and llm JS entrypoints, the provider-command library, and the bad intermediate shared runner have been removed.
+
+Remaining slices:
+
+1. Finish provider extraction: remove the remaining provider shared libraries after `loop` no longer imports them, and optionally turn each hidden provider directory into a formal small package if provider-specific dependencies are introduced.
+2. Extract `artifact` and `status` into filesystem-oriented capsules and remove the shared artifact/status JS modules.
+3. Extract `session` and `history` into capsules, preserving the existing file layout and jj-backed history behavior.
+4. Extract tool execution (`run-calls` and tool registry behavior) into command/script-tool boundaries or another explicit capability surface.
+5. Extract or rationalize `loop`, `llm`, `mcp`, `jsmcp`, and `porcelain` last, after provider and tool boundaries are stable.
+
+Validation rule for each slice:
+
+- Avoid `#strap/*` imports in capsule commands.
+- Avoid direct execution of repo-local JS implementation entrypoints from commands.
+- Compose through `strap <command>` or, for command-private helpers, `strap inner <command> <helper>`.
+- Run `strap project-check` and `strap project-test` after each slice.
+
 ## Historical Tool Context Snapshots
 
 - Current events capture tool calls and results.
