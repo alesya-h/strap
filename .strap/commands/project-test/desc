@@ -1,0 +1,4 @@
+Run the full project validation workflow.
+
+Usage:
+  strap project-test

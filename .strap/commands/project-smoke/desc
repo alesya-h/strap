@@ -1,0 +1,4 @@
+Run the project smoke workflow.
+
+Usage:
+  strap project-smoke

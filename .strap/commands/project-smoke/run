@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$STRAP_ROOT"
+
+strap=./bin/strap
+export STRAP_WORK=/tmp/strap-work-smoke
+export STRAP_PROJECT=/tmp/strap-project-smoke
+rm -rf "$STRAP_WORK" "$STRAP_PROJECT"
+
+$strap state init > /tmp/strap-smoke.json
+$strap state add-user 'hello' < /tmp/strap-smoke.json > /tmp/strap-smoke-2.json
+$strap state add-assistant 'world' < /tmp/strap-smoke-2.json > /tmp/strap-smoke-3.json
+$strap state bookmark add --text 'hello' --label smoke-start < /tmp/strap-smoke-3.json > /tmp/strap-smoke-bm-1.json 2> /tmp/strap-smoke-bm-1.log
+$strap state bookmark add --text 'world' --label smoke-end < /tmp/strap-smoke-bm-1.json > /tmp/strap-smoke-bm-2.json 2> /tmp/strap-smoke-bm-2.log
+$strap state bookmark list < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-bookmarks.json
+bm_start="$(node -e 'const s=require("/tmp/strap-smoke-bm-2.json"); console.log(s.root.children[0].bookmarks[0].id)')"
+bm_end="$(node -e 'const s=require("/tmp/strap-smoke-bm-2.json"); console.log(s.root.children[1].bookmarks[0].id)')"
+$strap state fold --from "$bm_start" --to "$bm_end" --summary 'smoke folded hello/world' < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-folded-range.json
+$strap state extract --from "$bm_start" --to "$bm_end" < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-context.json
+$strap context quote < /tmp/strap-smoke-context.json > /tmp/strap-smoke-quote.json
+$strap one-shot run 'Summarize quoted smoke context' --agent chat-concise --skill concise --dry-run --tools none < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-one-shot.json
+$strap context summarize 'Summarize quoted smoke context' --agent chat-concise --skill concise --dry-run < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-context-summary.json
+$strap state tree --hidden < /tmp/strap-smoke-folded-range.json > /tmp/strap-smoke-tree.txt
+$strap llm compile --model gpt-5.1-openai < /tmp/strap-smoke-2.json > /tmp/strap-model-openai.json
+$strap llm compile --model openai-gpt-5.1-openrouter < /tmp/strap-smoke-2.json > /tmp/strap-model-openrouter.json
+$strap llm compile --model claude-sonnet-4.5-anthropic < /tmp/strap-smoke-2.json > /tmp/strap-model-anthropic.json
+$strap llm compile < /tmp/strap-smoke-2.json > /tmp/strap-model-current.json
+$strap provider list > /tmp/strap-provider-list.json
+$strap provider chatgpt compile < /tmp/strap-smoke-2.json > /tmp/strap-provider-chatgpt-compile.json
+$strap provider openai compile --model gpt-5.1-openai < /tmp/strap-smoke-2.json > /tmp/strap-provider-openai-compile.json
+$strap agent fork --prompt 'inspect docs' < /tmp/strap-smoke-2.json > /tmp/strap-child.json
+$strap agent fold --child /tmp/strap-child.json --summary 'child result' < /tmp/strap-smoke-2.json > /tmp/strap-folded.json
+$strap porcelain list > /tmp/strap-porcelain-list.json
+$strap state init | $strap porcelain run basic ask 'hello from porcelain' > /tmp/strap-porcelain-state.json
+$strap state init | $strap porcelain run loop has-tool-calls > /tmp/strap-loop-has-calls.json
+nu --commands 'use nu/plumbing.nu *; open /tmp/strap-smoke-bm-2.json | with-events {|events| $events | where from == user | length } | save -f /tmp/strap-nu-with-events.json'
+nu --commands 'use nu/plumbing.nu *; let state = (open /tmp/strap-smoke-bm-2.json); let ids = ($state | bookmarks | get id); $state | with-extract ($ids | first) ($ids | last) {|ctx| $ctx.events | get text } | save -f /tmp/strap-nu-with-extract.json'
+$strap nu modules > /tmp/strap-nu-modules.json
+$strap nu path plumbing > /tmp/strap-nu-path.txt
+$strap nu lib-dir > /tmp/strap-nu-lib-dir.txt
+$strap nu env-line > /tmp/strap-nu-env-line.txt
+$strap nu use-line plumbing > /tmp/strap-nu-use-line.txt
+$strap nu use-line strap > /tmp/strap-nu-strap-use-line.txt
+STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap state init | strap agents apply chat-concise | strap skills apply concise | get actors.assistant.skills | save -f /tmp/strap-nu-module-skills.json"
+STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap model current | get model_id | save -f /tmp/strap-nu-model-current.json"
+STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap state init | strap add-user hello | strap provider chatgpt compile | get model | save -f /tmp/strap-nu-provider-compile.json"
+NU_LIB_DIRS="$($strap nu lib-dir)" STRAP_BIN=./bin/strap nu --commands 'use strap; strap init | strap add-user "hello from use strap" | strap events | get text | save -f /tmp/strap-nu-use-strap.json'
+$strap commands list --json > /tmp/strap-commands.json
+$strap commands validate --json > /tmp/strap-commands-validate.json
+$strap agents list > /tmp/strap-agents-list.json
+$strap agents show chat-concise > /tmp/strap-agents-show.json
+$strap state init | $strap agents apply chat-concise > /tmp/strap-agents-apply.json
+$strap skills list > /tmp/strap-skills-list.json
+$strap skills show concise > /tmp/strap-skills-show.json
+$strap state init | $strap agents apply chat-concise | $strap skills apply concise > /tmp/strap-skills-apply.json
+$strap model list > /tmp/strap-model-list.json
+$strap model show current > /tmp/strap-model-current-show.json
+$strap model fork current smoke-chatgpt --set-model-id smoke-model > /tmp/strap-model-fork.json
+$strap model use smoke-chatgpt > /tmp/strap-model-use.json
+$strap status > /tmp/strap-status.json
+$strap artifact status command > /tmp/strap-artifact-command-status.json
+$strap artifact status agent > /tmp/strap-artifact-agent-status.json
+$strap artifact status skill > /tmp/strap-artifact-skill-status.json
+$strap artifact status model > /tmp/strap-artifact-model-status.json
+$strap artifact workon porcelain basic > /tmp/strap-artifact-workon.json
+$strap artifact discard porcelain basic > /tmp/strap-artifact-discard.json
+$strap work init > /tmp/strap-work-init.json
+$strap session new 'smoke session' > /tmp/strap-session-new.json
+session_dir="$(node -e 'const s=require("/tmp/strap-session-new.json"); console.log(s.dir)')"
+session_name="$(basename "$session_dir")"
+$strap with-session "$session_name" -- session path > /tmp/strap-with-session-path.txt
+STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap session clear; strap session select $session_name | save -f /tmp/strap-nu-session-select.txt; \$env.STRAP_SESSION | save -f /tmp/strap-nu-session-env.txt"
+$strap history init > /tmp/strap-history-init.json
+$strap session ask 'remember this smoke question' > /tmp/strap-session-ask.json
+$strap session show > /tmp/strap-session-before-copy.json
+$strap state bookmark add --text 'remember this smoke question' --label session-copy-point < /tmp/strap-session-before-copy.json > /tmp/strap-session-bookmarked.json 2> /tmp/strap-session-bookmark.log
+$strap session save < /tmp/strap-session-bookmarked.json > /tmp/strap-session-save-bookmarked.json
+bm_session="$(node -e 'const s=require("/tmp/strap-session-bookmarked.json"); console.log(s.root.children[0].bookmarks[0].id)')"
+$strap session copy 'smoke copied session' --at "$bm_session" > /tmp/strap-session-copy.json
+$strap session show > /tmp/strap-session-show.json
+$strap session state > /tmp/strap-session-state.txt
+$strap state-bb init > /tmp/strap-state-bb.json
+$strap history snapshot --message 'smoke session state' > /tmp/strap-history-snapshot.json
+
+node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("json_echo"); if(!tool) throw new Error("missing json_echo"); const result=await tool.execute({value:"ok"}); if(!result.content[0].text.includes("ok")) throw new Error(result.content[0].text); })'
+
+rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope user --title 'Local hash memory' --body 'Offline smoke indexing works without network.' --tags smoke > /tmp/strap-zk-create.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope project --title 'Smoke linked memory' --body 'Linked target.' --tags smoke > /tmp/strap-zk-linked-create.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk update 'Local hash memory' --body 'Offline smoke indexing works without network. See [[Smoke linked memory]].' > /tmp/strap-zk-update.json
+$strap zk backlinks 'Smoke linked memory' > /tmp/strap-zk-backlinks.json
+$strap zk links 'Local hash memory' > /tmp/strap-zk-links.json
+$strap zk workon 'Smoke linked memory' > /tmp/strap-zk-workon.json
+$strap zk promote 'Smoke linked memory' > /tmp/strap-zk-promote.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-zk-smoke.sqlite 'offline indexing' > /tmp/strap-zk-search.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk list --scope all > /tmp/strap-zk-list.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk tags > /tmp/strap-zk-tags.json
+STRAP_ZK_EMBED_PROVIDER=hash node -e 'import("#strap/tools/registry").then(async ({toolMap})=>{ const tool=toolMap("scripts").get("zk"); if(!tool) throw new Error("missing zk"); const result=await tool.execute({action:"search_hybrid",db:"/tmp/strap-zk-smoke.sqlite",query:"offline indexing",limit:2}); if(!result.content[0].text.includes("Local hash memory")) throw new Error(result.content[0].text); })'
+
+rm -f /tmp/strap-md-zk-smoke.sqlite /tmp/strap-md-zk-smoke.sqlite-shm /tmp/strap-md-zk-smoke.sqlite-wal
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope user --title 'Markdown smoke memory' --body 'Markdown zettel source can rebuild the sqlite index.' --tags smoke,markdown > /tmp/strap-zk-md-create.json
+$strap zk search 'Markdown zettel' > /tmp/strap-zk-md-search.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk reindex --scope user --db /tmp/strap-md-zk-smoke.sqlite > /tmp/strap-zk-md-reindex.json
+STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-md-zk-smoke.sqlite 'rebuild sqlite index' > /tmp/strap-zk-md-index-search.json

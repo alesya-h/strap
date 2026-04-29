@@ -1,0 +1,4 @@
+Run project syntax and source-loading checks.
+
+Usage:
+  strap project-check

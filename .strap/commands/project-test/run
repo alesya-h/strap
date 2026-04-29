@@ -1,0 +1,6 @@
+#!/usr/bin/env nu
+
+let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+
+run-external $strap project-check
+run-external $strap project-smoke

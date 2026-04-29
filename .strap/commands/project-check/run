@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$STRAP_ROOT"
+
+node --check bin/strap
+node --check subprojects/mcp/servers/*.js
+node --check subprojects/core/bin/*.js
+node --check subprojects/core/src/*.js
+node --check subprojects/providers/bin/*.js
+node --check subprojects/providers/src/*.js
+node --check subprojects/loop/bin/*.js
+node --check subprojects/tools/bin/*.js
+node --check subprojects/tools/src/*.js
+node --check subprojects/mcp/bin/*.js
+node --check subprojects/mcp/src/*.js
+node --check subprojects/porcelain/bin/*.js
+node --check subprojects/porcelain/src/*.js
+node --check subprojects/zettel/bin/*.js
+node --check subprojects/jsmcp/src/*.js
+node --check subprojects/cli/bin/*.js
+node --check subprojects/sessions/bin/*.js
+
+nu --commands 'use nu/strap; use nu/plumbing.nu *; source subprojects/zettel/bin/zk.nu; source tools/zk; use porcelain/loop.nu *'
+
+shopt -s nullglob
+shell_files=(subprojects/cli/commands/*/run subprojects/cli/commands/carapace/inner/* .strap/commands/*/run .strap-user/commands/*/run)
+bash -n "${shell_files[@]}"
+jq empty package.json config/strap/config.json config/strap/models/*.json config/strap/tool-groups/*.json config/strap/zettel/config.json
+if bb -cp subprojects/state-bb/src -m strap.state --help >/tmp/strap-bb-help.txt 2>&1; then
+  :
+else
+  code=$?
+  test "$code" = 2
+fi
