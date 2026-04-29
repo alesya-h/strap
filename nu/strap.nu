@@ -38,7 +38,7 @@ export def complete [--model: string = "current", --tools: string = "all"] {
 }
 
 export def process-tools [--tools: string = "all"] {
-  $in | to json | ^node (strap-file [subprojects tools bin run-calls.js]) --tools $tools | from json
+  $in | to json | ^(strap-file [bin strap]) run-calls --tools $tools | from json
 }
 
 export def fork [--prompt: string = ""] {

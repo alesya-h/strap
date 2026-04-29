@@ -13,7 +13,7 @@ export def complete-once [--model: string = "current", --tools: string = "all"] 
 }
 
 export def process-tools-once [--tools: string = "all"] {
-  $in | to json | ^node (root-file [subprojects tools bin run-calls.js]) --tools $tools | from json
+  $in | to json | ^(root-file [bin strap]) run-calls --tools $tools | from json
 }
 
 export def complete-and-process [--model: string = "current", --tools: string = "all"] {
