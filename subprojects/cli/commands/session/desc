@@ -14,3 +14,5 @@ Usage:
   strap session trace
 
 Each session has its own overlay under `overlay/` and its own jj history. Session mutations create jj commits automatically. Commands operate on `STRAP_SESSION`; the outer runner fills it from the current-session pointer only when the env var is absent.
+
+In Nushell, `strap session select <session>` sets `$env.STRAP_SESSION`; without an argument it opens `sk` to choose a session interactively.

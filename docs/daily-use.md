@@ -60,6 +60,7 @@ In Nushell, select the session into the current shell environment:
 
 ```nu
 strap session select repo-analysis
+strap session select  # choose interactively with sk
 ```
 
 Create memory and rebuild the derived SQLite index:
