@@ -1,10 +1,4 @@
 Transform extracted context.
 
 Usage:
-  strap context quote < context.json
-  strap context render < context.json
-  strap context summarize "only architectural decisions and unresolved risks" --model current --agent chat-concise --skill concise < context.json
-  strap context summarize "dry run" --dry-run < context.json
-
-`quote` marks extracted conversation as evidence, not active dialogue history.
-`summarize` uses `strap one-shot` internally and outputs `strap.context-summary.v0.1`.
+  strap context <quote|render|summarize> [args] < context.json

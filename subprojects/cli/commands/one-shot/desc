@@ -1,7 +1,4 @@
 Run an agent once until its first final answer.
 
 Usage:
-  strap one-shot run "Summarize this" --model current --agent chat-concise --skill concise --tools none < context.json
-  strap one-shot run "Inspect built state" --dry-run < context.json
-
-`one-shot` does not mutate session state. It reads optional state/context/quoted-context JSON from stdin and outputs a `strap.one-shot.result.v0.1` JSON object.
+  strap one-shot run <task> [--model current|name|path.json] [--agent name] [--skill name ...] [--tools none|all|fs|process|web|agent|scripts|jsmcp] [--max-turns 8] [--dry-run]

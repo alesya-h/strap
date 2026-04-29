@@ -28,6 +28,27 @@ Commands receive:
 
 Command safety is not described by command-owned metadata. Use launch profiles, sandboxing, and restricted tool/jsmcp configuration for restricted modes.
 
+## Capsule Commands
+
+Project and user commands are capsules. A capsule command can be replaced, removed, or rewritten in another language without changing other command internals.
+
+A capsule command may use:
+
+- Its own command directory through `STRAP_CMD_DIR`.
+- The public Strap environment variables listed above.
+- Stdin/stdout JSON protocols.
+- Standard external runtimes and tools such as `nu`, `bash`, `node`, `jq`, `sqlite`, or `jj`.
+- Other Strap commands through the public process boundary, for example `strap state init | strap agents apply chat-concise`.
+
+A capsule command must not use:
+
+- `#strap/*` imports.
+- Repo-local implementation imports under `subprojects/*/src`.
+- Direct execution of repo-local JS implementation entrypoints under `subprojects/*/bin`.
+- Another command's private files except through `strap <command>` or `strap inner <command> <helper>`.
+
+`strap project-check` enforces the import/direct-JS parts of this rule for project and user command overlays, excluding the `project-*` validation commands themselves.
+
 Create a temporary command under the current session overlay, or under `.strap-user/commands` when no session is current:
 
 ```bash

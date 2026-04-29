@@ -1,10 +1,4 @@
 List, show, apply, and import agent profiles.
 
 Usage:
-  strap agents list
-  strap agents show chat-concise
-  strap agents apply chat-concise < state.json > next.json
-  strap agents roots
-  strap agents import-opencode ~/.config/opencode/agents
-
-Agents are markdown files with optional OpenCode-style frontmatter. They are discovered from `.strap-user/agents`, `.strap/agents`, config agents, and root agents.
+  strap agents <list|show|apply|roots|import-opencode> [args]

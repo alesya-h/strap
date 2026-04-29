@@ -1,5 +1,5 @@
 Fork and fold agent state.
 
 Usage:
-  strap agent fork --prompt "inspect docs"
-  strap agent fold --child child.json --summary "child result"
+  strap agent fork --prompt <text> < parent.json > child.json
+  strap agent fold --child child.json --summary <text> < parent.json > parent-next.json

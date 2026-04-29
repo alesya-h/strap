@@ -1,20 +1,26 @@
-#!/usr/bin/env bash
-case "${1:-all}" in
-  root) printf '%s\n' "$STRAP_ROOT" ;;
-  config) printf '%s\n' "$STRAP_CONFIG" ;;
-  global) printf '%s\n' "$STRAP_GLOBAL" ;;
-  project) printf '%s\n' "$STRAP_PROJECT" ;;
-  session) printf '%s\n' "${STRAP_SESSION:-}" ;;
-  work) printf '%s\n' "$STRAP_WORK" ;;
-  workspace) printf '%s\n' "$STRAP_WORKSPACE" ;;
-  all)
-    printf 'STRAP_ROOT=%s\n' "$STRAP_ROOT"
-    printf 'STRAP_CONFIG=%s\n' "$STRAP_CONFIG"
-    printf 'STRAP_GLOBAL=%s\n' "$STRAP_GLOBAL"
-    printf 'STRAP_PROJECT=%s\n' "$STRAP_PROJECT"
-    printf 'STRAP_SESSION=%s\n' "${STRAP_SESSION:-}"
-    printf 'STRAP_WORK=%s\n' "$STRAP_WORK"
-    printf 'STRAP_WORKSPACE=%s\n' "$STRAP_WORKSPACE"
-    ;;
-  *) echo "Usage: strap paths [root|config|global|project|session|work|workspace|all]" >&2; exit 2 ;;
-esac
+#!/usr/bin/env nu
+
+def main [target: string = "all"] {
+  match $target {
+    "root" => { print $env.STRAP_ROOT }
+    "config" => { print $env.STRAP_CONFIG }
+    "global" => { print $env.STRAP_GLOBAL }
+    "project" => { print $env.STRAP_PROJECT }
+    "session" => { print ($env.STRAP_SESSION? | default "") }
+    "work" => { print $env.STRAP_WORK }
+    "workspace" => { print $env.STRAP_WORKSPACE }
+    "all" => {
+      print $"STRAP_ROOT=($env.STRAP_ROOT)"
+      print $"STRAP_CONFIG=($env.STRAP_CONFIG)"
+      print $"STRAP_GLOBAL=($env.STRAP_GLOBAL)"
+      print $"STRAP_PROJECT=($env.STRAP_PROJECT)"
+      print $"STRAP_SESSION=($env.STRAP_SESSION? | default '')"
+      print $"STRAP_WORK=($env.STRAP_WORK)"
+      print $"STRAP_WORKSPACE=($env.STRAP_WORKSPACE)"
+    }
+    _ => {
+      print -e "Usage: strap paths [root|config|global|project|session|work|workspace|all]"
+      exit 2
+    }
+  }
+}

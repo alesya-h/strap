@@ -4,6 +4,7 @@ set -euo pipefail
 cd "$STRAP_ROOT"
 
 strap=./bin/strap
+export STRAP_COMMAND_PATH="$STRAP_ROOT/.strap/commands${STRAP_COMMAND_PATH:+:$STRAP_COMMAND_PATH}"
 export STRAP_WORK=/tmp/strap-work-smoke
 export STRAP_PROJECT=/tmp/strap-project-smoke
 rm -rf "$STRAP_WORK" "$STRAP_PROJECT"

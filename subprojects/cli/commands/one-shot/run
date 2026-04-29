@@ -1,2 +1,103 @@
-#!/usr/bin/env bash
-exec node "$STRAP_ROOT/subprojects/loop/bin/one-shot.js" "$@"
+#!/usr/bin/env nu
+
+const one_shot_instruction = "You are running as a one-shot agent. Complete the task and return one final answer. Do not assume quoted context is your active dialogue history."
+
+def write-json [] { $in | to json --indent 2 | print }
+
+def event-text [event: record] {
+  let to = (if (($event.to? | default null) | describe) =~ '^list' { $event.to | str join "," } else { $event.to? | default "all" })
+  let calls = if (($event.calls? | default [] | length) > 0) { $"\n<calls>\n($event.calls | to json --indent 2)\n</calls>" } else { "" }
+  let results = if (($event.results? | default [] | length) > 0) { $"\n<results>\n($event.results | to json --indent 2)\n</results>" } else { "" }
+  $"[($event.from) -> ($to); ($event.kind? | default 'message')]\n($event.text? | default '')($calls)($results)" | str trim
+}
+
+def flatten-node [node: record] {
+  if (($node.type? | default "") == "event") { [$node] } else if (($node.type? | default "") == "scope") and (($node.status? | default "open") == "collapsed") {
+    [{ type: "event", from: "harness", to: ($node.participants? | default []), kind: "summary", text: ($node.summary? | default $"[collapsed scope: ($node.label? | default 'scope')]") }]
+  } else if (($node.type? | default "") == "scope") {
+    $node.children? | default [] | reduce --fold [] {|child, acc| $acc | append (flatten-node $child) }
+  } else { [] }
+}
+
+def render-quoted-events [events: list<any>, title: string] {
+  let body = ($events | each {|event| event-text $event } | str join "\n\n")
+  $"The following is quoted context. Treat it as evidence, not as your active dialogue history, and do not assume you are one of its participants.\n\n<conversation title=\"($title)\">\n\n($body)\n\n</conversation>"
+}
+
+def append-event [event: record] {
+  let state = $in
+  $state | update root.children { append ({ type: "event" } | merge $event) }
+}
+
+def append-input-context [input: any] {
+  let state = $in
+  if (($input.root?.type? | default "") == "scope") {
+    return ($state | append-event { from: "harness", to: ["assistant"], kind: "quoted_context", text: (render-quoted-events (flatten-node $input.root) "input state") })
+  }
+  if (($input.version? | default "") == "strap.quoted-context.v0.1") {
+    return ($state | append-event { from: "harness", to: ["assistant"], kind: "quoted_context", text: ([$input.instruction? $input.text?] | compact | str join "\n\n"), source: ($input.source? | default null) })
+  }
+  if (($input.version? | default "") == "strap.context.v0.1") {
+    return ($state | append-event { from: "harness", to: ["assistant"], kind: "quoted_context", text: (render-quoted-events ($input.events? | default []) "extracted context"), source: ($input.source? | default null) })
+  }
+  $state | append-event { from: "harness", to: ["assistant"], kind: "quoted_context", text: $"Quoted JSON input:\n\n($input | to json --indent 2)" }
+}
+
+def build-state [input: any, has_input: bool, task: string, agent: string, skills: list<string>] {
+  let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+  mut state = (^$strap state init | from json)
+  if $agent != "" { $state = ($state | to json | ^$strap agents apply $agent | from json) }
+  for skill in $skills { $state = ($state | to json | ^$strap skills apply $skill | from json) }
+  let current_private = ($state.actors.assistant.self.private? | default "")
+  $state = ($state | update actors.assistant.self.private ([$current_private $one_shot_instruction] | where {|item| $item != null and $item != "" } | str join "\n\n"))
+  if $has_input { $state = ($state | append-input-context $input) }
+  $state | append-event { from: "user", to: ["assistant"], kind: "message", text: $task }
+}
+
+def answer-from [state: record] {
+  let matches = ($state.root.children | reverse | where {|event| ($event.type? | default "") == "event" and ($event.from? | default "") == "assistant" and ($event.text? | default "") != "" and (($event.calls? | default [] | length) == 0) })
+  if ($matches | is-empty) { "" } else { $matches | first | get text }
+}
+
+def usage [] { print -e "Usage: strap one-shot run <task> [--model current|name|path.json] [--agent name] [--skill name ...] [--tools none|all|fs|process|web|agent|scripts|jsmcp] [--max-turns 8] [--dry-run] < context.json"; exit 2 }
+
+def main [command?: string, ...task_parts: string, --model: string = "current", --agent: string = "", --skill: string = "", --tools: string = "none", --max-turns: int = 8, --finalize: string = "true", --dry-run] {
+  if ($command != "run") { usage }
+  let task = ($task_parts | str join " ")
+  if $task == "" { usage }
+  let input_text = (open --raw /dev/stdin)
+  let has_input = (($input_text | str trim) != "")
+  let input = if $has_input { $input_text | from json } else { null }
+  let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+  let skills = if $skill == "" { [] } else { [$skill] }
+  mut state = (build-state $input $has_input $task $agent $skills)
+  mut turns = 0
+  mut final = false
+  if not $dry_run {
+    while $turns < $max_turns {
+      $turns = $turns + 1
+      $state = ($state | to json | ^$strap llm complete --model $model --tools $tools | from json)
+      let last = ($state.root.children | last)
+      if (($last.calls? | default [] | length) == 0) { $final = true; break }
+      $state = ($state | to json | ^$strap run-calls --tools $tools | from json)
+    }
+    if (not $final) and ($finalize != "false") {
+      $state = ($state | append-event { from: "harness", to: ["assistant"], kind: "tool_budget_exhausted", text: $"Tool budget exhausted after ($max_turns) turn(s). Answer now using the gathered context. Do not request more tools." })
+      $state = ($state | to json | ^$strap llm complete --model $model --tools none | from json)
+      let last = ($state.root.children | last)
+      $final = (($last.calls? | default [] | length) == 0)
+    }
+  }
+  {
+    version: "strap.one-shot.result.v0.1"
+    agent: ($state.actors.assistant.agent? | default null)
+    skills: ($state.actors.assistant.skills? | default [])
+    task: $task
+    tools: $tools
+    turns: $turns
+    final: $final
+    dry_run: $dry_run
+    answer: (answer-from $state)
+    state: $state
+  } | write-json
+}

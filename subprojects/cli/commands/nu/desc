@@ -1,26 +1,4 @@
 Inspect Nushell plumbing modules.
 
 Usage:
-  strap nu modules
-  strap nu lib-dir
-  strap nu env-line
-  strap nu use-line strap
-  strap nu path plumbing
-  strap nu use-line plumbing
-  strap nu source-line plumbing
-
-The `strap` module re-exports grouped commands such as `strap state init`, `strap session new`, `strap agents list`, and `strap skills list`. The `plumbing` module contains Nu-first immutable state and context commands, including closure-based combinators such as `with-events`, `map-events`, `where-events`, and `with-extract`.
-
-Example:
-  use '/path/to/strap/nu/strap'
-  strap state init | strap agents apply chat-concise
-
-After adding `strap nu lib-dir` to `NU_LIB_DIRS`, this also works:
-  use strap
-  strap state init
-
-Plumbing-only example:
-  use '/path/to/strap/nu/plumbing.nu' *
-  open state.json | with-events {|events| $events | where from == user }
-
-Prefer `use-line`; `source-line` is retained for quick interactive experiments and compatibility.
+  strap nu <modules|path|lib-dir|env-line|use-line|source-line> [module]

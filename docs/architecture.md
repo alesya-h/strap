@@ -57,6 +57,8 @@ $STRAP_ROOT/subprojects/cli/commands
 
 The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/global commands can override built-ins.
 
+Project and user commands are intended to be isolated capsules. They compose with other commands through stdin/stdout and `strap <command>`, not by importing repo-local implementation modules. Legacy built-ins under `subprojects/cli/commands` still include Node wrappers over shared JS modules; project overlays should shadow them incrementally with self-contained Nu or command-local implementations.
+
 A command directory can contain:
 
 ```text
