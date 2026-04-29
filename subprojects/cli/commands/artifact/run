@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec node "$STRAP_ROOT/subprojects/core/bin/artifact.js" "$@"
+exec bb -cp "$STRAP_CMD_DIR/src" -m artifact.main "$@"

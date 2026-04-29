@@ -49,6 +49,8 @@ A capsule command must not use:
 
 `strap project-check` enforces the import/direct-JS parts of this rule for project and user command overlays, excluding the `project-*` validation commands themselves.
 
+File size is part of the capsule contract. A source file, `run` script, or helper file has a hard cap of 150 lines; prefer smaller files, usually 50-100 lines. If a file approaches the cap, split it into command-local modules under that command directory instead of adding more branches to one large script. Existing oversized files are refactor debt and should be split before substantive edits.
+
 ## Public, Hidden, And Inner Commands
 
 Use the smallest surface that matches the job:

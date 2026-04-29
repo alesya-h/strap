@@ -156,6 +156,8 @@ open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
 
 The intended boundary is: Nu owns local dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Babashka owns richer local algorithms and state/auth logic that are awkward in Nu but do not need a package ecosystem; Node is reserved for SDK-heavy integrations, long-running servers, MCP/jsmcp, browser/process edges, or provider code that genuinely needs package dependencies.
 
+Implementation files are intentionally small. The hard cap is 150 lines per source file, command `run` script, or helper; prefer even smaller files when a command has separable concepts. Command-local modules are the escape hatch for complexity, not shared repo libraries.
+
 `strap nu modules`, `strap nu lib-dir`, `strap nu use-line strap`, `strap nu path plumbing`, and `strap nu use-line plumbing` expose installed module paths/import lines for agents and humans.
 
 ## Execution Loops
