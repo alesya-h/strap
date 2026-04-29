@@ -6,6 +6,15 @@ import { debugCommand } from "#strap/core/debug";
 import { strapCommandDirs, strapConfigRoot, strapGlobalRoot, strapProjectRoot, strapRoot, strapSessionRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
 
 const [command, ...args] = process.argv.slice(2);
+resolveSessionEnvFromPointer();
+
+function resolveSessionEnvFromPointer() {
+  if (process.env.STRAP_SESSION) return;
+  const current = path.join(strapWorkRoot(), "sessions", "current");
+  if (!fs.existsSync(current)) return;
+  const session = fs.readFileSync(current, "utf8").trim();
+  if (session) process.env.STRAP_SESSION = path.resolve(session);
+}
 
 function usage() {
   prettyCommands(false);
@@ -120,8 +129,34 @@ else if (command === "command-dir") {
   const file = path.join(dir, "inner", script);
   if (!fs.existsSync(file)) die(`Inner script not found: ${file}`);
   await runExecutable(file, name, dir, rest);
+} else if (command === "with-session") {
+  const [session, separatorOrCommand, ...rest] = args;
+  if (!session || !separatorOrCommand) die("Usage: strap with-session <session> [--] <command> [args...]");
+  const commandArgs = separatorOrCommand === "--" ? rest : [separatorOrCommand, ...rest];
+  if (!commandArgs.length) die("Usage: strap with-session <session> [--] <command> [args...]");
+  process.env.STRAP_SESSION = resolveSession(session);
+  const [nextCommand, ...nextArgs] = commandArgs;
+  const dir = commandDir(nextCommand);
+  if (!dir) die(`Unknown command: ${nextCommand}`);
+  await runExecutable(path.join(dir, "run"), nextCommand, dir, nextArgs);
 } else {
   const dir = commandDir(command);
   if (!dir) die(`Unknown command: ${command}`);
   await runExecutable(path.join(dir, "run"), command, dir, args);
+}
+
+function resolveSession(value) {
+  const direct = path.resolve(value);
+  if (fs.existsSync(direct) && fs.statSync(direct).isDirectory()) return direct;
+  const sessions = path.join(strapWorkRoot(), "sessions");
+  const candidate = path.join(sessions, value);
+  if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) return candidate;
+  const matches = fs.existsSync(sessions)
+    ? fs.readdirSync(sessions, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.includes(value))
+      .map((entry) => path.join(sessions, entry.name))
+    : [];
+  if (matches.length === 1) return matches[0];
+  if (matches.length > 1) die(`Ambiguous session: ${value}`);
+  die(`Session not found: ${value}`);
 }

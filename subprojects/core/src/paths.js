@@ -62,10 +62,7 @@ export function strapWorkRoot() {
 
 export function strapSessionRoot() {
   if (process.env.STRAP_SESSION) return path.resolve(process.env.STRAP_SESSION);
-  const current = path.join(strapWorkRoot(), "sessions", "current");
-  if (!fs.existsSync(current)) return undefined;
-  const session = fs.readFileSync(current, "utf8").trim();
-  return session || undefined;
+  return undefined;
 }
 
 export function strapSessionOverlayRoot() {

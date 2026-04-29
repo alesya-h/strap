@@ -20,7 +20,7 @@ Commands receive:
 - `STRAP_CONFIG`
 - `STRAP_GLOBAL`
 - `STRAP_PROJECT`
-- `STRAP_SESSION` when a current session exists
+- `STRAP_SESSION` when an active session exists
 - `STRAP_WORK`
 - `STRAP_WORKSPACE`
 - `STRAP_CMD_NAME`
@@ -49,6 +49,12 @@ Private helpers go in `inner/` and can be called with:
 
 ```bash
 strap inner my-command helper-name arg1 arg2
+```
+
+Run a command against a specific session without changing the convenience pointer:
+
+```bash
+strap with-session my-session -- history log
 ```
 
 ## Built-in Commands

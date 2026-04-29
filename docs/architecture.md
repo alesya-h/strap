@@ -20,7 +20,7 @@ The runner resolves command directories, builds a standard environment, then spa
 | `STRAP_CONFIG` | Static harness config | `config/strap` when present, otherwise `$STRAP_GLOBAL` |
 | `STRAP_GLOBAL` | Global home-directory artifacts | `$XDG_CONFIG_HOME/strap` |
 | `STRAP_PROJECT` | Project-shared harness artifacts | nearest `.strap`, otherwise `$STRAP_WORKSPACE/.strap` |
-| `STRAP_SESSION` | Current session directory | `$STRAP_WORK/sessions/current` pointer when present |
+| `STRAP_SESSION` | Active session directory | explicit env var; `bin/strap` fills it from `$STRAP_WORK/sessions/current` only as an outer convenience |
 | `STRAP_WORK` | User/agent-local mutable state | nearest `.strap-user`, otherwise `$STRAP_WORKSPACE/.strap-user` |
 | `STRAP_WORKSPACE` | Filesystem workspace for tools | current working directory |
 
@@ -233,7 +233,9 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 - `overlay/`
 - `.jj/`
 
-`strap session copy <name>` copies the current session into a new current session. With `--at <bookmark>`, the copied state is truncated after that visible bookmark so the conversation can continue in a different direction from a specific point.
+`strap session copy <name>` copies the active session into a new session. With `--at <bookmark>`, the copied state is truncated after that visible bookmark so the conversation can continue in a different direction from a specific point.
+
+Actual session-aware commands rely on `STRAP_SESSION`. The outer `bin/strap` runner reads `$STRAP_WORK/sessions/current` only when `STRAP_SESSION` is absent, then exports `STRAP_SESSION` to the command it launches. Use `strap with-session <session> -- <command>` for one-off selection without changing the pointer. In Nushell, `strap session select <session>` is `def --env` and sets `$env.STRAP_SESSION` in the current shell.
 
 Session mutations create jj snapshots in the session directory. `strap history` operates on the current session rather than the project-user work root, and `strap history ui` launches `jjui` there.
 

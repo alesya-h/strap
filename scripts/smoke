@@ -65,6 +65,10 @@ $strap artifact workon porcelain basic > /tmp/strap-artifact-workon.json
 $strap artifact discard porcelain basic > /tmp/strap-artifact-discard.json
 $strap work init > /tmp/strap-work-init.json
 $strap session new 'smoke session' > /tmp/strap-session-new.json
+session_dir="$(node -e 'const s=require("/tmp/strap-session-new.json"); console.log(s.dir)')"
+session_name="$(basename "$session_dir")"
+$strap with-session "$session_name" -- session path > /tmp/strap-with-session-path.txt
+STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap session clear; strap session select $session_name | save -f /tmp/strap-nu-session-select.txt; \$env.STRAP_SESSION | save -f /tmp/strap-nu-session-env.txt"
 $strap history init > /tmp/strap-history-init.json
 $strap session ask 'remember this smoke question' > /tmp/strap-session-ask.json
 $strap session show > /tmp/strap-session-before-copy.json

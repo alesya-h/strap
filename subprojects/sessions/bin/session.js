@@ -32,8 +32,8 @@ function setCurrent(dir) {
 }
 
 function currentDir() {
-  if (!fs.existsSync(currentFile())) throw new Error("No current session. Run `strap session new <name>`.");
-  return fs.readFileSync(currentFile(), "utf8").trim();
+  if (!process.env.STRAP_SESSION) throw new Error("No active session. Set STRAP_SESSION, run `strap session new <name>`, or use `strap with-session <session> -- <command>`.");
+  return path.resolve(process.env.STRAP_SESSION);
 }
 
 function statePath(dir = currentDir()) {
@@ -73,7 +73,7 @@ function snapshotHistory(dir, message) {
 }
 
 function usage() {
-  console.error("Usage: strap session <new|copy|list|path|state|show|ask|save|trace> [args]");
+  console.error("Usage: strap session <new|copy|list|resolve|path|state|show|ask|save|trace> [args]");
   process.exit(2);
 }
 
@@ -124,6 +124,11 @@ if (command === "new") {
     })
     .sort((a, b) => a.name.localeCompare(b.name));
   writeJson(items);
+} else if (command === "resolve") {
+  const selector = args.join(" ");
+  if (!selector && process.env.STRAP_SESSION) process.stdout.write(`${path.resolve(process.env.STRAP_SESSION)}\n`);
+  else if (!selector) throw new Error("Usage: strap session resolve <name-or-path>");
+  else process.stdout.write(`${resolveSession(selector)}\n`);
 } else if (command === "path") {
   process.stdout.write(`${currentDir()}\n`);
 } else if (command === "state") {
@@ -160,6 +165,20 @@ function readSessionMeta(dir) {
 
 function readSessionTitle(dir) {
   return readSessionMeta(dir).title || path.basename(dir);
+}
+
+function resolveSession(selector) {
+  const direct = path.resolve(selector);
+  if (fs.existsSync(direct) && fs.statSync(direct).isDirectory()) return direct;
+  const root = sessionsRoot();
+  const exact = path.join(root, selector);
+  if (fs.existsSync(exact) && fs.statSync(exact).isDirectory()) return exact;
+  const matches = fs.readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.includes(selector))
+    .map((entry) => path.join(root, entry.name));
+  if (matches.length === 1) return matches[0];
+  if (matches.length > 1) throw new Error(`Ambiguous session: ${selector}`);
+  throw new Error(`Session not found: ${selector}`);
 }
 
 function truncateStateAfterBookmark(state, bookmarkId) {

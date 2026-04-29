@@ -4,6 +4,7 @@ Usage:
   strap session new "repo analysis"
   strap session copy "alternate direction"
   strap session copy "alternate direction" --at bm_abc
+  strap session resolve "repo analysis"
   strap session ask "Analyze this repo"
   strap session show
   strap session save < state.json
@@ -12,4 +13,4 @@ Usage:
   strap session state
   strap session trace
 
-Each session has its own overlay under `overlay/` and its own jj history. Session mutations create jj commits automatically.
+Each session has its own overlay under `overlay/` and its own jj history. Session mutations create jj commits automatically. Commands operate on `STRAP_SESSION`; the outer runner fills it from the current-session pointer only when the env var is absent.

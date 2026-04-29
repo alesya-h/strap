@@ -50,6 +50,18 @@ strap history snapshot --message "after initial repo analysis"
 strap history log
 ```
 
+For parallel work, prefer explicit session selection. In bash, use a one-command wrapper:
+
+```bash
+strap with-session repo-analysis -- history log
+```
+
+In Nushell, select the session into the current shell environment:
+
+```nu
+strap session select repo-analysis
+```
+
 Create memory and rebuild the derived SQLite index:
 
 ```bash

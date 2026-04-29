@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+printf 'with-session is handled by bin/strap before command dispatch.\n' >&2
+exit 2

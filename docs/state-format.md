@@ -336,7 +336,7 @@ strap state bookmark add --text "unique substring" --label fold-start < state.js
 strap state fold --from bm_start --to bm_end --summary "summary" < state.json > next.json
 ```
 
-Session commands intentionally write the current session file under `$STRAP_WORK/sessions`.
+Session commands operate on `STRAP_SESSION`. The outer `strap` runner may populate that env var from `$STRAP_WORK/sessions/current` as a convenience before invoking commands.
 
 ## Compatibility
 
