@@ -22,7 +22,7 @@ The public interface is:
 strap <command> [args...]
 ```
 
-This makes the harness inspectable and editable by both humans and agents. A project can carry promoted commands, tools, porcelain, and shared memory under `.strap/`, while user/agent-local sessions, history, scratch work, caches, and temporary generated capabilities live under `.strap-user/`.
+This makes the harness inspectable and editable by both humans and agents. A project can carry promoted commands, tools, porcelain, and shared memory under `.strap/`, while user/agent-local sessions, scratch work, caches, and project-user generated capabilities live under `.strap-user/`. Each session can carry its own overlay and history under its session directory.
 
 ## Current Spine
 
@@ -42,7 +42,9 @@ Everything else should orbit that spine.
 
 - `STRAP_ROOT`: installed harness code.
 - `STRAP_CONFIG`: static harness config.
+- `STRAP_GLOBAL`: global home-directory artifacts.
 - `STRAP_PROJECT`: project-shared `.strap` artifacts that may be committed with the project.
+- `STRAP_SESSION`: current session state, overlay, and history.
 - `STRAP_WORK`: user/agent-local mutable `.strap-user` work state.
 - `STRAP_WORKSPACE`: filesystem workspace for tools.
 

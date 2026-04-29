@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { strapAgentDirs, strapSkillDirs, strapWorkRoot } from "#strap/core/paths";
+import { strapActiveWorkRoot, strapAgentDirs, strapSkillDirs } from "#strap/core/paths";
+import { snapshotCurrentSession } from "#strap/core/session-history";
 
 export function agentRoots() {
   return strapAgentDirs();
@@ -96,7 +97,7 @@ export function applySkillProfile(state, profile, actorId = "assistant") {
 
 export function importOpenCodeAgents(sourceDir) {
   if (!isDirectory(sourceDir)) throw new Error(`OpenCode agents directory not found: ${sourceDir}`);
-  const target = path.join(strapWorkRoot(), "agents");
+  const target = path.join(strapActiveWorkRoot(), "agents");
   fs.mkdirSync(target, { recursive: true });
   const imported = [];
   for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
@@ -106,12 +107,13 @@ export function importOpenCodeAgents(sourceDir) {
     fs.copyFileSync(from, to);
     imported.push({ name: path.basename(entry.name, ".md"), path: to });
   }
+  if (imported.length) snapshotCurrentSession("agents import-opencode");
   return { ok: true, imported };
 }
 
 export function importOpenCodeSkills(sourceDir) {
   if (!isDirectory(sourceDir)) throw new Error(`OpenCode skills directory not found: ${sourceDir}`);
-  const target = path.join(strapWorkRoot(), "skills");
+  const target = path.join(strapActiveWorkRoot(), "skills");
   fs.mkdirSync(target, { recursive: true });
   const imported = [];
   for (const name of fs.readdirSync(sourceDir)) {
@@ -123,6 +125,7 @@ export function importOpenCodeSkills(sourceDir) {
     fs.cpSync(from, to, { recursive: true });
     imported.push({ name, path: to });
   }
+  if (imported.length) snapshotCurrentSession("skills import-opencode");
   return { ok: true, imported };
 }
 

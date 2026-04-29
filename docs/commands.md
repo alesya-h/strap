@@ -18,7 +18,9 @@ Commands receive:
 
 - `STRAP_ROOT`
 - `STRAP_CONFIG`
+- `STRAP_GLOBAL`
 - `STRAP_PROJECT`
+- `STRAP_SESSION` when a current session exists
 - `STRAP_WORK`
 - `STRAP_WORKSPACE`
 - `STRAP_CMD_NAME`
@@ -26,7 +28,7 @@ Commands receive:
 
 Command safety is not described by command-owned metadata. Use launch profiles, sandboxing, and restricted tool/jsmcp configuration for restricted modes.
 
-Create a user-local temporary command under `.strap-user/commands`:
+Create a temporary command under the current session overlay, or under `.strap-user/commands` when no session is current:
 
 ```bash
 strap commands new my-command
@@ -60,7 +62,7 @@ strap inner my-command helper-name arg1 arg2
 | `commands` | List, inspect, validate, and scaffold command directories. |
 | `context` | Transform extracted context, including quoting and summarization. |
 | `edit` | Edit or create command files. |
-| `history` | Manage jj-backed user-local strap history. |
+| `history` | Manage jj-backed current-session history. |
 | `llm` | Compile, call, or complete model-profile requests from canonical state. |
 | `loop` | Run the Node model/tool loop. |
 | `loop-nu` | Run the editable Nushell reference loop. |
@@ -68,7 +70,7 @@ strap inner my-command helper-name arg1 arg2
 | `model` | List, show, select, and fork model profiles. |
 | `nu` | Inspect Nushell plumbing module paths. |
 | `one-shot` | Run an agent once until its first final answer. |
-| `paths` | Print resolved root/config/project/work/workspace paths. |
+| `paths` | Print resolved root/config/global/project/session/work/workspace paths. |
 | `porcelain` | List and run model-editable Nushell porcelain modules. |
 | `provider` | Run provider-specific operations and authentication. |
 | `run-calls` | Execute pending tool calls in canonical state. |
@@ -85,7 +87,7 @@ Run `strap help <command>` for command-local usage text.
 
 ## Layered Artifacts
 
-Commands, script tools, porcelain modules, model profiles, agent profiles, and skill bundles can be inspected and moved through the user/project overlay lifecycle:
+Commands, script tools, porcelain modules, model profiles, agent profiles, and skill bundles can be inspected and moved through the session/user/project/global/root overlay lifecycle:
 
 ```bash
 strap status
@@ -95,10 +97,11 @@ strap artifact status skill
 strap artifact status model
 strap artifact workon porcelain basic
 strap artifact promote porcelain basic
+strap artifact promote porcelain basic --from project --to global
 strap artifact discard porcelain basic
 ```
 
-`workon` creates a user-layer working copy, `promote` writes that copy into the project layer and clears the overlay, and `discard` removes the user-layer copy.
+`workon` creates a session-layer working copy when a current session exists, otherwise a user-layer copy. `promote` moves one step down by default: session to user, user to project, project to global, and global to root. `discard` removes the session-layer copy first, then the user-layer copy.
 
 ## Agent Profiles
 

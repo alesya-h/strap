@@ -4,16 +4,16 @@
 
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
-- Separate harness, static config, project, user-work, and workspace roots: `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
+- Separate harness, static config, global, project, session, user-work, and workspace roots: `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_GLOBAL`, `STRAP_PROJECT`, `STRAP_SESSION`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Subproject commands for state editing, model request compilation, agent fork/fold, and pending tool execution.
 - Nu-first structured plumbing with a git-like plumbing/porcelain split for model-authored workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
-- Executable script tools discovered from overlayed user/project/config/root tool dirs.
+- Executable script tools discovered from overlayed session/user/project/global/root tool dirs.
 - A shared markdown-source zettelkasten CLI and script tool for agent memory, with inline wikilinks and a derived SQLite/sqlite-vec index.
 - A generic layered artifact model for command, tool, porcelain, model, agent, and skill workon/promote/discard flows.
 - Layered markdown agent profiles compatible with OpenCode-style frontmatter.
 - Layered skill instruction bundles compatible with OpenCode-style `SKILL.md` directories.
-- jj-backed user-local state history under `.strap-user`.
+- jj-backed session-local state and overlay history under each session directory.
 - jsmcp bridge tools for programmable access to configured MCP servers.
 - Layered model profiles for OpenAI API keys, OpenRouter, Anthropic, and ChatGPT/Codex-backend OAuth auth.
 - A reference analysis note in `docs/reference-tool-ux.md`.
@@ -68,6 +68,8 @@ strap session show \
 | tee session.json \
 | strap session save
 ```
+
+Each current session has a session-local overlay under `overlay/` that shadows user, project, global, and root artifacts. `strap artifact workon <type> <name>` writes there while a session is current, and `strap artifact promote <type> <name>` promotes one step at a time: session to user, user to project, project to global, and global to the Strap repo layer. Session state and session overlay changes are jj-backed in the session directory; use `strap history log`, `strap history diff`, or `strap history ui`.
 
 See `docs/daily-use.md`, `docs/commands.md`, and `docs/architecture.md`.
 

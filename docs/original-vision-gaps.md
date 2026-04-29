@@ -109,7 +109,7 @@ Current state: capability separation is partly implemented, but restricted modes
 ## Persistence And Session Management
 
 - State files are explicit JSON documents, and `strap session` provides a user-local session store under `$STRAP_WORK/sessions`.
-- Session directories include `meta.json`, `state.json`, `trace.jsonl`, `provider-requests/`, and `tool-results/`.
+- Session directories include `meta.json`, `state.json`, `trace.jsonl`, `provider-requests/`, `tool-results/`, `overlay/`, and session-local `.jj/` history.
 - No index of sessions, branches, summaries, and zettelkasten references.
 - No garbage collection/pruning story for old runs.
 
@@ -119,8 +119,8 @@ Current state: persistence is unix-explicit via files, `tee`, redirection, `save
 
 - `.strap` now represents project-shared harness artifacts.
 - `.strap-user` now represents user/agent-local runtime state.
-- `strap artifact promote` can move command/tool/porcelain overlays from `.strap-user` into `.strap`, but promotion does not yet enforce diffs, provenance, validation hooks, or review.
-- Basic jj-backed `.strap-user` history exists through `strap history`, but higher-level session branching/fold-back workflows are not built yet.
+- `strap artifact promote` can move command/tool/porcelain/model/agent/skill overlays from session to user, user to project, project to global, and global to root, but promotion does not yet enforce diffs, provenance, validation hooks, or review.
+- Basic jj-backed session history exists through `strap history`, but higher-level session branching/fold-back workflows are not built yet.
 - Markdown-source zettelkasten commands exist with overlay promotion and backlinks, but there is no migration strategy, chunking model, or conflict story yet.
 
 ## Testing Gaps

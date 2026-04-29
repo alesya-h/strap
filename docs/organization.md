@@ -6,7 +6,9 @@
 
 - `STRAP_ROOT`: installed harness code root. In development this is the repository root.
 - `STRAP_CONFIG`: static harness config. Defaults to `config/strap` in this repo when present.
+- `STRAP_GLOBAL`: global home-directory artifacts. Defaults to `$XDG_CONFIG_HOME/strap`.
 - `STRAP_PROJECT`: project-shared harness artifacts. Defaults to nearest `.strap`, or `$STRAP_WORKSPACE/.strap`.
+- `STRAP_SESSION`: current session directory when a session is active.
 - `STRAP_WORK`: user/agent-local mutable work directory. Defaults to nearest `.strap-user`, or `$STRAP_WORKSPACE/.strap-user`.
 
 `STRAP_WORKSPACE` remains the filesystem workspace that tools operate in. It defaults to the current working directory.
@@ -43,9 +45,10 @@ Resolution order lets project/user commands override built-ins:
 
 ```text
 STRAP_COMMAND_PATH
+$STRAP_SESSION/overlay/commands
 $STRAP_WORK/commands
 $STRAP_PROJECT/commands
-$STRAP_CONFIG/commands
+$STRAP_GLOBAL/commands
 $STRAP_ROOT/subprojects/cli/commands
 ```
 
@@ -79,7 +82,7 @@ config/strap/
   porcelain/
 ```
 
-For a personal install, mirror this at `~/.config/strap` or set `STRAP_CONFIG`.
+For global home-directory overlays, use `~/.config/strap` or set `STRAP_GLOBAL`.
 
 ## Project And User Work
 
@@ -106,7 +109,6 @@ my-project/.strap-user/
   agents/
   skills/
   models/
-  history/
   sessions/
   logs/
   cache/
@@ -119,9 +121,9 @@ my-project/.strap-user/
   config/
 ```
 
-This directory should be ignored by the project VCS. It is where sessions, caches, logs, jj-backed state history, private memory, and temporary generated commands/tools/porcelain belong.
+This directory should be ignored by the project VCS. It is where sessions, caches, logs, private memory, and project-user generated commands/tools/porcelain belong.
 
-Agents, skills, models, commands, tools, porcelain, and zettel notes use `.strap-user` as an overlay on top of `.strap`. Inspect overlays with `strap status` or `strap artifact status`, create working copies with `strap artifact workon <type> <name>`, promote agent/skill/model/command/tool/porcelain artifacts with `strap artifact promote <type> <name>`, and promote zettel notes with `strap zk promote <note>`.
+Agents, skills, models, commands, tools, and porcelain use session/user/project/global/root overlays. Inspect overlays with `strap status` or `strap artifact status`, create working copies with `strap artifact workon <type> <name>`, and promote agent/skill/model/command/tool/porcelain artifacts one layer at a time with `strap artifact promote <type> <name>`. Zettel notes still use the user/project overlay through `strap zk promote <note>`.
 
 `user/template/.strap` and `user/template/.strap-user` are checked-in templates for this split.
 

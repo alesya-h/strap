@@ -6,6 +6,7 @@ Usage:
   strap artifact status [command|tool|porcelain] [--paths]
   strap artifact workon command my-command
   strap artifact promote tool my_tool
+  strap artifact promote tool my_tool --from project --to global
   strap artifact discard porcelain draft
 
-The user layer shadows project/config/root layers. `promote` writes the user-layer artifact into the project layer, then clears the user overlay.
+Layer order is session, user, project, global, root. `workon` writes to the session layer when a current session exists, otherwise to the user layer. `promote` moves one layer down by default: session to user, user to project, project to global, global to root. Use `--from` and `--to` for explicit layer moves.

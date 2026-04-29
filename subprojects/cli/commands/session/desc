@@ -11,3 +11,5 @@ Usage:
   strap session path
   strap session state
   strap session trace
+
+Each session has its own overlay under `overlay/` and its own jj history. Session mutations create jj commits automatically.

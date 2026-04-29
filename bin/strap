@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { debugCommand } from "#strap/core/debug";
-import { strapCommandDirs, strapConfigRoot, strapProjectRoot, strapRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
+import { strapCommandDirs, strapConfigRoot, strapGlobalRoot, strapProjectRoot, strapRoot, strapSessionRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
 
 const [command, ...args] = process.argv.slice(2);
 
@@ -63,7 +63,9 @@ function envFor(name, dir) {
     ...process.env,
     STRAP_ROOT: strapRoot(),
     STRAP_CONFIG: strapConfigRoot(),
+    STRAP_GLOBAL: strapGlobalRoot(),
     STRAP_PROJECT: strapProjectRoot(),
+    ...(strapSessionRoot() ? { STRAP_SESSION: strapSessionRoot() } : {}),
     STRAP_WORK: strapWorkRoot(),
     STRAP_WORKSPACE: workspaceRoot(),
     STRAP_CMD_NAME: name,

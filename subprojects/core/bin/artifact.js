@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { writeJson } from "#strap/core/cli-io";
+import { takeOption, writeJson } from "#strap/core/cli-io";
 import { allArtifactStatus, artifactRoots, artifactTypes, discardArtifact, listArtifacts, promoteArtifact, workonArtifact } from "#strap/core/artifacts";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap artifact <types|roots|status|workon|promote|discard> [type] [name] [--paths]");
+  console.error("Usage: strap artifact <types|roots|status|workon|promote|discard> [type] [name] [--paths] [--from layer] [--to layer]");
   process.exit(2);
 }
 
@@ -28,10 +28,12 @@ if (command === "types") {
   writeJson(type ? listArtifacts(type, { includePaths }) : allArtifactStatus({ includePaths }));
 } else if (["workon", "promote", "discard"].includes(command)) {
   const includePaths = takeFlag("--paths");
+  const from = takeOption(args, "--from");
+  const to = takeOption(args, "--to");
   const [type, name] = args;
   if (!type || !name) usage();
   const action = { workon: workonArtifact, promote: promoteArtifact, discard: discardArtifact }[command];
-  writeJson(action(type, name, { includePaths }));
+  writeJson(action(type, name, { includePaths, from, to }));
 } else {
   usage();
 }

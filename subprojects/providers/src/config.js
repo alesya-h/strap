@@ -3,7 +3,8 @@ import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { decodeJwt, expandHome, loadChatgptToken } from "#strap/providers/chatgpt-auth";
-import { strapModelDirs, strapWorkRoot } from "#strap/core/paths";
+import { strapActiveWorkRoot, strapModelDirs } from "#strap/core/paths";
+import { snapshotCurrentSession } from "#strap/core/session-history";
 
 export function modelRoots() {
   return strapModelDirs();
@@ -34,17 +35,18 @@ export async function loadModelConfig(nameOrPath = "current") {
 
 export async function useModel(name) {
   const file = resolveModelFile(name);
-  const targetDir = path.join(strapWorkRoot(), "models");
+  const targetDir = path.join(strapActiveWorkRoot(), "models");
   await fs.mkdir(targetDir, { recursive: true });
   const target = path.join(targetDir, "current.json");
   await fs.rm(target, { force: true });
   await fs.symlink(file, target);
+  snapshotCurrentSession(`model use: ${name}`);
   return { ok: true, current: "current", target, model: publicModel(await loadModelConfig(name), true) };
 }
 
 export async function forkModel(source, target, { modelId } = {}) {
   const config = await loadModelConfig(source);
-  const targetDir = path.join(strapWorkRoot(), "models");
+  const targetDir = path.join(strapActiveWorkRoot(), "models");
   await fs.mkdir(targetDir, { recursive: true });
   const targetFile = path.join(targetDir, `${target}.json`);
   const next = {
@@ -55,6 +57,7 @@ export async function forkModel(source, target, { modelId } = {}) {
   delete next.model;
   delete next.sourcePath;
   await fs.writeFile(targetFile, `${JSON.stringify(next, null, 2)}\n`);
+  snapshotCurrentSession(`model fork: ${target}`);
   return { ok: true, source, target, path: targetFile, model: publicModel(normalizeModelConfig(next, targetFile), true) };
 }
 

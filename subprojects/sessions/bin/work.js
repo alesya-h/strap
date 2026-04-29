@@ -5,7 +5,7 @@ import { strapProjectRoot, strapWorkRoot } from "#strap/core/paths";
 
 const [command = "init"] = process.argv.slice(2);
 const projectDirs = ["agents", "skills", "models", "commands", "tools", "porcelain", "zettel", "config"];
-const workDirs = ["agents", "skills", "models", "history", "sessions", "logs", "cache", "branches", "scratch", "commands", "tools", "porcelain", "zettel", "config"];
+const workDirs = ["agents", "skills", "models", "sessions", "logs", "cache", "branches", "scratch", "commands", "tools", "porcelain", "zettel", "config"];
 
 if (command === "init") {
   const project = strapProjectRoot();
@@ -20,7 +20,7 @@ if (command === "init") {
   }
   const workReadme = path.join(work, "README.md");
   if (!fs.existsSync(workReadme)) {
-    fs.writeFileSync(workReadme, `# Strap User Work\n\nUser/agent-local mutable harness state. This directory should be ignored by the project VCS.\n\n- agents/\n- skills/\n- models/\n- history/\n- sessions/\n- logs/\n- cache/\n- branches/\n- scratch/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n`);
+    fs.writeFileSync(workReadme, `# Strap User Work\n\nUser/agent-local mutable harness state. This directory should be ignored by the project VCS. Session-local history is stored inside each session directory.\n\n- agents/\n- skills/\n- models/\n- sessions/\n- logs/\n- cache/\n- branches/\n- scratch/\n- commands/\n- tools/\n- porcelain/\n- zettel/\n- config/\n`);
   }
   process.stdout.write(`${JSON.stringify({ ok: true, project, work, project_dirs: projectDirs, work_dirs: workDirs }, null, 2)}\n`);
 } else if (command === "path") {

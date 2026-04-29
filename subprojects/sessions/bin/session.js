@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { createState, appendEvent, normalizeState } from "#strap/core/state";
 import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import { strapWorkRoot } from "#strap/core/paths";
@@ -47,6 +48,30 @@ function recordTrace(dir, event) {
   fs.appendFileSync(tracePath(dir), `${JSON.stringify({ at: new Date().toISOString(), ...event })}\n`);
 }
 
+function runJj(dir, jjArgs, opts = {}) {
+  const child = spawnSync("jj", jjArgs, { cwd: dir, stdio: opts.capture ? ["ignore", "pipe", "pipe"] : "inherit", encoding: "utf8" });
+  if (child.error?.code === "ENOENT") throw new Error("jj is required for strap session history");
+  if (child.status !== 0) throw new Error(opts.capture ? (child.stderr || child.stdout) : `jj exited ${child.status}`);
+  return child.stdout;
+}
+
+function ensureHistory(dir) {
+  ensureIgnore(dir);
+  if (!fs.existsSync(path.join(dir, ".jj"))) runJj(dir, ["git", "init", "--no-colocate", "."], { capture: true });
+}
+
+function ensureIgnore(dir) {
+  const file = path.join(dir, ".gitignore");
+  const wanted = ["/provider-requests/tmp/", "/tool-results/tmp/", ""].join("\n");
+  if (!fs.existsSync(file)) fs.writeFileSync(file, wanted);
+}
+
+function snapshotHistory(dir, message) {
+  ensureHistory(dir);
+  runJj(dir, ["describe", "-m", message], { capture: true });
+  runJj(dir, ["new"], { capture: true });
+}
+
 function usage() {
   console.error("Usage: strap session <new|copy|list|path|state|show|ask|save|trace> [args]");
   process.exit(2);
@@ -61,15 +86,16 @@ if (command === "new") {
   fs.writeFileSync(path.join(dir, "meta.json"), `${JSON.stringify({ title, created_at: new Date().toISOString() }, null, 2)}\n`);
   fs.writeFileSync(statePath(dir), `${JSON.stringify(createState(), null, 2)}\n`);
   fs.writeFileSync(tracePath(dir), "");
-  setCurrent(dir);
   recordTrace(dir, { kind: "session_new", title });
+  snapshotHistory(dir, `session new: ${title}`);
+  setCurrent(dir);
   process.stdout.write(`${JSON.stringify({ ok: true, dir, state: statePath(dir) }, null, 2)}\n`);
 } else if (command === "copy") {
   const source = currentDir();
   const at = takeOption(args, "--at", "");
   const title = args.join(" ") || `${readSessionTitle(source)} copy`;
   const dir = path.join(sessionsRoot(), `${stamp()}-${slug(title)}`);
-  fs.cpSync(source, dir, { recursive: true, errorOnExist: true });
+  fs.cpSync(source, dir, { recursive: true, errorOnExist: true, filter: (file) => path.basename(file) !== ".jj" });
   const meta = readSessionMeta(dir);
   fs.writeFileSync(path.join(dir, "meta.json"), `${JSON.stringify({
     ...meta,
@@ -83,8 +109,9 @@ if (command === "new") {
     truncateStateAfterBookmark(state, at);
     fs.writeFileSync(statePath(dir), `${JSON.stringify(state, null, 2)}\n`);
   }
-  setCurrent(dir);
   recordTrace(dir, { kind: "session_copy", copied_from: source, title, at: at || undefined });
+  snapshotHistory(dir, `session copy: ${title}`);
+  setCurrent(dir);
   writeJson({ ok: true, dir, state: statePath(dir), copied_from: source, copied_at: at || undefined });
 } else if (command === "list") {
   const items = fs.readdirSync(sessionsRoot(), { withFileTypes: true })
@@ -113,12 +140,14 @@ if (command === "new") {
   appendEvent(state, { from: "user", to: ["assistant"], kind: "message", text });
   fs.writeFileSync(statePath(dir), `${JSON.stringify(state, null, 2)}\n`);
   recordTrace(dir, { kind: "session_ask", text });
+  snapshotHistory(dir, "session ask");
   writeJson(state);
 } else if (command === "save") {
   const dir = currentDir();
   const state = normalizeState(await readJsonInput("-"));
   fs.writeFileSync(statePath(dir), `${JSON.stringify(state, null, 2)}\n`);
   recordTrace(dir, { kind: "session_save" });
+  snapshotHistory(dir, "session save");
   writeJson({ ok: true, state: statePath(dir) });
 } else {
   usage();

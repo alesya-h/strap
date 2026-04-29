@@ -37,14 +37,15 @@ strap status
 strap work path
 strap session list
 strap session trace
+strap history log
 strap zk list
 strap zk tags
 ```
 
-Snapshot user-local agent state with jj:
+Inspect or explicitly snapshot current-session state with jj:
 
 ```bash
-strap history init
+strap history log
 strap history snapshot --message "after initial repo analysis"
 strap history log
 ```

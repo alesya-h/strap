@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { strapConfigRoot, strapProjectRoot, strapRoot, strapToolDirs, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
+import { strapConfigRoot, strapGlobalRoot, strapProjectRoot, strapRoot, strapSessionRoot, strapToolDirs, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
 import { toolResult, truncateText } from "#strap/core/result";
 
 const DEFAULT_SCHEMA = {
@@ -83,7 +83,9 @@ function runScript(filePath, input, spec) {
         ...process.env,
         STRAP_ROOT: strapRoot(),
         STRAP_CONFIG: strapConfigRoot(),
+        STRAP_GLOBAL: strapGlobalRoot(),
         STRAP_PROJECT: strapProjectRoot(),
+        ...(strapSessionRoot() ? { STRAP_SESSION: strapSessionRoot() } : {}),
         STRAP_WORK: strapWorkRoot(),
         STRAP_TOOL_NAME: spec.name,
         STRAP_WORKSPACE: workspaceRoot(),

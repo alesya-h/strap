@@ -1,16 +1,19 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { strapConfigRoot, strapProjectRoot, strapRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
+import { strapActiveWorkRoot, strapGlobalRoot, strapProjectRoot, strapRepoConfigRoot, strapRoot, strapSessionOverlayRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
+import { snapshotCurrentSession } from "#strap/core/session-history";
 
-const LAYERS = ["user", "project", "config", "root"];
+const LAYERS = ["session", "user", "project", "global", "root"];
+const MUTABLE_LAYERS = ["session", "user", "project", "global"];
 
 const TYPES = {
   command: {
     roots: () => ({
+      session: maybeJoin(strapSessionOverlayRoot(), "commands"),
       user: path.join(strapWorkRoot(), "commands"),
       project: path.join(strapProjectRoot(), "commands"),
-      config: path.join(strapConfigRoot(), "commands"),
+      global: path.join(strapGlobalRoot(), "commands"),
       root: path.join(strapRoot(), "subprojects", "cli", "commands"),
     }),
     discover: discoverCommandArtifacts,
@@ -18,9 +21,10 @@ const TYPES = {
   },
   tool: {
     roots: () => ({
+      session: maybeJoin(strapSessionOverlayRoot(), "tools"),
       user: path.join(strapWorkRoot(), "tools"),
       project: path.join(strapProjectRoot(), "tools"),
-      config: path.join(strapConfigRoot(), "tools"),
+      global: path.join(strapGlobalRoot(), "tools"),
       root: path.join(strapRoot(), "tools"),
     }),
     discover: discoverToolArtifacts,
@@ -28,9 +32,10 @@ const TYPES = {
   },
   porcelain: {
     roots: () => ({
+      session: maybeJoin(strapSessionOverlayRoot(), "porcelain"),
       user: path.join(strapWorkRoot(), "porcelain"),
       project: path.join(strapProjectRoot(), "porcelain"),
-      config: path.join(strapConfigRoot(), "porcelain"),
+      global: path.join(strapGlobalRoot(), "porcelain"),
       root: path.join(strapRoot(), "porcelain"),
     }),
     discover: discoverPorcelainArtifacts,
@@ -38,9 +43,10 @@ const TYPES = {
   },
   agent: {
     roots: () => ({
+      session: maybeJoin(strapSessionOverlayRoot(), "agents"),
       user: path.join(strapWorkRoot(), "agents"),
       project: path.join(strapProjectRoot(), "agents"),
-      config: path.join(strapConfigRoot(), "agents"),
+      global: path.join(strapGlobalRoot(), "agents"),
       root: path.join(strapRoot(), "agents"),
     }),
     discover: discoverAgentArtifacts,
@@ -48,9 +54,10 @@ const TYPES = {
   },
   skill: {
     roots: () => ({
+      session: maybeJoin(strapSessionOverlayRoot(), "skills"),
       user: path.join(strapWorkRoot(), "skills"),
       project: path.join(strapProjectRoot(), "skills"),
-      config: path.join(strapConfigRoot(), "skills"),
+      global: path.join(strapGlobalRoot(), "skills"),
       root: path.join(strapRoot(), "skills"),
     }),
     discover: discoverSkillArtifacts,
@@ -58,10 +65,11 @@ const TYPES = {
   },
   model: {
     roots: () => ({
+      session: maybeJoin(strapSessionOverlayRoot(), "models"),
       user: path.join(strapWorkRoot(), "models"),
       project: path.join(strapProjectRoot(), "models"),
-      config: path.join(strapConfigRoot(), "models"),
-      root: path.join(strapRoot(), "models"),
+      global: path.join(strapGlobalRoot(), "models"),
+      root: path.join(strapRepoConfigRoot(), "models"),
     }),
     discover: discoverModelArtifacts,
     destination: (root, artifact) => path.join(root, artifact.entryName),
@@ -100,42 +108,53 @@ export function workonArtifact(type, name, { includePaths = false } = {}) {
   const roots = config.roots();
   const all = artifactsByLayer(type);
   const artifact = findVisible(type, name, all);
-  if (artifact.layer === "user") return { ok: true, action: "workon", artifact: describeArtifact(artifact, all, includePaths) };
-  const target = config.destination(roots.user, artifact);
+  const targetLayer = roots.session ? "session" : "user";
+  if (artifact.layer === targetLayer) return { ok: true, action: "workon", artifact: describeArtifact(artifact, all, includePaths) };
+  const target = config.destination(roots[targetLayer], artifact);
   copyArtifact(artifact, target);
+  if (targetLayer === "session") snapshotCurrentSession(`artifact workon: ${type}/${name}`);
   const nextAll = artifactsByLayer(type);
-  return { ok: true, action: "workon", artifact: describeArtifact(findLayer(type, artifact.name, "user", nextAll), nextAll, includePaths) };
+  return { ok: true, action: "workon", artifact: describeArtifact(findLayer(type, artifact.name, targetLayer, nextAll), nextAll, includePaths) };
 }
 
-export function promoteArtifact(type, name, { includePaths = false } = {}) {
+export function promoteArtifact(type, name, { includePaths = false, from, to } = {}) {
   const config = typeConfig(type);
   const roots = config.roots();
   const all = artifactsByLayer(type);
-  const artifact = findLayer(type, name, "user", all);
-  const target = config.destination(roots.project, artifact);
+  const sourceLayer = from || firstPromotableLayer(type, name, all);
+  const targetLayer = to || nextLayer(sourceLayer);
+  if (!targetLayer) throw new Error(`Cannot promote from ${sourceLayer}`);
+  if (!roots[targetLayer]) throw new Error(`${targetLayer} layer is not available`);
+  const artifact = findLayer(type, name, sourceLayer, all);
+  const target = config.destination(roots[targetLayer], artifact);
   copyArtifact(artifact, target);
   removeArtifact(artifact);
+  if (sourceLayer === "session" || targetLayer === "session") snapshotCurrentSession(`artifact promote: ${type}/${name} ${sourceLayer}->${targetLayer}`);
   const nextAll = artifactsByLayer(type);
-  return { ok: true, action: "promote", artifact: describeArtifact(findLayer(type, artifact.name, "project", nextAll), nextAll, includePaths) };
+  return { ok: true, action: "promote", from: sourceLayer, to: targetLayer, artifact: describeArtifact(findLayer(type, artifact.name, targetLayer, nextAll), nextAll, includePaths) };
 }
 
-export function discardArtifact(type, name) {
+export function discardArtifact(type, name, { from } = {}) {
   const all = artifactsByLayer(type);
-  const artifact = findLayer(type, name, "user", all);
+  const layer = from || firstDiscardableLayer(type, name, all);
+  const artifact = findLayer(type, name, layer, all);
   removeArtifact(artifact);
-  return { ok: true, action: "discard", type, name: artifact.name };
+  if (layer === "session") snapshotCurrentSession(`artifact discard: ${type}/${name}`);
+  return { ok: true, action: "discard", type, name: artifact.name, from: layer };
 }
 
 export function globalStatus({ includePaths = false } = {}) {
   return {
     roots: {
       workspace: workspaceRoot(),
+      session: strapSessionOverlayRoot(),
       project: strapProjectRoot(),
       work: strapWorkRoot(),
-      config: strapConfigRoot(),
+      active_work: strapActiveWorkRoot(),
+      global: strapGlobalRoot(),
       root: strapRoot(),
     },
-    layers: ["user", "project", "config", "root"],
+    layers: LAYERS,
     artifacts: allArtifactStatus({ includePaths }),
   };
 }
@@ -149,7 +168,7 @@ function typeConfig(type) {
 function artifactsByLayer(type) {
   const config = typeConfig(type);
   const roots = config.roots();
-  return LAYERS.flatMap((layer) => config.discover(roots[layer], layer));
+  return LAYERS.flatMap((layer) => roots[layer] ? config.discover(roots[layer], layer) : []);
 }
 
 function discoverCommandArtifacts(root, layer) {
@@ -208,7 +227,7 @@ function discoverModelArtifacts(root, layer) {
 function describeArtifact(artifact, all, includePaths) {
   const base = all.find((item) => item.name === artifact.name && LAYERS.indexOf(item.layer) > LAYERS.indexOf(artifact.layer));
   const shadows = all.filter((item) => item.name === artifact.name && item.layer !== artifact.layer).map((item) => item.layer);
-  const status = artifact.layer === "user"
+  const status = ["session", "user"].includes(artifact.layer)
     ? base ? artifactDigest(artifact) === artifactDigest(base) ? "working" : "modified" : "new"
     : artifact.layer;
   return {
@@ -236,6 +255,29 @@ function findLayer(type, name, layer, all) {
   if (matches.length === 0) throw new Error(`${type} artifact not found in ${layer} layer: ${name}`);
   if (matches.length > 1) throw new Error(`Ambiguous ${type} artifact in ${layer} layer: ${name}`);
   return matches[0];
+}
+
+function firstPromotableLayer(type, name, all) {
+  for (const layer of MUTABLE_LAYERS) {
+    if (all.some((item) => item.layer === layer && item.name === name)) return layer;
+  }
+  throw new Error(`${type} artifact not found in a promotable layer: ${name}`);
+}
+
+function firstDiscardableLayer(type, name, all) {
+  for (const layer of ["session", "user"]) {
+    if (all.some((item) => item.layer === layer && item.name === name)) return layer;
+  }
+  throw new Error(`${type} artifact not found in a discardable layer: ${name}`);
+}
+
+function nextLayer(layer) {
+  const index = LAYERS.indexOf(layer);
+  return index === -1 ? undefined : LAYERS[index + 1];
+}
+
+function maybeJoin(root, name) {
+  return root ? path.join(root, name) : undefined;
 }
 
 function copyArtifact(artifact, target) {

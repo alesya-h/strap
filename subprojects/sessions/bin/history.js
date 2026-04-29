@@ -2,17 +2,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { strapWorkRoot } from "#strap/core/paths";
+import { strapSessionRoot } from "#strap/core/paths";
 
 const [command = "status", ...args] = process.argv.slice(2);
 
 function usage() {
-  console.error("Usage: strap history <init|root|status|log|diff|snapshot|new|restore> [args]");
+  console.error("Usage: strap history <init|root|status|log|diff|snapshot|new|restore|ui|jjui> [args]");
   process.exit(2);
 }
 
-function work() {
-  const root = strapWorkRoot();
+function session() {
+  const root = strapSessionRoot();
+  if (!root) throw new Error("No current session. Run `strap session new <name>` first.");
   fs.mkdirSync(root, { recursive: true });
   return root;
 }
@@ -20,7 +21,9 @@ function work() {
 function ensureIgnore(root) {
   const file = path.join(root, ".gitignore");
   const wanted = ["/cache/", "/logs/", "/zettel/*.sqlite", "/zettel/*.sqlite-*", "/auth/", ""].join("\n");
-  if (!fs.existsSync(file)) fs.writeFileSync(file, wanted);
+  if (fs.existsSync(file)) return false;
+  fs.writeFileSync(file, wanted);
+  return true;
 }
 
 function runJj(root, jjArgs, opts = {}) {
@@ -32,19 +35,24 @@ function runJj(root, jjArgs, opts = {}) {
 
 if (command === "init") {
   const root = work();
-  ensureIgnore(root);
-  if (!fs.existsSync(path.join(root, ".jj"))) runJj(root, ["git", "init", "--no-colocate", "."], { capture: true });
+  const changed = ensureIgnore(root);
+  const initialized = !fs.existsSync(path.join(root, ".jj"));
+  if (initialized) runJj(root, ["git", "init", "--no-colocate", "."], { capture: true });
+  if (changed || initialized) {
+    runJj(root, ["describe", "-m", "history init"], { capture: true });
+    runJj(root, ["new"], { capture: true });
+  }
   process.stdout.write(`${JSON.stringify({ ok: true, work: root, jj: path.join(root, ".jj") }, null, 2)}\n`);
 } else if (command === "root") {
-  process.stdout.write(`${work()}\n`);
+  process.stdout.write(`${session()}\n`);
 } else if (["status", "st"].includes(command)) {
-  runJj(work(), ["status", ...args]);
+  runJj(session(), ["status", ...args]);
 } else if (command === "log") {
-  runJj(work(), ["log", ...args]);
+  runJj(session(), ["log", ...args]);
 } else if (command === "diff") {
-  runJj(work(), ["diff", ...args]);
+  runJj(session(), ["diff", ...args]);
 } else if (command === "snapshot") {
-  const root = work();
+  const root = session();
   if (!fs.existsSync(path.join(root, ".jj"))) throw new Error("History is not initialized. Run `strap history init`.");
   const message = takeOption(args, "--message") || takeOption(args, "-m") || args.join(" ") || "strap state snapshot";
   runJj(root, ["describe", "-m", message], { capture: true });
@@ -52,13 +60,25 @@ if (command === "init") {
   process.stdout.write(`${JSON.stringify({ ok: true, work: root, message }, null, 2)}\n`);
 } else if (command === "new") {
   const rev = args[0];
-  runJj(work(), rev ? ["new", rev] : ["new"]);
+  runJj(session(), rev ? ["new", rev] : ["new"]);
 } else if (command === "restore") {
   const rev = args[0];
   if (!rev) usage();
-  runJj(work(), ["restore", "--from", rev]);
+  runJj(session(), ["restore", "--from", rev]);
+} else if (["ui", "jjui"].includes(command)) {
+  runUi(session(), args);
 } else {
   usage();
+}
+
+function work() {
+  return session();
+}
+
+function runUi(root, uiArgs) {
+  const child = spawnSync("jjui", uiArgs, { cwd: root, stdio: "inherit", encoding: "utf8" });
+  if (child.error?.code === "ENOENT") throw new Error("jjui is required for `strap history ui`");
+  if (child.status !== 0) throw new Error(`jjui exited ${child.status ?? child.signal}`);
 }
 
 function takeOption(values, name) {

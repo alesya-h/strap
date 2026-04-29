@@ -17,8 +17,10 @@ The runner resolves command directories, builds a standard environment, then spa
 | Root | Purpose | Default |
 | --- | --- | --- |
 | `STRAP_ROOT` | Installed harness code | repository root in development |
-| `STRAP_CONFIG` | Static harness config | `config/strap` when present, otherwise XDG config |
+| `STRAP_CONFIG` | Static harness config | `config/strap` when present, otherwise `$STRAP_GLOBAL` |
+| `STRAP_GLOBAL` | Global home-directory artifacts | `$XDG_CONFIG_HOME/strap` |
 | `STRAP_PROJECT` | Project-shared harness artifacts | nearest `.strap`, otherwise `$STRAP_WORKSPACE/.strap` |
+| `STRAP_SESSION` | Current session directory | `$STRAP_WORK/sessions/current` pointer when present |
 | `STRAP_WORK` | User/agent-local mutable state | nearest `.strap-user`, otherwise `$STRAP_WORKSPACE/.strap-user` |
 | `STRAP_WORKSPACE` | Filesystem workspace for tools | current working directory |
 
@@ -30,12 +32,13 @@ Use `strap paths` or `strap commands roots` to inspect resolution.
 
 Commands, script tools, and porcelain modules share a layered artifact model:
 
+- `session`: current-session overlay under `$STRAP_SESSION/overlay`.
 - `user`: mutable user/agent overlay under `.strap-user`.
 - `project`: shared project artifacts under `.strap`.
-- `config`: static/global config artifacts.
+- `global`: home-directory artifacts under `$STRAP_GLOBAL`.
 - `root`: installed harness defaults.
 
-The user layer shadows lower layers. `strap artifact workon <type> <name>` copies a lower-layer artifact into the user layer, `strap artifact promote <type> <name>` writes the user-layer artifact to the project layer and clears the overlay, and `strap artifact discard <type> <name>` removes the user-layer overlay.
+The session layer shadows lower layers when a current session exists. `strap artifact workon <type> <name>` copies a lower-layer artifact into the session layer, or into the user layer if there is no current session. `strap artifact promote <type> <name>` moves one layer down by default: session to user, user to project, project to global, and global to root. `strap artifact discard <type> <name>` removes the session overlay first, then user overlay.
 
 Supported artifact types are currently `command`, `tool`, `porcelain`, `model`, `agent`, and `skill`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
 
@@ -45,13 +48,14 @@ Commands are searched in this order:
 
 ```text
 STRAP_COMMAND_PATH
+$STRAP_SESSION/overlay/commands
 $STRAP_WORK/commands
 $STRAP_PROJECT/commands
-$STRAP_CONFIG/commands
+$STRAP_GLOBAL/commands
 $STRAP_ROOT/subprojects/cli/commands
 ```
 
-The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/config commands can override built-ins.
+The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/global commands can override built-ins.
 
 A command directory can contain:
 
@@ -226,14 +230,18 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 - `trace.jsonl`
 - `provider-requests/`
 - `tool-results/`
+- `overlay/`
+- `.jj/`
 
 `strap session copy <name>` copies the current session into a new current session. With `--at <bookmark>`, the copied state is truncated after that visible bookmark so the conversation can continue in a different direction from a specific point.
+
+Session mutations create jj snapshots in the session directory. `strap history` operates on the current session rather than the project-user work root, and `strap history ui` launches `jjui` there.
 
 Memory is explicit: agents and humans use `strap zk` or the `zk` script tool to search, create, and update zettelkasten notes. Session commands do not implicitly inject or write memory.
 
 `strap zk` stores markdown notes under `.strap-user/zettel` for user/private memory or `.strap/zettel` for project-shared memory. The user layer is a transparent overlay on the project layer: user notes shadow project notes with the same id, `workon` copies a project note into the user layer, `promote` writes it back, and normal output hides physical `.strap*` paths. Inline `[[wikilinks]]` are the canonical link source; backlinks and ambiguity diagnostics are derived during normal reads/writes. SQLite/FTS/vector data under `$STRAP_WORK/zettel` is a derived cache rebuilt by `strap zk reindex` and on hybrid/vector searches.
 
-`strap history` wraps a separate jj repo in `$STRAP_WORK`, which defaults to `.strap-user`. It tracks user-local sessions, temporary commands/tools/porcelain, private markdown memory, and other agent state without touching the project workspace history.
+`strap history` wraps the current session directory as a jj repo. Project-user overlays and private memory remain under `$STRAP_WORK`, but session-local state and session overlays get per-session history without touching the project workspace history.
 
 ## Subprojects
 

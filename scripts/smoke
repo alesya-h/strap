@@ -64,8 +64,8 @@ $strap artifact status model > /tmp/strap-artifact-model-status.json
 $strap artifact workon porcelain basic > /tmp/strap-artifact-workon.json
 $strap artifact discard porcelain basic > /tmp/strap-artifact-discard.json
 $strap work init > /tmp/strap-work-init.json
-$strap history init > /tmp/strap-history-init.json
 $strap session new 'smoke session' > /tmp/strap-session-new.json
+$strap history init > /tmp/strap-history-init.json
 $strap session ask 'remember this smoke question' > /tmp/strap-session-ask.json
 $strap session show > /tmp/strap-session-before-copy.json
 $strap state bookmark add --text 'remember this smoke question' --label session-copy-point < /tmp/strap-session-before-copy.json > /tmp/strap-session-bookmarked.json 2> /tmp/strap-session-bookmark.log

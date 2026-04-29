@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { strapCommandDirs, strapConfigRoot, strapProjectRoot, strapRoot, strapWorkRoot } from "#strap/core/paths";
+import { strapActiveWorkRoot, strapCommandDirs, strapGlobalRoot, strapProjectRoot, strapRoot, strapSessionOverlayRoot, strapWorkRoot } from "#strap/core/paths";
+import { snapshotCurrentSession } from "#strap/core/session-history";
 
 const [command, ...args] = process.argv.slice(2);
 
@@ -86,7 +87,7 @@ if (command === "list") {
   if (json) process.stdout.write(`${JSON.stringify(items, null, 2)}\n`);
   else for (const item of items) process.stdout.write(`${item.name}\t${item.description}\n`);
 } else if (command === "roots") {
-  process.stdout.write(`${JSON.stringify({ root: strapRoot(), config: strapConfigRoot(), project: strapProjectRoot(), work: strapWorkRoot(), command_dirs: strapCommandDirs() }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ root: strapRoot(), global: strapGlobalRoot(), project: strapProjectRoot(), work: strapWorkRoot(), session: strapSessionOverlayRoot(), active_work: strapActiveWorkRoot(), command_dirs: strapCommandDirs() }, null, 2)}\n`);
 } else if (command === "manifest") {
   const name = args[0];
   const item = commandItems().find((item) => item.name === name);
@@ -104,13 +105,14 @@ if (command === "list") {
 } else if (command === "new") {
   const name = args[0];
   if (!validName(name)) throw new Error("Command name must match [a-z][a-z0-9-]*");
-  const dir = path.join(strapWorkRoot(), "commands", name);
+  const dir = path.join(strapActiveWorkRoot(), "commands", name);
   if (fs.existsSync(dir)) throw new Error(`Command already exists: ${dir}`);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "run"), `#!/usr/bin/env bash\nset -euo pipefail\n\necho "${name}: implement me"\n`);
   fs.chmodSync(path.join(dir, "run"), 0o755);
   fs.writeFileSync(path.join(dir, "desc"), `${name} command.\n\nUsage:\n  strap ${name}\n`);
   fs.mkdirSync(path.join(dir, "inner"));
+  if (strapSessionOverlayRoot()) snapshotCurrentSession(`command new: ${name}`);
   process.stdout.write(`${JSON.stringify({ ok: true, name, dir }, null, 2)}\n`);
 } else {
   usage();

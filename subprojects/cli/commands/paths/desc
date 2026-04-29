@@ -1,9 +1,11 @@
-Print resolved strap root, config, project, work, and workspace paths.
+Print resolved strap root, global, project, session, work, and workspace paths.
 
 Usage:
   strap paths
   strap paths root
   strap paths config
+  strap paths global
   strap paths project
+  strap paths session
   strap paths work
   strap paths workspace
