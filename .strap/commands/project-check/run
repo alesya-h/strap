@@ -3,7 +3,44 @@ set -euo pipefail
 
 cd "$STRAP_ROOT"
 
-shopt -s nullglob
+shopt -s nullglob globstar
+
+check_line_cap() {
+  local limit=150
+  local exceptions_file=.strap/config/line-cap-exceptions.txt
+  local failed=0
+  local line_count
+  local files=(bin/strap scripts/check scripts/smoke subprojects/cli/commands/**/* .strap/commands/**/* .strap-user/commands/**/*)
+
+  for file in "${files[@]}"; do
+    [ -f "$file" ] || continue
+    line_count=$(wc -l < "$file")
+    if [ "$line_count" -le "$limit" ]; then continue; fi
+    if [ -f "$exceptions_file" ] && grep -Fxq -- "$file" "$exceptions_file"; then continue; fi
+    printf 'File exceeds %s-line cap: %s (%s lines)\n' "$limit" "$file" "$line_count" >&2
+    failed=1
+  done
+
+  if [ -f "$exceptions_file" ]; then
+    while IFS= read -r file; do
+      case "$file" in ''|'#'*) continue ;; esac
+      if [ ! -f "$file" ]; then
+        printf 'Line-cap exception no longer exists: %s\n' "$file" >&2
+        failed=1
+        continue
+      fi
+      line_count=$(wc -l < "$file")
+      if [ "$line_count" -le "$limit" ]; then
+        printf 'Stale line-cap exception under %s lines: %s (%s lines)\n' "$limit" "$file" "$line_count" >&2
+        failed=1
+      fi
+    done < "$exceptions_file"
+  fi
+
+  [ "$failed" -eq 0 ] || exit 1
+}
+
+check_line_cap
 js_files=(
   bin/strap
   subprojects/mcp/servers/*.js
