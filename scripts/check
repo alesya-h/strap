@@ -35,6 +35,9 @@ for file in "${command_files[@]}"; do
     *nu*) nu --ide-check 20 "$file" >/dev/null ;;
   esac
 done
+for file in subprojects/cli/commands/provider-*/main.nu; do
+  [ -f "$file" ] && nu --ide-check 20 "$file" >/dev/null
+done
 jq empty package.json config/strap/config.json config/strap/models/*.json config/strap/tool-groups/*.json config/strap/zettel/config.json
 if bb -cp subprojects/state-bb/src -m strap.state --help >/tmp/strap-bb-help.txt 2>&1; then
   :
@@ -49,6 +52,12 @@ else
   test "$code" = 2
 fi
 if bb subprojects/cli/commands/zk/inner/index --help >/tmp/strap-zk-index-bb-help.txt 2>&1; then
+  :
+else
+  code=$?
+  test "$code" = 2
+fi
+if bb -cp subprojects/cli/commands/provider-chatgpt/src -m provider.chatgpt >/tmp/strap-provider-chatgpt-bb-help.txt 2>&1; then
   :
 else
   code=$?

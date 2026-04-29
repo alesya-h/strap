@@ -58,7 +58,7 @@ Completed slices:
 - `zk` is now a self-contained Babashka capsule over markdown notes, with a command-private Babashka SQLite/FTS/vector helper at `strap inner zk index`.
 - `embed` exists as a public embedding facade. Local hash embeddings are implemented in the command; provider-backed embeddings route to `strap provider <name> embed`.
 - `provider` now dispatches to hidden `provider-*` implementation commands, preserving a clean public surface while allowing provider-local command identity.
-- Hidden provider commands now have provider-owned entrypoints: `provider-chatgpt/run.js`, `provider-openai/run.js`, `provider-openrouter/run.js`, and `provider-anthropic/run.js`. The old provider and llm JS entrypoints, the provider-command library, and the bad intermediate shared runner have been removed.
+- Hidden provider commands now have provider-owned implementations: `provider-openai`, `provider-openrouter`, and `provider-anthropic` are Nushell REST capsules; `provider-chatgpt` is a Babashka capsule. The old provider and llm JS entrypoints, the provider-command library, and the bad intermediate shared runner have been removed.
 
 Remaining slices:
 
