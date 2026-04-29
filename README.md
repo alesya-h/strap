@@ -48,6 +48,15 @@ strap state init \
 
 Use `strap help`, `strap -a`, `strap paths`, and `strap status` to inspect the command surface, resolved roots, and active overlays. See `docs/organization.md`.
 
+Debug command and tool execution without contaminating JSON stdout:
+
+```bash
+STRAP_COMMANDS_DEBUG=1 strap paths
+STRAP_TOOLS_DEBUG=1 strap run-calls --tools all < state.json > next.json
+```
+
+`STRAP_COMMANDS_DEBUG` writes dispatched commands and arguments to stderr. `STRAP_TOOLS_DEBUG` writes tool calls and tool results to stderr.
+
 Project-local daily workflow:
 
 ```bash

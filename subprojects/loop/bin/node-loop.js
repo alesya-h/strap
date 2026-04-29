@@ -4,6 +4,7 @@ import { readJsonInput, takeOption, writeJson } from "#strap/core/cli-io";
 import { loadModelConfig } from "#strap/providers/config";
 import { completeProvider } from "#strap/providers/call";
 import { getTools, toolMap } from "#strap/tools/registry";
+import { debugToolCall, debugToolResult } from "#strap/core/debug";
 
 const args = process.argv.slice(2);
 
@@ -50,10 +51,12 @@ writeJson(state);
 
 async function executeCall(call, toolsByName) {
   if (call.ok !== undefined) return;
+  debugToolCall(call);
   const tool = toolsByName.get(call.tool);
   if (!tool) {
     call.ok = false;
     call.error = `Unknown tool: ${call.tool}`;
+    debugToolResult(call);
     return;
   }
   try {
@@ -63,4 +66,5 @@ async function executeCall(call, toolsByName) {
     call.ok = false;
     call.error = error.message;
   }
+  debugToolResult(call);
 }

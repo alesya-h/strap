@@ -2,6 +2,7 @@ import { appendEvent, createState, eventToText, flattenVisible, normalizeState }
 import { applyAgentProfile, applySkillProfile } from "#strap/core/profiles";
 import { completeProvider } from "#strap/providers/call";
 import { getTools, toolMap } from "#strap/tools/registry";
+import { debugToolCall, debugToolResult } from "#strap/core/debug";
 
 const ONE_SHOT_INSTRUCTION = "You are running as a one-shot agent. Complete the task and return one final answer. Do not assume quoted context is your active dialogue history.";
 
@@ -79,10 +80,12 @@ function renderQuotedEvents(events, title) {
 
 async function executeCall(call, toolsByName) {
   if (call.ok !== undefined) return;
+  debugToolCall(call);
   const tool = toolsByName.get(call.tool);
   if (!tool) {
     call.ok = false;
     call.error = `Unknown tool: ${call.tool}`;
+    debugToolResult(call);
     return;
   }
   try {
@@ -92,6 +95,7 @@ async function executeCall(call, toolsByName) {
     call.ok = false;
     call.error = error.message;
   }
+  debugToolResult(call);
 }
 
 function oneShotResult({ state, task, toolsName, turns, final, dryRun }) {

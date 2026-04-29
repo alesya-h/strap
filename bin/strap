@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { debugCommand } from "#strap/core/debug";
 import { strapCommandDirs, strapConfigRoot, strapProjectRoot, strapRoot, strapWorkRoot, workspaceRoot } from "#strap/core/paths";
 
 const [command, ...args] = process.argv.slice(2);
@@ -88,6 +89,7 @@ function commandCwd(dir, env) {
 async function runExecutable(file, name, dir, args) {
   const env = envFor(name, dir);
   const cwd = await commandCwd(dir, env);
+  debugCommand({ name, args, file, dir, cwd });
   const child = spawn(file, args, { cwd, env, stdio: "inherit" });
   child.on("error", (error) => die(error.message));
   child.on("close", (code, signal) => {
