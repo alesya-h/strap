@@ -33,7 +33,7 @@ async function main(argv) {
         continue;
       }
       try {
-        call.output = await tool.execute(call.input || {});
+        call.output = await tool.execute(call.input || {}, { state, event, call });
         call.ok = true;
       } catch (error) {
         call.ok = false;

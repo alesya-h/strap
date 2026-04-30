@@ -2,18 +2,22 @@
 
 `strap` exposes installed `jsmcp` as a normal tool group named `jsmcp`.
 
-It shells out to:
+It calls the local `jsmcp` HTTP API:
 
 ```bash
-jsmcp client
+http://127.0.0.1:41528/api/call
 ```
 
 Override with:
 
 ```bash
-STRAP_JSMCP_COMMAND=jsmcp
-STRAP_JSMCP_ARGS="client --profile work"
+STRAP_JSMCP_URL=http://127.0.0.1:41528
+STRAP_JSMCP_API_KEY_FILE=~/.config/jsmcp/api-key.txt
+STRAP_JSMCP_API_KEY=...
+STRAP_JSMCP_PROFILE=work
 ```
+
+`run-calls` stores jsmcp discovery memory in canonical state under `runtime.jsmcp`. Successful `jsmcp_list_servers` and `jsmcp_list_tools` calls cache the observed server/tool surface. Before `jsmcp_execute_code`, Strap refreshes cached discovery through the HTTP API; if the observed capabilities changed, it rejects with the same cached-discovery-change message as `jsmcp client` and updates the cache for the next attempt.
 
 ## Tools
 
