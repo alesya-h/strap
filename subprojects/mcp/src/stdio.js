@@ -1,4 +1,7 @@
-import { publicToolSpec, toolMap } from "#strap/tools/registry";
+import { spawn } from "node:child_process";
+import path from "node:path";
+
+const LOCAL_GROUPS = ["fs", "process", "web", "agent", "scripts"];
 
 function encodeMessage(message) {
   const json = JSON.stringify(message);
@@ -6,9 +9,7 @@ function encodeMessage(message) {
 }
 
 export function startMcpServer({ name = "strap", group = "all" } = {}) {
-  const tools = toolMap(group);
   let buffer = Buffer.alloc(0);
-
   process.stdin.on("data", (chunk) => {
     buffer = Buffer.concat([buffer, chunk]);
     while (true) {
@@ -29,8 +30,7 @@ export function startMcpServer({ name = "strap", group = "all" } = {}) {
   async function handle(message) {
     if (!message.id) return;
     try {
-      const result = await dispatch(message);
-      send({ jsonrpc: "2.0", id: message.id, result });
+      send({ jsonrpc: "2.0", id: message.id, result: await dispatch(message) });
     } catch (error) {
       send({ jsonrpc: "2.0", id: message.id, error: { code: -32000, message: error.message } });
     }
@@ -39,19 +39,11 @@ export function startMcpServer({ name = "strap", group = "all" } = {}) {
   async function dispatch(message) {
     switch (message.method) {
       case "initialize":
-        return {
-          protocolVersion: message.params?.protocolVersion || "2024-11-05",
-          capabilities: { tools: { listChanged: false } },
-          serverInfo: { name, version: "0.1.0" },
-        };
+        return { protocolVersion: message.params?.protocolVersion || "2024-11-05", capabilities: { tools: { listChanged: false } }, serverInfo: { name, version: "0.1.0" } };
       case "tools/list":
-        return { tools: [...tools.values()].map(publicToolSpec) };
-      case "tools/call": {
-        const toolName = message.params?.name;
-        const tool = tools.get(toolName);
-        if (!tool) throw new Error(`Unknown tool: ${toolName}`);
-        return await tool.execute(message.params?.arguments || {});
-      }
+        return { tools: await listTools(group) };
+      case "tools/call":
+        return await callTool(group, message.params?.name, message.params?.arguments || {});
       case "ping":
         return {};
       default:
@@ -62,4 +54,59 @@ export function startMcpServer({ name = "strap", group = "all" } = {}) {
   function send(message) {
     process.stdout.write(encodeMessage(message));
   }
+}
+
+async function listTools(group) {
+  const seen = new Set();
+  const out = [];
+  for (const item of await toolsWithGroups(group)) {
+    if (seen.has(item.tool.name)) continue;
+    seen.add(item.tool.name);
+    out.push(item.tool);
+  }
+  return out;
+}
+
+async function callTool(group, name, input) {
+  const item = (await toolsWithGroups(group)).find((entry) => entry.tool.name === name);
+  if (!item) throw new Error(`Unknown tool: ${name}`);
+  const state = oneCallState(name, input);
+  const next = await runStrapJson(["run-calls", "--tools", item.group], state);
+  const call = next.root.children[0].calls[0];
+  if (!call.ok) throw new Error(call.error || `Tool failed: ${name}`);
+  return call.output;
+}
+
+async function toolsWithGroups(group) {
+  const groups = expandGroups(group);
+  const nested = await Promise.all(groups.map(async (item) => (await runStrapJson(["tools", "list", "--group", item, "--json"])).map((tool) => ({ group: item, tool }))));
+  return nested.flat();
+}
+
+function expandGroups(group) {
+  return String(group || "all").split(",").flatMap((item) => item.trim() === "all" ? LOCAL_GROUPS : [item.trim()]).filter(Boolean);
+}
+
+function oneCallState(tool, input) {
+  return { version: "strap.state.v0.2", actors: {}, root: { type: "scope", label: "root", status: "open", participants: ["assistant", "harness"], children: [{ type: "event", from: "assistant", to: ["harness"], kind: "tool_request", calls: [{ id: "mcp-call", tool, input }] }] } };
+}
+
+function strapBin() {
+  return process.env.STRAP_BIN || path.join(process.env.STRAP_ROOT || process.cwd(), "bin", "strap");
+}
+
+function runStrapJson(args, input) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(strapBin(), args, { env: process.env, stdio: ["pipe", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => { stdout += chunk; });
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve(JSON.parse(stdout || "null"));
+      else reject(new Error(stderr || stdout || `strap exited ${code}`));
+    });
+    child.stdin.end(input === undefined ? "" : `${JSON.stringify(input)}\n`);
+  });
 }

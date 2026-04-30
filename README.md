@@ -178,16 +178,19 @@ See `docs/self-modifying-porcelain.md` for the design.
 Each server speaks MCP over stdio:
 
 ```bash
-node subprojects/mcp/servers/fs.js
-node subprojects/mcp/servers/process.js
-node subprojects/mcp/servers/web.js
-node subprojects/mcp/servers/agent.js
-node subprojects/mcp/servers/scripts.js
+strap mcp fs
+strap mcp process
+strap mcp web
+strap mcp agent
+strap mcp scripts
+strap mcp fs,process,scripts
 ```
+
+`strap mcp all` exposes local Strap tool groups only: `fs`, `process`, `web`, `agent`, and `scripts`. The `jsmcp` group is available only when explicitly requested.
 
 ## jsmcp
 
-`strap` can call installed `jsmcp` through the `jsmcp` tool group. By default it runs `jsmcp client`, matching the OpenCode config in `~/.config/opencode/opencode.jsonc`.
+`strap` can call installed `jsmcp` through the `jsmcp` tool group. It uses the local jsmcp HTTP API and stores discovery memory in canonical state.
 
 ```bash
 strap state init \

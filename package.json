@@ -7,7 +7,6 @@
   "imports": {
     "#strap/core/*": "./subprojects/core/src/*.js",
     "#strap/providers/*": "./subprojects/providers/src/*.js",
-    "#strap/tools/*": "./subprojects/tools/src/*.js",
     "#strap/mcp/*": "./subprojects/mcp/src/*.js",
     "#strap/jsmcp/*": "./subprojects/jsmcp/src/*.js",
     "#strap/porcelain/*": "./subprojects/porcelain/src/*.js",

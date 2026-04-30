@@ -4,11 +4,11 @@
 
 - `cli/`: filesystem-discovered command runner and built-in command directories.
 - `core/`: canonical state, path resolution, CLI I/O, layered artifact/profile/skill helpers, and agent state helpers.
-- `providers/`: model-profile loading, provider request compilation/calls, streaming, and auth.
-- `loop/`: Node model/tool loop.
-- `tools/`: built-in tool registry and tool implementations.
+- `providers/`: legacy provider JS retained until dead-code cleanup; active providers live under `cli/commands/provider-*`.
+- `loop/`: legacy location; active loop lives under `cli/commands/loop`.
+- `tools/`: legacy location; active schemas/execution live under `cli/commands/tools` and `cli/commands/run-calls`.
 - `mcp/`: bundled stdio MCP servers.
-- `jsmcp/`: bridge to installed `jsmcp client`.
+- `jsmcp/`: legacy stdio bridge location; active jsmcp integration uses the HTTP API from `run-calls`.
 - `porcelain/`: runner for model-editable Nushell porcelain modules.
 - `zettel/`: markdown-source zettelkasten, derived SQLite/FTS/vector index, and embedding helper.
 - `sessions/`: `.strap` project artifact and `.strap-user` local work/session CLIs.

@@ -78,8 +78,14 @@ for file in subprojects/cli/commands/run-calls/src/**/*.js; do
     exit 1
   fi
 done
-if grep -R -n '#strap/tools/registry' subprojects/cli/commands/provider-* >&2; then
-  printf 'Provider commands must load tools through `strap tools`, not #strap/tools/registry.\n' >&2
+for file in subprojects/tools/src/registry.js subprojects/tools/src/agent-tools.js subprojects/tools/src/fs-tools.js subprojects/tools/src/process-tools.js subprojects/tools/src/script-tools.js subprojects/tools/src/web-tools.js; do
+  if [ -e "$file" ]; then
+    printf 'Replaced shared tool JS file should not exist: %s\n' "$file" >&2
+    exit 1
+  fi
+done
+if grep -R -n '#strap/tools' . --include='*.js' --include='*.json' --include='*.md' --exclude-dir=.git >&2; then
+  printf 'Shared #strap/tools imports are retired; use strap tools/run-calls boundaries.\n' >&2
   exit 1
 fi
 

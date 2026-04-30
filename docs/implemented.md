@@ -73,7 +73,8 @@ This document records what `strap` currently implements.
 ## MCP And jsmcp
 
 - Bundled stdio MCP servers for filesystem, process, web, agent, and scripts.
-- jsmcp bridge tool group using installed `jsmcp client`.
+- MCP servers list tools through `strap tools` and execute through `strap run-calls`.
+- jsmcp bridge tool group using the local jsmcp HTTP API with state-backed discovery memory.
 - Bridge tools:
   - `jsmcp_list_servers`
   - `jsmcp_list_tools`
@@ -81,7 +82,7 @@ This document records what `strap` currently implements.
   - `jsmcp_fetch_logs`
   - `jsmcp_clear_logs`
 - Tested Kagi search through jsmcp.
-- MCP stdio client uses newline-delimited JSON framing for this environment.
+- MCP servers use Content-Length stdio framing.
 
 ## Porcelain
 

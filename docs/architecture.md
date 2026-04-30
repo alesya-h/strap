@@ -199,7 +199,9 @@ $STRAP_ROOT/tools
 
 They receive JSON on stdin and can expose a sidecar JSON schema.
 
-Bundled stdio MCP servers live under `subprojects/mcp/servers/`. The jsmcp bridge shells out to `jsmcp client` and exposes configured MCP servers as programmable tools.
+`strap mcp <group>` exposes Strap tools as stdio MCP servers for external MCP hosts. It lists schemas through `strap tools` and executes calls through `strap run-calls`. `strap mcp all` expands to local groups only: `fs`, `process`, `web`, `agent`, and `scripts`; `jsmcp` must be requested explicitly.
+
+The jsmcp bridge uses the local jsmcp HTTP API and exposes configured MCP servers as programmable Strap tools. It stores observed server/tool discovery in canonical state and rejects `execute_code` when cached discovery changes.
 
 ## Models, Providers, And Auth
 
