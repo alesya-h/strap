@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec node "$STRAP_CMD_DIR/src/main.js" "$@"
+exec bb -cp "$STRAP_CMD_DIR/src" -m run-calls.main "$@"

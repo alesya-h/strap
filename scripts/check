@@ -70,6 +70,12 @@ for file in subprojects/core/bin/artifact.js subprojects/core/bin/status.js subp
     exit 1
   fi
 done
+for file in subprojects/cli/commands/run-calls/src/**/*.js; do
+  if [ -e "$file" ]; then
+    printf 'run-calls is a Babashka capsule; JS file should not exist: %s\n' "$file" >&2
+    exit 1
+  fi
+done
 if grep -R -n '#strap/tools/registry' subprojects/cli/commands/provider-* >&2; then
   printf 'Provider commands must load tools through `strap tools`, not #strap/tools/registry.\n' >&2
   exit 1
@@ -90,40 +96,12 @@ for file in subprojects/cli/commands/provider-*/main.nu; do
   [ -f "$file" ] && nu --ide-check 20 "$file" >/dev/null
 done
 jq empty package.json config/strap/config.json config/strap/models/*.json config/strap/tool-groups/*.json config/strap/zettel/config.json
-if bb -cp subprojects/state-bb/src -m strap.state --help >/tmp/strap-bb-help.txt 2>&1; then
-  :
-else
-  code=$?
-  test "$code" = 2
-fi
-if bb subprojects/cli/commands/zk/run --help >/tmp/strap-zk-bb-help.txt 2>&1; then
-  :
-else
-  code=$?
-  test "$code" = 2
-fi
-if bb subprojects/cli/commands/zk/inner/index --help >/tmp/strap-zk-index-bb-help.txt 2>&1; then
-  :
-else
-  code=$?
-  test "$code" = 2
-fi
-if bb -cp subprojects/cli/commands/provider-chatgpt/src -m provider.chatgpt >/tmp/strap-provider-chatgpt-bb-help.txt 2>&1; then
-  :
-else
-  code=$?
-  test "$code" = 2
-fi
-if bb -cp subprojects/cli/commands/artifact/src -m artifact.main --help >/tmp/strap-artifact-bb-help.txt 2>&1; then
-  :
-else
-  code=$?
-  test "$code" = 2
-fi
-if bb subprojects/cli/commands/status/run --help >/tmp/strap-status-bb-help.txt 2>&1; then
-  :
-else
-  code=$?
-  test "$code" = 2
-fi
+expect_exit2() { "$@" >/tmp/strap-check-help.txt 2>&1 || [ "$?" = 2 ]; }
+expect_exit2 bb -cp subprojects/state-bb/src -m strap.state --help
+expect_exit2 bb subprojects/cli/commands/zk/run --help
+expect_exit2 bb subprojects/cli/commands/zk/inner/index --help
+expect_exit2 bb -cp subprojects/cli/commands/provider-chatgpt/src -m provider.chatgpt
+expect_exit2 bb -cp subprojects/cli/commands/artifact/src -m artifact.main --help
+bb -cp subprojects/cli/commands/run-calls/src -e "(require 'run-calls.main)"
+expect_exit2 bb subprojects/cli/commands/status/run --help
 printf '{"texts":["check"]}' | bb subprojects/cli/commands/embed/run --provider hash | jq empty
