@@ -125,5 +125,5 @@ This document records what `strap` currently implements.
 ## Validation
 
 - `npm test` passes.
-- `npm run check` validates Node syntax and Nushell source loading.
+- `npm run check` validates MCP Node syntax and Nushell source loading.
 - Smoke tests cover canonical state transforms, provider request compilation, script tools, and offline zettelkasten search.

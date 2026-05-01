@@ -5,11 +5,7 @@
   "type": "module",
   "private": true,
   "imports": {
-    "#strap/core/*": "./subprojects/core/src/*.js",
-    "#strap/providers/*": "./subprojects/providers/src/*.js",
-    "#strap/mcp/*": "./subprojects/mcp/src/*.js",
-    "#strap/jsmcp/*": "./subprojects/jsmcp/src/*.js",
-    "#strap/loop/*": "./subprojects/loop/src/*.js"
+    "#strap/mcp/*": "./subprojects/mcp/src/*.js"
   },
   "bin": {
     "strap": "./bin/strap"

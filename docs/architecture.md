@@ -276,15 +276,9 @@ The zettelkasten is a self-contained Babashka command capsule because markdown o
 
 Code is grouped by capability:
 
-- `cli`: command runner support and built-in command directories.
-- `core`: paths, canonical state, CLI I/O, agent fork/fold helpers.
-- `providers`: legacy provider modules retained until the remaining dead-code cleanup slice.
-- `loop`: legacy location; the active loop is the Nu capsule under `subprojects/cli/commands/loop`.
-- `tools`: tool registry and built-in tools.
+- `strap-main`: Babashka main command dispatcher behind `bin/strap`.
+- `cli`: built-in command capsules.
 - `mcp`: bundled stdio MCP servers.
-- `jsmcp`: bridge to installed `jsmcp`.
-- `zettel`: legacy location; the active `zk` command now lives as a Babashka capsule under `subprojects/cli/commands/zk`.
-- `sessions`: project work and session CLIs.
 - `state-bb`: Babashka pure-state prototype.
 
 ## Validation

@@ -44,24 +44,11 @@ check_line_cap() {
 check_line_cap
 js_files=(
   subprojects/mcp/servers/*.js
-  subprojects/core/bin/*.js
-  subprojects/core/src/*.js
-  subprojects/providers/bin/*.js
-  subprojects/providers/src/*.js
-  subprojects/loop/bin/*.js
-  subprojects/tools/bin/*.js
-  subprojects/tools/src/*.js
   subprojects/mcp/bin/*.js
   subprojects/mcp/src/*.js
-  subprojects/zettel/bin/*.js
-  subprojects/jsmcp/src/*.js
-  subprojects/cli/bin/*.js
-  subprojects/cli/commands/*/*.js
-  subprojects/cli/commands/*/src/**/*.js
-  subprojects/sessions/bin/*.js
 )
 for file in "${js_files[@]}"; do node --check "$file"; done
-for file in bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
+for file in bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/cli/bin subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
   if [ -e "$file" ]; then
     printf 'Replaced legacy JS file should not exist: %s\n' "$file" >&2
     exit 1
@@ -85,7 +72,7 @@ if grep -R -nE '^\(require|babashka\.classpath|cp/add-classpath' tools --include
   printf 'Babashka tool run scripts should be thin launchers for tool.main.\n' >&2
   exit 1
 fi
-if grep -R -nE ':metadata|metadata[})]' tools subprojects/cli/commands/run-calls subprojects/core/src/result.js --include='*.clj' --include='*.js' --include='*.nu' >&2; then
+if grep -R -nE ':metadata|metadata[})]' tools subprojects/cli/commands/run-calls --include='*.clj' --include='*.js' --include='*.nu' >&2; then
   printf 'Tool results must not use metadata; use equivalent content and structuredContent.\n' >&2; exit 1
 fi
 for file in tools/*; do [ ! -f "$file" ] || { printf 'Tool artifacts must be grouped directories, not flat files: %s\n' "$file" >&2; exit 1; }; done
@@ -97,6 +84,10 @@ for file in subprojects/tools/src/registry.js subprojects/tools/src/agent-tools.
 done
 if grep -R -n '#strap/tools' . --include='*.js' --include='*.json' --include='*.md' --exclude-dir=.git >&2; then
   printf 'Shared #strap/tools imports are retired; use strap tools/run-calls boundaries.\n' >&2
+  exit 1
+fi
+if grep -R -nE '#strap/(core|providers|jsmcp|loop)|\^node' . --include='*.js' --include='*.json' --include='*.md' --include='*.nu' --include='*.clj' --include='*.sh' --exclude-dir=.git --exclude-dir=subprojects/mcp >&2; then
+  printf 'Non-MCP Node surfaces are retired; use Nu/Babashka command boundaries instead.\n' >&2
   exit 1
 fi
 
