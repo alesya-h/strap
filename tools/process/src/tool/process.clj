@@ -17,14 +17,14 @@
        (when-not (str/blank? (:stderr result))
          (str "\n[stderr]\n" (:stderr result)))))
 
-(defn limited-result [result args & [extra-metadata]]
+(defn limited-result [result args & [extra-details]]
   (let [limited (c/truncate (combine result)
                             (long (or (:max_output_bytes args) 40000)))]
     (c/tool-result (:text limited)
                    (merge {:exitCode (:code result)
                            :signal nil
                            :truncated (:truncated limited)}
-                          extra-metadata))))
+                          extra-details))))
 
 (defn shell-runner [cwd command read-only?]
   (if read-only?

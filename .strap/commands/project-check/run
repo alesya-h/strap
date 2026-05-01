@@ -89,6 +89,9 @@ if grep -R -nE '^\(require|babashka\.classpath|cp/add-classpath' tools --include
   printf 'Babashka tool run scripts should be thin launchers for tool.main.\n' >&2
   exit 1
 fi
+if grep -R -nE ':metadata|metadata[})]' tools subprojects/cli/commands/run-calls subprojects/core/src/result.js --include='*.clj' --include='*.js' --include='*.nu' >&2; then
+  printf 'Tool results must not use metadata; use equivalent content and structuredContent.\n' >&2; exit 1
+fi
 for file in tools/*; do [ ! -f "$file" ] || { printf 'Tool artifacts must be grouped directories, not flat files: %s\n' "$file" >&2; exit 1; }; done
 for file in subprojects/tools/src/registry.js subprojects/tools/src/agent-tools.js subprojects/tools/src/fs-tools.js subprojects/tools/src/process-tools.js subprojects/tools/src/script-tools.js subprojects/tools/src/web-tools.js; do
   if [ -e "$file" ]; then

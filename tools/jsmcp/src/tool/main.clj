@@ -8,6 +8,14 @@
 (defn write-json [value]
   (println (json/generate-string value {:pretty true})))
 
+(defn result-content [value]
+  [{:type "text" :text (json/generate-string value {:pretty true})}])
+
+(defn normalize-result [result]
+  (let [value (or (:structuredContent result) result)]
+    {:content (result-content value)
+     :structuredContent value}))
+
 (defn own-state-atom [envelope]
   (atom {:runtime {:jsmcp (or (:own_state envelope) {})}}))
 
@@ -18,7 +26,7 @@
     (when-not f
       (throw (ex-info (str "Unknown jsmcp action: " action) {})))
     (try
-      (write-json {:result (f (:arguments envelope) {:state state})
+      (write-json {:result (normalize-result (f (:arguments envelope) {:state state}))
                    :own_state (get-in @state [:runtime :jsmcp])})
       (catch Exception e
         (write-json {:error (.getMessage e)

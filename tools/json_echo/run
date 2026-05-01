@@ -12,11 +12,12 @@ def main [action?: string] {
 
   let envelope = (^cat | from json)
   let arguments = ($envelope.arguments? | default {})
-  let text = ($arguments | to json --raw)
+  let text = ($arguments | to json)
 
   {
     result: {
       content: [{type: "text", text: $text}]
+      structuredContent: $arguments
     }
   } | to json | print
 }

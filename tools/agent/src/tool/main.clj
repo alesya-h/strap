@@ -34,7 +34,9 @@
       (assoc-in state [:root :children idx] collapsed))))
 
 (defn text-result [text]
-  {:content [{:type "text" :text text}]})
+  (let [value {:text text}]
+    {:content [{:type "text" :text (json/generate-string value {:pretty true})}]
+     :structuredContent value}))
 
 (defn run-action [action]
   (let [envelope (read-json)

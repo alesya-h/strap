@@ -18,10 +18,10 @@
 (defn tool-result
   ([output]
    (tool-result output {}))
-  ([output metadata]
-   {:content [{:type "text"
-               :text (if (string? output) output (json-str output))}]
-    :metadata metadata}))
+  ([output details]
+   (let [value (if (map? output) (merge output details) (merge {:value output} details))]
+     {:content [{:type "text" :text (json-str value)}]
+      :structuredContent value})))
 
 (defn truncate [text limit]
   (let [value (str text)]

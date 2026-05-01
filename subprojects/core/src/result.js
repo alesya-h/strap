@@ -6,9 +6,10 @@ export function jsonContent(value) {
   return textContent(JSON.stringify(value, null, 2));
 }
 
-export function toolResult(output, metadata = {}) {
-  if (typeof output === "string") return { content: textContent(output), metadata };
-  return { content: jsonContent(output), metadata };
+export function toolResult(output, details = {}) {
+  const base = typeof output === "object" && output !== null && !Array.isArray(output) ? output : { value: output };
+  const structuredContent = { ...base, ...details };
+  return { content: jsonContent(structuredContent), structuredContent };
 }
 
 export function truncateText(text, limit = 40000) {

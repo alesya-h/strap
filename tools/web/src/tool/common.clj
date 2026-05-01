@@ -4,13 +4,19 @@
 (defn json-str [value]
   (json/generate-string value {:pretty true}))
 
+(defn structured [output details]
+  (cond
+    (map? output) (merge output details)
+    (empty? details) {:value output}
+    :else (merge {:value output} details)))
+
 (defn tool-result
   ([output]
-   (tool-result output {}))
-  ([output metadata]
-   {:content [{:type "text"
-               :text (if (string? output) output (json-str output))}]
-    :metadata metadata}))
+    (tool-result output {}))
+  ([output details]
+   (let [value (structured output details)]
+     {:content [{:type "text" :text (json-str value)}]
+      :structuredContent value})))
 
 (defn truncate [text limit]
   (let [value (str text)]

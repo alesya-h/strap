@@ -24,7 +24,7 @@ Adopted here:
 - Search tools wrap `rg` semantics because that is what agents already learn well.
 - Shell takes `workdir`, `timeout_ms`, `max_output_bytes`, and `description` for auditability.
 - Dynamic and external tools should be namespaced rather than blended into core names.
-- Tool execution returns content plus metadata; large output is truncated before model exposure.
+- Tool execution returns semantically equivalent `content` and `structuredContent`; large output is truncated before model exposure.
 - Bubblewrap is a runtime option for read-only filesystem execution, not a prompt-only promise.
 
 Deferred for later:
@@ -52,7 +52,7 @@ For `strap`, the safer version is:
 - tool groups live in `tools/<group>/` or directories listed in `STRAP_TOOL_PATH`
 - action metadata in `meta.json` or `meta/<action>.json` supplies `description`, `inputSchema`, and optional `process_state`
 - input is JSON on stdin, not string interpolation into a shell command
-- output is stdout plus metadata
+- output is `content` plus equivalent `structuredContent`
 - tools are exposed through dotted names like `json_echo.echo` and `strap mcp json_echo`
 
 This preserves the unix-ish extensibility while making quoting, injection, and schema drift easier to reason about.
