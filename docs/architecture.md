@@ -196,7 +196,7 @@ $STRAP_CONFIG/tools
 $STRAP_ROOT/tools
 ```
 
-Tool artifacts are grouped directories: `tools/<group>/run`, `tools/<group>/desc`, and either `tools/<group>/meta.json` or `tools/<group>/meta/<action>.json`. Provider-facing names are dotted, for example `fs.read_file` and `jsmcp.list_servers`. Action metadata can set `process_state` to `none` (default), `own`, or `full`; own-state tools read/write `runtime.tools.<group>` through an `own_state` envelope. Results use semantically equivalent `content` and `structuredContent`; result `metadata` is not part of the contract.
+Tool artifacts are grouped directories: `tools/<group>/run`, `tools/<group>/desc`, and either `tools/<group>/meta.json` or `tools/<group>/meta/<action>.json`. Provider-facing names are dotted, for example `fs.read_file` and `jsmcp.list_servers`. Action metadata can set `process_state` to `none` (default), `own`, or `full`; own-state tools read/write `runtime.tools.<group>` through an `own_state` envelope. Results use semantically equivalent `content` and `structuredContent`; `content` should be readable for the specific tool, and result `metadata` is not part of the contract.
 
 `strap mcp <group>` exposes Strap tools as stdio MCP servers for external MCP hosts. It lists schemas through `strap tools` and executes calls through `strap run-calls`. `strap mcp all` expands to local groups only; `jsmcp` must be requested explicitly.
 

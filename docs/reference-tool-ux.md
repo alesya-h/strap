@@ -24,7 +24,7 @@ Adopted here:
 - Search tools wrap `rg` semantics because that is what agents already learn well.
 - Shell takes `workdir`, `timeout_ms`, `max_output_bytes`, and `description` for auditability.
 - Dynamic and external tools should be namespaced rather than blended into core names.
-- Tool execution returns semantically equivalent `content` and `structuredContent`; large output is truncated before model exposure.
+- Tool execution returns semantically equivalent `content` and `structuredContent`; `content` is tool-specific readable prose/text, not a JSON dump, and large output is truncated before model exposure.
 - Bubblewrap is a runtime option for read-only filesystem execution, not a prompt-only promise.
 
 Deferred for later:

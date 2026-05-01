@@ -10,12 +10,28 @@
     (empty? details) {:value output}
     :else (merge {:value output} details)))
 
+(defn detail [k v]
+  (str "- " (name k) ": " v))
+
+(defn result-line [entry]
+  (str "- " (:title entry) "\n  " (:url entry)))
+
+(defn render-output [output]
+  (cond
+    (string? output) output
+    (and (sequential? output) (every? map? output)) (str/join "\n" (map result-line output))
+    :else (json-str output)))
+
 (defn tool-result
   ([output]
     (tool-result output {}))
   ([output details]
    (let [value (structured output details)]
-     {:content [{:type "text" :text (json-str value)}]
+     {:content [{:type "text"
+                 :text (str (render-output output)
+                            (when (seq details)
+                              (str "\n\nResponse details:\n"
+                                   (str/join "\n" (map (fn [[k v]] (detail k v)) details)))))}]
       :structuredContent value})))
 
 (defn truncate [text limit]

@@ -12,15 +12,30 @@
     (empty? details) {:value output}
     :else (merge {:value output} details)))
 
-(defn text-content [value]
-  [{:type "text" :text (json-str value)}])
+(defn detail [k v]
+  (str "- " (name k) ": " (if (coll? v) (json-str v) v)))
+
+(defn entry-line [entry]
+  (str "- " (:path entry) " (" (:type entry) ")"))
+
+(defn render-output [output]
+  (cond
+    (string? output) output
+    (and (sequential? output) (every? map? output)) (str/join "\n" (map entry-line output))
+    :else (json-str output)))
+
+(defn text-content [output details]
+  (let [detail-text (str/join "\n" (map (fn [[k v]] (detail k v)) details))]
+    [{:type "text"
+      :text (str (render-output output)
+                 (when (seq details) (str "\n\nDetails:\n" detail-text)))}]))
 
 (defn tool-result
   ([output]
     (tool-result output {}))
   ([output details]
    (let [value (structured output details)]
-     {:content (text-content value)
+     {:content (text-content output details)
       :structuredContent value})))
 
 (defn env [k default]

@@ -14,7 +14,7 @@ def main [action?: string] {
 
   {
     result: {
-      content: [{type: "text", text: ({text: $text} | to json)}]
+      content: [{type: "text", text: $text}]
       structuredContent: {text: $text}
     }
   } | to json | print

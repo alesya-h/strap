@@ -10,7 +10,13 @@
   (let [value (if (map? output)
                 (merge output details)
                 (merge {:value output} details))]
-    {:content [{:type "text" :text (json-str value)}]
+    {:content [{:type "text" :text (str output
+                                       "\n\nProcess details:"
+                                       "\n- exitCode: " (:exitCode details)
+                                       "\n- signal: " (or (:signal details) "none")
+                                       "\n- truncated: " (:truncated details)
+                                       (when (:description details)
+                                         (str "\n- description: " (:description details))))}]
      :structuredContent value}))
 
 (defn truncate [text limit]

@@ -1,5 +1,6 @@
 (ns tool.main
   (:require [cheshire.core :as json]
+            [clojure.string :as str]
             [tool.jsmcp :as jsmcp]))
 
 (defn read-json []
@@ -8,8 +9,25 @@
 (defn write-json [value]
   (println (json/generate-string value {:pretty true})))
 
+(defn server-line [server]
+  (str "- " (:name server) ": " (if (:ok server) "ok" (str "error: " (:error server)))))
+
+(defn tool-line [tool]
+  (str "- " (:name tool) (when (:description tool) (str ": " (:description tool)))))
+
+(defn render-map [value]
+  (str/join "\n" (map (fn [[k v]] (str "- " (name k) ": " v)) value)))
+
+(defn render-result [value]
+  (cond
+    (:servers value) (str "Servers:\n" (str/join "\n" (map server-line (:servers value))))
+    (:tools value) (str "Tools:\n" (str/join "\n" (map tool-line (:tools value))))
+    (:result value) (str (:result value))
+    (map? value) (render-map value)
+    :else (str value)))
+
 (defn result-content [value]
-  [{:type "text" :text (json/generate-string value {:pretty true})}])
+  [{:type "text" :text (render-result value)}])
 
 (defn normalize-result [result]
   (let [value (or (:structuredContent result) result)]

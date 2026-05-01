@@ -12,7 +12,13 @@ def main [action?: string] {
 
   let envelope = (^cat | from json)
   let arguments = ($envelope.arguments? | default {})
-  let text = ($arguments | to json)
+  let text = if (($arguments | is-empty)) {
+    "No arguments"
+  } else {
+    $arguments | transpose key value | each {|row|
+      $"($row.key): ($row.value | to json --raw)"
+    } | str join "\n"
+  }
 
   {
     result: {
