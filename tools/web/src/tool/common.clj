@@ -1,5 +1,6 @@
 (ns tool.common
-  (:require [cheshire.core :as json]))
+  (:require [cheshire.core :as json]
+            [clojure.string :as str]))
 
 (defn json-str [value]
   (json/generate-string value {:pretty true}))

@@ -51,7 +51,7 @@ def search-one [query start] {
 def render-result [item] { $"($item.number): ($item.title)\n($item.url)\nPublished Date: ($item.published)\n($item.snippet)" }
 def render-query [block] { $"-----\nResults for search query \"($block.query)\":\n-----\n(if ($block.error? | default null) != null { 'ERROR: ' + ($block.error | to json --raw) } else if ($block.results | is-empty) { 'No results found.' } else { $block.results | each {|r| render-result $r } | str join "\n\n" })" }
 
-def search-fetch [args] {
+def web-search [args] {
   let queries = ($args.queries? | default [])
   if ($queries | is-empty) { error make {msg: "Search called with no queries."} }
   mut next = 1
@@ -75,7 +75,7 @@ def summarizer [args] {
 }
 
 def main [action?: string] {
-  if ($action | is-empty) { print ([search_fetch summarizer] | to json); return }
+  if ($action | is-empty) { print ([web_search summarizer] | to json); return }
   let args = ((^cat | from json).arguments? | default {})
-  match $action { search_fetch => (search-fetch $args), summarizer => (summarizer $args), _ => (error make {msg: $"Unknown kagi action: ($action)"}) } | to json | print
+  match $action { web_search => (web-search $args), summarizer => (summarizer $args), _ => (error make {msg: $"Unknown kagi action: ($action)"}) } | to json | print
 }

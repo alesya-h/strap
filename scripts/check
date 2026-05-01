@@ -137,3 +137,4 @@ expect_exit2 bb -cp subprojects/cli/commands/artifact/src -m artifact.main --hel
 bb -cp subprojects/cli/commands/run-calls/src -e "(require 'run-calls.main)"
 expect_exit2 bb subprojects/cli/commands/status/run --help
 printf '{"texts":["check"]}' | bb subprojects/cli/commands/embed/run --provider hash | jq empty
+./bin/strap tool-contract-check

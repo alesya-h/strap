@@ -1,5 +1,5 @@
 {
-  "search_fetch": {
+  "web_search": {
     "description": "Fetch web results from the Kagi Search API. Each query can include Kagi search options like lens, region, sorting, and date filters. Results from all queries are numbered continuously.",
     "process_state": "none",
     "inputSchema": {

@@ -51,7 +51,7 @@ Then execute a search:
 {
   "tool": "jsmcp.execute_code",
   "input": {
-    "code": "return await kagi.kagi_search_fetch({ queries: [{ q: \"Strap agent harness immutable state\" }] })"
+    "code": "return await kagi.kagi_summarizer({ url: \"https://example.com\" })"
   }
 }
 ```

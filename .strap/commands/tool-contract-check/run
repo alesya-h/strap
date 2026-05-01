@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$STRAP_ROOT"
+strap=${STRAP_BIN:-./bin/strap}
+
+all_specs="$($strap tools list --group all --json)"
+printf '%s' "$all_specs" | jq -e '
+  type == "array" and all(.[];
+    (.name | type == "string" and test("^[^.]+[.][^.]+$")) and
+    (.description | type == "string") and
+    (.inputSchema | type == "object"))' >/dev/null
+
+for dir in tools/*; do
+  [ -d "$dir" ] || continue
+  group="$(basename "$dir")"
+  [ -x "$dir/run" ] || { printf 'missing executable run: %s\n' "$dir" >&2; exit 1; }
+  [ -f "$dir/desc" ] || { printf 'missing desc: %s\n' "$dir" >&2; exit 1; }
+  [ -f "$dir/meta.json" ] || [ -d "$dir/meta" ] || { printf 'missing meta: %s\n' "$dir" >&2; exit 1; }
+
+  actions="$(STRAP_TOOL_DIR="$dir" "$dir/run")"
+  specs="$($strap tools list --group "$group" --json --internal)"
+  jq -n -e --argjson actions "$actions" --argjson specs "$specs" '
+    ($actions | type == "array") and
+    all($actions[]; type == "string") and
+    (($actions | sort) == ($specs | map(.action) | sort)) and
+    all($specs[]; (.process_state // "none") as $mode | ["none", "own", "full"] | index($mode))' >/dev/null
+done
