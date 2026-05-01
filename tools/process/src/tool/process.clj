@@ -1,7 +1,7 @@
-(ns run-calls.process-tools
+(ns tool.process
   (:require [babashka.process :as p]
             [clojure.string :as str]
-            [run-calls.common :as c]))
+            [tool.common :as c]))
 
 (defn proc [cmd args opts]
   (let [result (apply p/shell

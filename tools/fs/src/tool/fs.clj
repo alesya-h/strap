@@ -1,8 +1,8 @@
-(ns run-calls.fs-tools
+(ns tool.fs
   (:require [babashka.fs :as fs]
             [babashka.process :as p]
             [clojure.string :as str]
-            [run-calls.common :as c]))
+            [tool.common :as c]))
 
 (defn line-window [text offset limit]
   (let [lines (str/split text #"\n" -1)
@@ -70,10 +70,8 @@
   (cond-> ["--line-number" "--color" "never"]
     (pos? (long (or (:context args) 0)))
     (conj "--context" (str (:context args)))
-
     (:include args)
     (conj "-g" (str (:include args)))
-
     true
     (conj (str (:pattern args)))))
 

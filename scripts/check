@@ -7,7 +7,7 @@ check_line_cap() {
   local exceptions_file=.strap/config/line-cap-exceptions.txt
   local failed=0
   local line_count
-  local files=(bin/strap bin/strap-runner/**/* scripts/check scripts/smoke subprojects/cli/commands/**/*)
+  local files=(bin/strap bin/strap-runner/**/* scripts/check scripts/smoke subprojects/cli/commands/**/* tools/**/*)
 
   for file in "${files[@]}"; do
     [ -f "$file" ] || continue
@@ -82,6 +82,13 @@ for file in subprojects/cli/commands/run-calls/src/run_calls/*_tools.clj subproj
     exit 1
   fi
 done
+if compgen -G 'tools/*/src/run_calls/*' >/dev/null; then
+  printf 'Tool-local code should use tool.* namespaces, not run_calls paths.\n' >&2
+  exit 1
+fi
+if grep -R -n 'run-calls\.' tools --include='*.clj' >&2; then
+  printf 'Tool-local Clojure namespaces should not live under run-calls.*\n' >&2; exit 1
+fi
 for file in tools/*; do
   if [ -f "$file" ]; then
     printf 'Tool artifacts must be grouped directories, not flat files: %s\n' "$file" >&2

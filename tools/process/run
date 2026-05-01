@@ -5,7 +5,7 @@
          '[cheshire.core :as json])
 
 (cp/add-classpath (str (fs/path (fs/parent *file*) "src")))
-(require '[run-calls.process-tools :as tools])
+(require '[tool.process :as tools])
 
 (defn read-json []
   (json/parse-string (slurp *in*) true))

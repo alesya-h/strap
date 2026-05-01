@@ -1,4 +1,4 @@
-(ns run-calls.jsmcp-diff
+(ns tool.jsmcp-diff
   (:require [clojure.string :as str]))
 
 (defn structured [response]
@@ -40,10 +40,8 @@
   (cond-> [(str label " changed:")]
     (seq (:added summary))
     (conj (summary-line "added" item-label (:added summary)))
-
     (seq (:removed summary))
     (conj (summary-line "removed" item-label (:removed summary)))
-
     (seq (:changed summary))
     (conj (summary-line "updated" item-label (:changed summary)))))
 

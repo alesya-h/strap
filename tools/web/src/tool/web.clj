@@ -1,7 +1,7 @@
-(ns run-calls.web-tools
+(ns tool.web
   (:require [babashka.curl :as curl]
             [clojure.string :as str]
-            [run-calls.common :as c]))
+            [tool.common :as c]))
 
 (def user-agent "strap/0.1")
 

@@ -1,9 +1,9 @@
-(ns run-calls.jsmcp
+(ns tool.jsmcp
   (:require [babashka.curl :as curl]
             [cheshire.core :as json]
             [clojure.string :as str]
-            [run-calls.common :as c]
-            [run-calls.jsmcp-diff :as diff]))
+            [tool.common :as c]
+            [tool.jsmcp-diff :as diff]))
 
 (defn endpoint []
   (or (System/getenv "STRAP_JSMCP_URL") "http://127.0.0.1:41528"))
