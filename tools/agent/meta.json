@@ -1,0 +1,26 @@
+{
+  "context_push": {
+    "description": "Open a compactable scope in the active state.",
+    "process_state": "full",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "label": { "type": "string", "description": "Scope label" }
+      },
+      "required": ["label"],
+      "additionalProperties": false
+    }
+  },
+  "context_pop": {
+    "description": "Collapse the most recent open scope in the active state.",
+    "process_state": "full",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string", "description": "Visible scope summary" }
+      },
+      "required": ["summary"],
+      "additionalProperties": false
+    }
+  }
+}

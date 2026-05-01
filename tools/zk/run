@@ -1,0 +1,10 @@
+#!/usr/bin/env nu
+def main [action?: string] {
+  if ($action | is-empty) { print ([search_hybrid search backlinks status] | to json); return }
+  let root = ($env.STRAP_ROOT? | default (pwd))
+  let envelope = (^cat | from json)
+  let args = ($envelope.arguments? | default {})
+  let next = ($args | upsert action $action)
+  let text = ($next | to json | ^($root | path join bin strap) zk tool)
+  print ({ result: { content: [{ type: "text", text: $text }] } } | to json)
+}

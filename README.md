@@ -182,11 +182,11 @@ strap mcp fs
 strap mcp process
 strap mcp web
 strap mcp agent
-strap mcp scripts
-strap mcp fs,process,scripts
+strap mcp json_echo
+strap mcp fs,process,json_echo
 ```
 
-`strap mcp all` exposes local Strap tool groups only: `fs`, `process`, `web`, `agent`, and `scripts`. The `jsmcp` group is available only when explicitly requested.
+`strap mcp all` exposes local Strap tool groups only. The `jsmcp` group is available only when explicitly requested.
 
 ## jsmcp
 
@@ -194,17 +194,17 @@ strap mcp fs,process,scripts
 
 ```bash
 strap state init \
-| strap porcelain run basic request-tool jsmcp_list_servers '{}' \
+| strap porcelain run basic request-tool jsmcp.list_servers '{}' \
 | strap run-calls --tools jsmcp
 ```
 
 Available bridge tools:
 
-- `jsmcp_list_servers`
-- `jsmcp_list_tools`
-- `jsmcp_execute_code`
-- `jsmcp_fetch_logs`
-- `jsmcp_clear_logs`
+- `jsmcp.list_servers`
+- `jsmcp.list_tools`
+- `jsmcp.execute_code`
+- `jsmcp.fetch_logs`
+- `jsmcp.clear_logs`
 
 The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` does.
 
@@ -223,7 +223,7 @@ STRAP_ZK_EMBED_PROVIDER=hash strap zk search-hybrid 'semantic recall'
 strap zk backlinks 'Local agent memory'
 ```
 
-Agents get the same capability through the `zk` script tool in the `scripts` tool group. See `docs/zettelkasten.md`.
+Agents get the same capability through the grouped `zk.*` tools. See `docs/zettelkasten.md`.
 
 Embeddings can use `OPENAI_API_KEY`, the deterministic hash provider, or the local ChatGPT subscription OAuth path:
 
@@ -267,7 +267,16 @@ strap state init \
 
 Executable files in `tools/` become model-callable tools. A script receives JSON input on stdin and writes stdout as the tool result.
 
-Add a sidecar JSON file, either `tools/name.json` or `tools/name.sh.json`, to define model-facing metadata:
+Each tool artifact is a grouped directory with action metadata:
+
+```text
+tools/example/
+  run
+  desc
+  meta.json
+```
+
+`meta.json` maps action names to model-facing metadata. `meta/<action>.json` is also supported.
 
 ```json
 {

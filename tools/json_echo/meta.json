@@ -1,0 +1,17 @@
+{
+  "echo": {
+    "description": "Echo the JSON input. Useful as a smoke-test tool.",
+    "process_state": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Value to echo"
+        }
+      },
+      "required": ["value"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,6 +1,5 @@
-[
-  {
-    "name": "read_file",
+{
+  "read_file": {
     "description": "Read a workspace file or directory. File output includes line numbers and supports offset/limit pagination.",
     "inputSchema": {
       "type": "object",
@@ -24,10 +23,10 @@
         "path"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "list_dir",
+  "list_dir": {
     "description": "List direct children of a workspace directory.",
     "inputSchema": {
       "type": "object",
@@ -39,10 +38,10 @@
       },
       "required": [],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "glob_files",
+  "glob_files": {
     "description": "Find workspace files with ripgrep glob syntax. Prefer this for file discovery.",
     "inputSchema": {
       "type": "object",
@@ -65,10 +64,10 @@
         "pattern"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "grep_files",
+  "grep_files": {
     "description": "Search workspace file contents with ripgrep regex syntax.",
     "inputSchema": {
       "type": "object",
@@ -100,10 +99,10 @@
         "pattern"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "write_file",
+  "write_file": {
     "description": "Create or replace a workspace file. Existing files require overwrite=true.",
     "inputSchema": {
       "type": "object",
@@ -126,10 +125,10 @@
         "content"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "edit_file",
+  "edit_file": {
     "description": "Edit a file by exact string replacement. Use a uniquely identifying old_text unless replace_all=true.",
     "inputSchema": {
       "type": "object",
@@ -157,10 +156,10 @@
         "new_text"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "multi_edit_file",
+  "multi_edit_file": {
     "description": "Apply a sequence of exact string replacements to one file.",
     "inputSchema": {
       "type": "object",
@@ -201,6 +200,7 @@
         "edits"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   }
-]
+}

@@ -98,6 +98,6 @@
                                    (when (contains? args :data) {:data (:data args)}))
              (:state ctx)))
 
-(def tools {"jsmcp_list_servers" list-servers "jsmcp_list_tools" list-tools "jsmcp_execute_code" execute-code
-            "jsmcp_fetch_logs" (fn [_ ctx] (call-http "fetch_logs" {} (:state ctx)))
-            "jsmcp_clear_logs" (fn [_ ctx] (call-http "clear_logs" {} (:state ctx)))})
+(def tools {"list_servers" list-servers "list_tools" list-tools "execute_code" execute-code
+            "fetch_logs" (fn [_ ctx] (call-http "fetch_logs" {} (:state ctx)))
+            "clear_logs" (fn [_ ctx] (call-http "clear_logs" {} (:state ctx)))})

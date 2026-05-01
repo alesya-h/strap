@@ -1,5 +1,0 @@
-#!/usr/bin/env nu
-def main [] {
-  let root = ($env.STRAP_ROOT? | default (pwd))
-  ^cat | ^([ $root bin strap ] | path join) zk tool
-}

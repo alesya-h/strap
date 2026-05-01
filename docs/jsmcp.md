@@ -17,21 +17,21 @@ STRAP_JSMCP_API_KEY=...
 STRAP_JSMCP_PROFILE=work
 ```
 
-`run-calls` stores jsmcp discovery memory in canonical state under `runtime.jsmcp`. Successful `jsmcp_list_servers` and `jsmcp_list_tools` calls cache the observed server/tool surface. Before `jsmcp_execute_code`, Strap refreshes cached discovery through the HTTP API; if the observed capabilities changed, it rejects with the same cached-discovery-change message as `jsmcp client` and updates the cache for the next attempt.
+`run-calls` stores jsmcp discovery memory in canonical state under `runtime.tools.jsmcp`. Successful `jsmcp.list_servers` and `jsmcp.list_tools` calls cache the observed server/tool surface. Before `jsmcp.execute_code`, Strap refreshes cached discovery through the HTTP API; if the observed capabilities changed, it rejects with the same cached-discovery-change message as `jsmcp client` and updates the cache for the next attempt.
 
 ## Tools
 
-- `jsmcp_list_servers`
-- `jsmcp_list_tools`
-- `jsmcp_execute_code`
-- `jsmcp_fetch_logs`
-- `jsmcp_clear_logs`
+- `jsmcp.list_servers`
+- `jsmcp.list_tools`
+- `jsmcp.execute_code`
+- `jsmcp.fetch_logs`
+- `jsmcp.clear_logs`
 
 ## Example
 
 ```bash
 strap state init \
-| strap porcelain run basic request-tool jsmcp_list_servers '{}' \
+| strap porcelain run basic request-tool jsmcp.list_servers '{}' \
 | strap run-calls --tools jsmcp
 ```
 
@@ -41,7 +41,7 @@ The local jsmcp YAML config includes a `kagi` server. Tested flow:
 
 ```bash
 strap state init \
-| strap porcelain run basic request-tool jsmcp_list_tools '{"server":"kagi"}' \
+| strap porcelain run basic request-tool jsmcp.list_tools '{"server":"kagi"}' \
 | strap run-calls --tools jsmcp
 ```
 
@@ -49,7 +49,7 @@ Then execute a search:
 
 ```json
 {
-  "tool": "jsmcp_execute_code",
+  "tool": "jsmcp.execute_code",
   "input": {
     "code": "return await kagi.kagi_search_fetch({ queries: [{ q: \"Strap agent harness immutable state\" }] })"
   }

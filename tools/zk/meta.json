@@ -1,0 +1,46 @@
+{
+  "search_hybrid": {
+    "description": "Hybrid search over zettelkasten notes.",
+    "process_state": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "db": {"type": "string", "description": "Optional derived SQLite index path."},
+        "query": {"type": "string", "description": "Search query."},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 50, "description": "Maximum result count."}
+      },
+      "required": ["query"],
+      "additionalProperties": false
+    }
+  },
+  "search": {
+    "description": "Text search zettelkasten notes.",
+    "process_state": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {"type": "string", "description": "Search query."},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 50, "description": "Maximum result count."}
+      },
+      "required": ["query"],
+      "additionalProperties": false
+    }
+  },
+  "backlinks": {
+    "description": "List backlinks to a zettelkasten note.",
+    "process_state": "none",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "description": "Note id, title, alias, slug, or filename."}
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    }
+  },
+  "status": {
+    "description": "Show zettelkasten status.",
+    "process_state": "none",
+    "inputSchema": {"type": "object", "properties": {}, "additionalProperties": false}
+  }
+}

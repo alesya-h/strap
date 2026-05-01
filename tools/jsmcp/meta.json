@@ -1,6 +1,5 @@
-[
-  {
-    "name": "jsmcp_list_servers",
+{
+  "list_servers": {
     "description": "List jsmcp MCP server namespaces and startup status. Call this before using other jsmcp tools.",
     "inputSchema": {
       "type": "object",
@@ -13,10 +12,10 @@
       },
       "required": [],
       "additionalProperties": false
-    }
+    },
+    "process_state": "own"
   },
-  {
-    "name": "jsmcp_list_tools",
+  "list_tools": {
     "description": "List allowed tools for a jsmcp server namespace.",
     "inputSchema": {
       "type": "object",
@@ -35,10 +34,10 @@
         "server"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "own"
   },
-  {
-    "name": "jsmcp_execute_code",
+  "execute_code": {
     "description": "Execute JavaScript against jsmcp server namespaces after listing servers/tools.",
     "inputSchema": {
       "type": "object",
@@ -62,11 +61,11 @@
         "code"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "own"
   },
-  {
-    "name": "jsmcp_fetch_logs",
-    "description": "Fetch and clear logs emitted by jsmcp_execute_code console methods.",
+  "fetch_logs": {
+    "description": "Fetch and clear logs emitted by jsmcp.execute_code console methods.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -78,11 +77,11 @@
       },
       "required": [],
       "additionalProperties": false
-    }
+    },
+    "process_state": "own"
   },
-  {
-    "name": "jsmcp_clear_logs",
-    "description": "Clear logs emitted by jsmcp_execute_code console methods.",
+  "clear_logs": {
+    "description": "Clear logs emitted by jsmcp.execute_code console methods.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -94,6 +93,7 @@
       },
       "required": [],
       "additionalProperties": false
-    }
+    },
+    "process_state": "own"
   }
-]
+}

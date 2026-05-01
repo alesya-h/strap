@@ -153,7 +153,7 @@ Agents get the same memory surface through the `zk` script tool. Session command
 
 ## Agent Tool
 
-The executable script tool `tools/zk` exposes the same store to agents through the existing `scripts` tool group. Example input:
+The grouped tool artifact `tools/zk` exposes the same store to agents through dotted tool names such as `zk.search_hybrid`, `zk.search`, and `zk.backlinks`. Example input:
 
 ```json
 {

@@ -183,23 +183,22 @@ Tool schemas are exposed through `strap tools list --group <group> --json`:
 - `process`
 - `web`
 - `agent`
-- `scripts`
 - `jsmcp`
 - `all`
 
 Script tools are executable files discovered from:
 
 ```text
-STRAP_SCRIPT_TOOLS
+STRAP_TOOL_PATH
 $STRAP_WORK/tools
 $STRAP_PROJECT/tools
 $STRAP_CONFIG/tools
 $STRAP_ROOT/tools
 ```
 
-They receive JSON on stdin and can expose a sidecar JSON schema.
+Tool artifacts are grouped directories: `tools/<group>/run`, `tools/<group>/desc`, and either `tools/<group>/meta.json` or `tools/<group>/meta/<action>.json`. Provider-facing names are dotted, for example `fs.read_file` and `jsmcp.list_servers`. Action metadata can set `process_state` to `none` (default), `own`, or `full`; own-state tools read/write `runtime.tools.<group>` through an `own_state` envelope.
 
-`strap mcp <group>` exposes Strap tools as stdio MCP servers for external MCP hosts. It lists schemas through `strap tools` and executes calls through `strap run-calls`. `strap mcp all` expands to local groups only: `fs`, `process`, `web`, `agent`, and `scripts`; `jsmcp` must be requested explicitly.
+`strap mcp <group>` exposes Strap tools as stdio MCP servers for external MCP hosts. It lists schemas through `strap tools` and executes calls through `strap run-calls`. `strap mcp all` expands to local groups only; `jsmcp` must be requested explicitly.
 
 The jsmcp bridge uses the local jsmcp HTTP API and exposes configured MCP servers as programmable Strap tools. It stores observed server/tool discovery in canonical state and rejects `execute_code` when cached discovery changes.
 

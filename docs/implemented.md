@@ -67,20 +67,20 @@ This document records what `strap` currently implements.
 - Process/Nushell/tmux-oriented process tools.
 - Web fetch/search-style tools.
 - Agent/context tools.
-- Script tool discovery from `tools/` and `STRAP_SCRIPT_TOOLS`.
-- Script tools receive JSON on stdin and expose model-facing sidecar JSON schemas.
+- Tool group discovery from layered `tools/<group>/` artifact directories.
+- Tool artifacts are grouped directories with `run`, `desc`, and action metadata in `meta.json` or `meta/<action>.json`.
 
 ## MCP And jsmcp
 
-- Bundled stdio MCP servers for filesystem, process, web, agent, and scripts.
+- Bundled stdio MCP servers for grouped Strap tools.
 - MCP servers list tools through `strap tools` and execute through `strap run-calls`.
 - jsmcp bridge tool group using the local jsmcp HTTP API with state-backed discovery memory.
 - Bridge tools:
-  - `jsmcp_list_servers`
-  - `jsmcp_list_tools`
-  - `jsmcp_execute_code`
-  - `jsmcp_fetch_logs`
-  - `jsmcp_clear_logs`
+  - `jsmcp.list_servers`
+  - `jsmcp.list_tools`
+  - `jsmcp.execute_code`
+  - `jsmcp.fetch_logs`
+  - `jsmcp.clear_logs`
 - Tested Kagi search through jsmcp.
 - MCP servers use Content-Length stdio framing.
 

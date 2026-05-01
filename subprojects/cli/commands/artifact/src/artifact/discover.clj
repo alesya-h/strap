@@ -38,40 +38,12 @@
          (keep #(directory-artifact "skill" % layer root "SKILL.md"))
          vec)))
 
-(defn sidecars-for-tool [file]
-  (let [text (str file)
-        candidates [(str text ".json") (str/replace text #"\.[^.]+$" ".json")]]
-    (->> candidates distinct (filter fs/exists?) (map str) vec)))
-
-(defn tool-name [file sidecars]
-  (or
-    (some
-      (fn [sidecar]
-        (try
-          (:name (json/parse-string (slurp sidecar) true))
-          (catch Exception _ nil)))
-      sidecars)
-    (-> (fs/file-name file)
-        (str/replace #"\.[^.]+$" "")
-        (str/replace #"[^a-zA-Z0-9_]" "_"))))
-
 (defn discover-tool-artifacts [root layer]
   (if-not (c/directory? root)
     []
     (->> (fs/list-dir root)
-         (filter c/regular-file?)
-         (remove #(str/ends-with? (fs/file-name %) ".json"))
-         (filter c/executable?)
-         (map (fn [file]
-                (let [sidecars (sidecars-for-tool file)]
-                  {:type "tool"
-                   :name (tool-name file sidecars)
-                   :layer layer
-                   :kind "file"
-                   :entryName (fs/file-name file)
-                   :root root
-                   :path (str file)
-                   :files (vec (cons (str file) sidecars))})))
+         (filter fs/directory?)
+         (keep #(directory-artifact "tool" % layer root "run"))
          vec)))
 
 (defn single-file-artifact [type file layer root ext]

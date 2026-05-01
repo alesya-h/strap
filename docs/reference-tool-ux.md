@@ -11,7 +11,7 @@ The useful common shape is a declarative tool contract:
 
 ```json
 {
-  "name": "read_file",
+  "name": "fs.read_file",
   "description": "Read a file with line-numbered pagination",
   "inputSchema": { "type": "object", "properties": {} }
 }
@@ -19,7 +19,7 @@ The useful common shape is a declarative tool contract:
 
 Adopted here:
 
-- Small Unix-like primitives beat one giant shell: `read_file`, `glob_files`, `grep_files`, `edit_file`, `write_file`, `shell`.
+- Small Unix-like primitives beat one giant shell: `fs.read_file`, `fs.glob_files`, `fs.grep_files`, `fs.edit_file`, `fs.write_file`, `process.shell`.
 - Mutating operations are separate and explicit; `write_file` requires `overwrite=true` for existing files.
 - Search tools wrap `rg` semantics because that is what agents already learn well.
 - Shell takes `workdir`, `timeout_ms`, `max_output_bytes`, and `description` for auditability.
@@ -49,11 +49,11 @@ The useful idea is that a tool can be authored outside the harness as a small sh
 
 For `strap`, the safer version is:
 
-- executable scripts live in `tools/` or directories listed in `STRAP_SCRIPT_TOOLS`
-- sidecar JSON supplies `name`, `description`, and `inputSchema`
+- tool groups live in `tools/<group>/` or directories listed in `STRAP_TOOL_PATH`
+- action metadata in `meta.json` or `meta/<action>.json` supplies `description`, `inputSchema`, and optional `process_state`
 - input is JSON on stdin, not string interpolation into a shell command
 - output is stdout plus metadata
-- scripts are exposed through the `scripts` tool group and `strap mcp scripts`
+- tools are exposed through dotted names like `json_echo.echo` and `strap mcp json_echo`
 
 This preserves the unix-ish extensibility while making quoting, injection, and schema drift easier to reason about.
 

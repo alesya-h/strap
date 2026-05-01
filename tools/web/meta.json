@@ -1,6 +1,5 @@
-[
-  {
-    "name": "web_fetch",
+{
+  "web_fetch": {
     "description": "Fetch a URL and return text with response metadata. Conversion is intentionally minimal; downstream tools can transform it.",
     "inputSchema": {
       "type": "object",
@@ -28,10 +27,10 @@
         "url"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "web_search",
+  "web_search": {
     "description": "Search the web using a lightweight public HTML search page and return parsed result titles/URLs when available.",
     "inputSchema": {
       "type": "object",
@@ -50,6 +49,7 @@
         "query"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   }
-]
+}

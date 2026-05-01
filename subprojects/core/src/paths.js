@@ -91,7 +91,7 @@ export function strapCommandDirs() {
 }
 
 export function strapToolDirs() {
-  const configured = (process.env.STRAP_SCRIPT_TOOLS || "").split(path.delimiter).filter(Boolean);
+  const configured = (process.env.STRAP_TOOL_PATH || "").split(path.delimiter).filter(Boolean);
   return [
     ...configured,
     ...maybeJoin(strapSessionOverlayRoot(), "tools"),

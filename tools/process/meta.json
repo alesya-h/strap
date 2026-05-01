@@ -1,6 +1,5 @@
-[
-  {
-    "name": "shell",
+{
+  "shell": {
     "description": "Run a bash command in the workspace. Prefer dedicated file/search tools for routine filesystem work.",
     "inputSchema": {
       "type": "object",
@@ -36,10 +35,10 @@
         "command"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "nu_eval",
+  "nu_eval": {
     "description": "Run a Nushell command in the workspace.",
     "inputSchema": {
       "type": "object",
@@ -67,10 +66,10 @@
         "command"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "tmux",
+  "tmux": {
     "description": "Run a tmux subcommand. Use narrower tmux_capture and tmux_send when possible.",
     "inputSchema": {
       "type": "object",
@@ -93,10 +92,10 @@
         "subcommand"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "tmux_capture",
+  "tmux_capture": {
     "description": "Capture recent text from a tmux pane.",
     "inputSchema": {
       "type": "object",
@@ -113,10 +112,10 @@
       },
       "required": [],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   },
-  {
-    "name": "tmux_send",
+  "tmux_send": {
     "description": "Send keys to a tmux pane.",
     "inputSchema": {
       "type": "object",
@@ -138,6 +137,7 @@
         "text"
       ],
       "additionalProperties": false
-    }
+    },
+    "process_state": "none"
   }
-]
+}

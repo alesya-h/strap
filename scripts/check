@@ -76,6 +76,18 @@ for file in subprojects/cli/commands/run-calls/src/**/*.js; do
     exit 1
   fi
 done
+for file in subprojects/cli/commands/run-calls/src/run_calls/*_tools.clj subprojects/cli/commands/run-calls/src/run_calls/jsmcp.clj subprojects/cli/commands/run-calls/src/run_calls/registry.clj subprojects/cli/commands/run-calls/src/run_calls/scripts.clj; do
+  if [ -e "$file" ]; then
+    printf 'run-calls must stay a thin router; concrete tool implementation should not exist here: %s\n' "$file" >&2
+    exit 1
+  fi
+done
+for file in tools/*; do
+  if [ -f "$file" ]; then
+    printf 'Tool artifacts must be grouped directories, not flat files: %s\n' "$file" >&2
+    exit 1
+  fi
+done
 for file in subprojects/tools/src/registry.js subprojects/tools/src/agent-tools.js subprojects/tools/src/fs-tools.js subprojects/tools/src/process-tools.js subprojects/tools/src/script-tools.js subprojects/tools/src/web-tools.js; do
   if [ -e "$file" ]; then
     printf 'Replaced shared tool JS file should not exist: %s\n' "$file" >&2
@@ -87,7 +99,7 @@ if grep -R -n '#strap/tools' . --include='*.js' --include='*.json' --include='*.
   exit 1
 fi
 
-nu --commands 'use nu/strap; use nu/plumbing.nu *; source tools/zk'
+nu --commands 'use nu/strap; use nu/plumbing.nu *'
 
 command_files=(subprojects/cli/commands/*/run subprojects/cli/commands/*/inner/*)
 for file in "${command_files[@]}"; do

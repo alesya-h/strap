@@ -1,4 +1,4 @@
 {
   "name": "default",
-  "groups": ["fs", "process", "web", "agent", "scripts", "jsmcp"]
+  "groups": ["fs", "process", "web", "agent", "json_echo", "zk", "jsmcp"]
 }

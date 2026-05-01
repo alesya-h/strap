@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec bb -cp "$(dirname "$0")/src" -e '
+(require (quote [cheshire.core :as json]) (quote [run-calls.web-tools :as tools]))
+(defn read-json [] (json/parse-string (slurp *in*) true))
+(defn write-json [x] (println (json/generate-string x {:pretty true})))
+(let [args *command-line-args*]
+  (if (empty? args)
+    (write-json (sort (keys tools/tools)))
+    (let [action (first args) env (read-json) f (get tools/tools action)]
+      (when-not f (throw (ex-info (str "Unknown web action: " action) {})))
+      (write-json {:result (f (:arguments env) {})}))))
+' -- "$@"

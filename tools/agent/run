@@ -1,0 +1,21 @@
+#!/usr/bin/env bb
+(require '[cheshire.core :as json])
+(defn read-json [] (json/parse-string (slurp *in*) true))
+(defn write-json [x] (println (json/generate-string x {:pretty true})))
+(defn push-scope [state label]
+  (update-in state [:root :children] conj {:type "scope" :label label :status "open" :participants ["assistant" "harness"] :children []}))
+(defn pop-scope [state summary]
+  (let [children (get-in state [:root :children])
+        match (last (filter #(and (= "scope" (:type (second %))) (= "open" (:status (second %)))) (map-indexed vector children)))]
+    (when-not match (throw (ex-info "No open scope found" {})))
+    (let [[idx scope] match]
+      (assoc-in state [:root :children idx] (assoc scope :status "collapsed" :summary summary :hidden {:children (:children scope)} :children [])))))
+(defn -main [& args]
+  (if (empty? args)
+    (write-json ["context_push" "context_pop"])
+    (let [action (first args) env (read-json) st (:state env) a (:arguments env)]
+      (case action
+        "context_push" (write-json {:state (push-scope st (:label a)) :result {:content [{:type "text" :text (str "opened scope: " (:label a))}]}})
+        "context_pop" (write-json {:state (pop-scope st (:summary a)) :result {:content [{:type "text" :text (:summary a)}]}})
+        (throw (ex-info (str "Unknown agent action: " action) {}))))))
+(apply -main *command-line-args*)
