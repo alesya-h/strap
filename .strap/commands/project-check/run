@@ -68,6 +68,7 @@ def check-content-guards [] {
   rg-forbid "Babashka tool run scripts should be thin launchers for tool.main." '^\(require|babashka[.]classpath|cp/add-classpath' [tools "--glob" run]
   rg-forbid "Tool results must not use metadata; use equivalent content and structuredContent." ':metadata|metadata[})]' [tools subprojects/cli/commands/run-calls "--glob" "*.clj" "--glob" "*.js" "--glob" "*.nu"]
   rg-forbid "Shared #strap/tools imports are retired; use strap tools/run-calls boundaries." "#strap/tools" ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "!.git/**"]
+  rg-forbid "Root npm/package entrypoints are retired; use strap project-* commands." "npm test|npm run|package[.]json" ["README.md" "docs" "--glob" "*.md"]
   rg-forbid "Non-MCP Node surfaces are retired; use Nu/Babashka command boundaries instead." '#strap/(core|providers|jsmcp|loop)|\^node' ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "*.nu" "--glob" "*.clj" "--glob" "*.sh" "--glob" "!.git/**" "--glob" "!subprojects/mcp/**"]
 }
 
@@ -106,7 +107,7 @@ check-content-guards
 run-external nu ...[--commands "use nu/strap; use nu/plumbing.nu *"]
 check-command-syntax
 check-capsule-files
-run-external jq empty package.json config/strap/config.json ...((glob --no-dir "config/strap/models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
+run-external jq empty subprojects/mcp/package.json config/strap/config.json ...((glob --no-dir "config/strap/models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
 expect-exit2 [bb -cp subprojects/state-bb/src -m strap.state --help]
 with-env { STRAP_CMD_DIR: "subprojects/cli/commands/zk" } { expect-exit2 [bb subprojects/cli/commands/zk/run --help] }
 with-env { STRAP_CMD_DIR: "subprojects/cli/commands/zk" } { expect-exit2 [bb subprojects/cli/commands/zk/inner/index --help] }

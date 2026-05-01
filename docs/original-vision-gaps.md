@@ -167,7 +167,7 @@ Current state: persistence is unix-explicit via files, `tee`, redirection, `save
 
 - Provider-native tool-use lowering needs targeted tests.
 - `strap loop` needs behavior tests for budget/stop/error cases.
-- jsmcp smoke test is not in `npm test` because it depends on local config/services.
+- jsmcp smoke test is not in `strap project-test` because it depends on local config/services.
 - ChatGPT subscription provider tests are manual because they depend on local auth.
 - Zettelkasten has smoke tests, but not detailed schema/migration/search quality tests.
 

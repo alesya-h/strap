@@ -160,7 +160,7 @@ open state.json | map-events {|event| { from: $event.from, text: $event.text } }
 open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
 ```
 
-The intended boundary is: Nu owns local dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Babashka owns richer local algorithms and state/auth logic that are awkward in Nu but do not need a package ecosystem; Node is reserved for SDK-heavy integrations, long-running servers, MCP/jsmcp, browser/process edges, or provider code that genuinely needs package dependencies.
+The intended boundary is: Nu owns local dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Babashka owns richer local algorithms and state/auth logic that are awkward in Nu but do not need a package ecosystem; Node is reserved for MCP and real package/runtime pressure only.
 
 Implementation files are intentionally small. The hard cap is 150 lines per source file, command `run` script, or helper; prefer even smaller files when a command has separable concepts. Command-local modules are the escape hatch for complexity, not shared repo libraries. Existing oversized files must appear in `.strap/config/line-cap-exceptions.txt` until they are split.
 
@@ -171,7 +171,7 @@ Implementation files are intentionally small. The hard cap is 150 lines per sour
 There is one loop surface:
 
 - `strap loop`: Nushell loop for provider/tool orchestration.
-- `strap one-shot`: Node one-shot runner that builds a temporary child state from optional state/context input and returns the first final assistant answer without mutating sessions.
+- `strap one-shot`: Nu one-shot runner that builds a temporary child state from optional state/context input and returns the first final assistant answer without mutating sessions.
 
 The loop composes through public commands: `strap llm complete` for provider interaction and `strap run-calls` for tool execution.
 
@@ -286,8 +286,8 @@ Code is grouped by capability:
 Use:
 
 ```bash
-npm test
+./bin/strap project-test
 strap commands validate --json
 ```
 
-`npm test` runs syntax/source checks and the smoke workflow.
+`strap project-test` runs syntax/source checks and the smoke workflow.

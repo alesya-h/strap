@@ -32,7 +32,6 @@
   ],
   "defaults": {
     "model": "current",
-    "tool_group": "all",
-    "loop_engine": "node"
+    "tool_group": "all"
   }
 }

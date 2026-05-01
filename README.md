@@ -27,7 +27,7 @@ Start with:
 ## Quick Start
 
 ```bash
-npm test
+./bin/strap project-test
 strap state init \
 | strap state add-user "Inspect this repo" \
 | tee state.json \
