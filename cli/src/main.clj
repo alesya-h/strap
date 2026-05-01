@@ -1,9 +1,9 @@
 (ns main
   (:require [babashka.fs :as fs]
-            [strap-main.commands :as commands]
-            [strap-main.env :as env]
-            [strap-main.execute :as execute]
-            [strap-main.session :as session]))
+            [cli.commands :as commands]
+            [cli.env :as env]
+            [cli.execute :as execute]
+            [cli.session :as session]))
 
 (defn die [message]
   (binding [*out* *err*]

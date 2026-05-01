@@ -47,13 +47,13 @@ Current state: enough provider support exists for working agent loops, but the o
 ## Capsule Command Refactor
 
 - The command model is only partially aligned with the original small, replaceable capability vision.
-- Several public commands have been converted into self-contained capsules, but important commands still shell into shared Node entrypoints and libraries under `subprojects/*/src`.
+- Public commands have been converted into self-contained capsules under `commands/`; remaining cleanup focuses on hardening and product behavior rather than shared implementation libraries.
 - `inner/` is now reserved for command-private implementation helpers, callable only through `strap inner <command> <helper>`. It is appropriate for conceptually self-contained commands such as `zk`, not for cross-cutting families such as providers.
 - Hidden commands are available through a `hide` file and should be used for implementation commands that need command identity without entering the visible command surface, for example `provider-chatgpt` behind `strap provider chatgpt ...`.
 
 Completed slices:
 
-- `bin/strap` is a shell exec wrapper into the Babashka `subprojects/strap-main` runner and no longer imports shared `#strap/*` libraries.
+- `bin/strap` is a shell exec wrapper into the Babashka root `cli` runner and no longer imports shared `#strap/*` libraries.
 - Several root commands have Nu capsule implementations: `agent`, `agents`, `commands`, `context`, `model`, `nu`, `one-shot`, `paths`, `skills`, `state`, and `work`.
 - `zk` is now a self-contained Babashka capsule over markdown notes, with a command-private Babashka SQLite/FTS/vector helper at `strap inner zk index`.
 - `embed` exists as a public embedding facade. Local hash embeddings are implemented in the command; provider-backed embeddings route to `strap provider <name> embed`.

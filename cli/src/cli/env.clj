@@ -1,4 +1,4 @@
-(ns strap-main.env
+(ns cli.env
   (:require [babashka.fs :as fs]
             [clojure.string :as str]))
 
@@ -14,7 +14,6 @@
   (-> *file*
       fs/file
       fs/absolutize
-      fs/parent
       fs/parent
       fs/parent
       fs/parent

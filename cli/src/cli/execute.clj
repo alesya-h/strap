@@ -1,8 +1,8 @@
-(ns strap-main.execute
+(ns cli.execute
   (:require [babashka.fs :as fs]
             [cheshire.core :as json]
             [clojure.string :as str]
-            [strap-main.env :as env])
+            [cli.env :as env])
   (:import [java.lang ProcessBuilder$Redirect]))
 
 (defn apply-env! [^ProcessBuilder builder values]

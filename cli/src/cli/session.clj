@@ -1,7 +1,7 @@
-(ns strap-main.session
+(ns cli.session
   (:require [babashka.fs :as fs]
             [clojure.string :as str]
-            [strap-main.env :as env]))
+            [cli.env :as env]))
 
 (defn resolve-session [value die]
   (let [direct (fs/absolutize value)

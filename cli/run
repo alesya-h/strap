@@ -2,5 +2,5 @@
 set -euo pipefail
 
 main_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-export STRAP_ROOT="${STRAP_ROOT:-$(cd -- "$main_dir/../.." && pwd)}"
+export STRAP_ROOT="${STRAP_ROOT:-$(cd -- "$main_dir/.." && pwd)}"
 exec bb -cp "$main_dir/src" -m main "$@"

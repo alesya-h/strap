@@ -49,8 +49,8 @@ A capsule command may use:
 A capsule command must not use:
 
 - `#strap/*` imports.
-- Repo-local implementation imports under `subprojects/*/src`.
-- Direct execution of repo-local JS implementation entrypoints under `subprojects/*/bin`.
+- Repo-local implementation imports from another command's private source tree.
+- Direct execution of repo-local JS implementation entrypoints outside the owning command capsule.
 - Another command's private files except through `strap <command>` or `strap inner <command> <helper>`.
 
 `strap project-check` enforces the import/direct-JS parts of this rule for project and user command overlays, excluding the `project-*` validation commands themselves.

@@ -1,7 +1,7 @@
-(ns strap-main.commands
+(ns cli.commands
   (:require [babashka.fs :as fs]
             [clojure.string :as str]
-            [strap-main.env :as env]))
+            [cli.env :as env]))
 
 (defn maybe-join [root name]
   (if root [(str (fs/path root name))] []))

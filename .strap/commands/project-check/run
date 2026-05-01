@@ -22,7 +22,7 @@ def exception-lines [] {
 def check-line-cap [] {
   let exceptions = (exception-lines)
   mut failed = false
-  let files = (files-for [bin/strap "subprojects/strap-main/**/*" "commands/**/*" "tools/**/*" ".strap/commands/**/*" ".strap-user/commands/**/*"])
+  let files = (files-for [bin/strap "cli/**/*" "commands/**/*" "tools/**/*" ".strap/commands/**/*" ".strap-user/commands/**/*"])
   for file in $files {
     if ($file | str ends-with ".json") { continue }
     let n = (open --raw $file | lines | length)
@@ -54,7 +54,7 @@ def rg-forbid [message: string, pattern: string, args: list<string>] {
 def check-no-retired-surfaces [] {
   require-missing [
     bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md
-    subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/mcp subprojects/cli subprojects/state-bb commands/state-bb
+    subprojects cli/strap-main subprojects/strap-main subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/mcp commands/state-bb
     subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu
   ]
   if not (glob --no-dir "commands/run-calls/src/**/*.js" | is-empty) { fail "run-calls is a Babashka capsule; JS files must not exist there." }
@@ -112,7 +112,7 @@ with-env { STRAP_CMD_DIR: "commands/zk" } { expect-exit2 [bb commands/zk/run --h
 with-env { STRAP_CMD_DIR: "commands/zk" } { expect-exit2 [bb commands/zk/inner/index --help] }
 expect-exit2 [bb -cp commands/provider-chatgpt/src -m provider.chatgpt]
 expect-exit2 [bb -cp commands/artifact/src -m artifact.main --help]
-run-external bb ...[-cp subprojects/strap-main/src -e "(require 'main)"]
+run-external bb ...[-cp cli/src -e "(require 'main)"]
 run-external bb ...[-cp commands/run-calls/src -e "(require 'run-calls.main)"]
 with-env { STRAP_CMD_DIR: "commands/status" } { expect-exit2 [bb commands/status/run --help] }
 '{"texts":["check"]}' | run-external bb ...[commands/embed/run --provider hash] | from json | ignore
