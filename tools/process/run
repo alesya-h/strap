@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-exec bb -cp "$dir/src" -m tool.main "$@"
+exec bb -cp "$STRAP_TOOL_DIR/src" -m tool.main "$@"

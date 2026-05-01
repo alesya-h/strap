@@ -1,5 +1,6 @@
 (ns run-calls.main
   (:require [babashka.process :as p]
+            [babashka.fs :as fs]
             [clojure.string :as str]
             [run-calls.common :as c]
             [run-calls.state :as state]))
@@ -55,13 +56,15 @@
       (reset! full-replaced true)
       (reset! state-atom (:state result)))
     nil))
+(defn tool-env [spec]
+  {"STRAP_TOOL_DIR" (str (fs/parent (:runner spec)))})
 
 (defn run-tool [spec input state full-replaced]
   (let [mode (or (:process_state spec) "none")
         body (c/json-str (envelope mode spec input @state))
-        result (p/shell {:out :string :err :string :in body :continue true}
-                        (:runner spec)
-                        (:action spec))]
+        result (p/shell {:out :string :err :string :in body :continue true
+                         :extra-env (tool-env spec)}
+                        (:runner spec) (:action spec))]
     (when-not (zero? (:exit result))
       (throw (ex-info (str/trim (or (:err result) (:out result))) {})))
     (let [parsed (c/parse-json (:out result))]
