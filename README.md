@@ -6,11 +6,11 @@
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
 - Separate harness, static config, global, project, session, user-work, and workspace roots: `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_GLOBAL`, `STRAP_PROJECT`, `STRAP_SESSION`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Subproject commands for state editing, model request compilation, agent fork/fold, and pending tool execution.
-- Nu-first structured plumbing with a git-like plumbing/porcelain split for model-authored workflows.
+- Nu-first structured plumbing for model-authored workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from overlayed session/user/project/global/root tool dirs.
 - A shared markdown-source zettelkasten CLI and script tool for agent memory, with inline wikilinks and a derived SQLite/sqlite-vec index.
-- A generic layered artifact model for command, tool, porcelain, model, agent, and skill workon/promote/discard flows.
+- A generic layered artifact model for command, tool, model, agent, and skill workon/promote/discard flows.
 - Layered markdown agent profiles compatible with OpenCode-style frontmatter.
 - Layered skill instruction bundles compatible with OpenCode-style `SKILL.md` directories.
 - jj-backed session-local state and overlay history under each session directory.
@@ -126,7 +126,7 @@ For development shells, expose it with:
 NU_LIB_DIRS="$(strap nu lib-dir)" nu
 ```
 
-`nu/plumbing.nu` is the preferred local data plumbing layer. It provides pure state transforms plus closure-based combinators; Node remains the adapter layer for provider, OAuth, MCP, jsmcp, and other protocol edges.
+`nu/plumbing.nu` is the preferred local data plumbing layer. It provides pure state transforms plus closure-based combinators; Node remains only for MCP and real package/runtime pressure.
 
 ```nu
 use '/path/to/strap/nu/plumbing.nu' *
@@ -144,7 +144,7 @@ open state.json
 
 `strap nu modules` prints the installed Nu modules, `strap nu lib-dir` prints the directory to add to `NU_LIB_DIRS`, `strap nu use-line strap` prints the grouped module import, `strap nu path plumbing` prints the plumbing module path, and `strap nu use-line plumbing` prints a plumbing-only import line.
 
-`nu/strap.nu` wraps the Node filters as native structured pipeline commands when an effectful adapter is needed:
+`nu/strap.nu` wraps Strap commands as native structured pipeline commands when an effectful adapter is needed:
 
 ```nu
 use nu/strap.nu *
@@ -156,22 +156,6 @@ init
 | tee { save -f session.json }
 | display-last-message
 ```
-
-## Self-Modifying Porcelain
-
-Porcelain modules in `porcelain/*.nu` are meant to be cheap for a model to write, rewrite, fork, and discard. The stable substrate lives in `nu/plumbing.nu` and the Node filter CLIs.
-
-```bash
-strap porcelain list
-strap artifact workon porcelain basic
-strap artifact promote porcelain basic
-
-strap state init \
-| strap porcelain run basic ask "List files" \
-| strap porcelain run basic scope "repo scan"
-```
-
-See `docs/self-modifying-porcelain.md` for the design.
 
 ## MCP Servers
 
@@ -194,8 +178,7 @@ strap mcp fs,process,json_echo
 
 ```bash
 strap state init \
-| strap porcelain run basic request-tool jsmcp.list_servers '{}' \
-| strap run-calls --tools jsmcp
+| strap one-shot run "List configured jsmcp servers" --tools jsmcp
 ```
 
 Available bridge tools:
@@ -327,6 +310,5 @@ The active format is the actor/event/scope shape.
 - `docs/daily-use.md`: daily project-local workflow.
 - `docs/zettelkasten.md`: shared memory CLI and agent tool.
 - `docs/jsmcp.md`: jsmcp bridge.
-- `docs/self-modifying-porcelain.md`: editable Nu porcelain model.
 - `docs/implemented.md`: implemented capability inventory.
 - `docs/original-vision-gaps.md`: remaining hardening/product gaps.

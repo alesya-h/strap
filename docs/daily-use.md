@@ -83,9 +83,9 @@ strap commands validate --json
 Work on and promote overlayed artifacts:
 
 ```bash
-strap artifact workon porcelain basic
-strap artifact status porcelain
-strap artifact promote porcelain basic
+strap artifact workon tool json_echo
+strap artifact status tool
+strap artifact promote tool json_echo
 ```
 
 Apply an agent profile to a state:

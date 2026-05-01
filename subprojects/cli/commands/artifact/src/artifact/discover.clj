@@ -65,9 +65,6 @@
          (map #(single-file-artifact type % layer root ext))
          vec)))
 
-(defn discover-porcelain-artifacts [root layer]
-  (discover-by-extension "porcelain" root layer ".nu" c/regular-file?))
-
 (defn discover-agent-artifacts [root layer]
   (discover-by-extension "agent" root layer ".md" c/regular-file?))
 
@@ -78,7 +75,6 @@
   (case type
     "command" (discover-command-artifacts root layer)
     "tool" (discover-tool-artifacts root layer)
-    "porcelain" (discover-porcelain-artifacts root layer)
     "agent" (discover-agent-artifacts root layer)
     "skill" (discover-skill-artifacts root layer)
     "model" (discover-model-artifacts root layer)))

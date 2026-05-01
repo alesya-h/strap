@@ -51,8 +51,6 @@ js_files=(
   subprojects/tools/src/*.js
   subprojects/mcp/bin/*.js
   subprojects/mcp/src/*.js
-  subprojects/porcelain/bin/*.js
-  subprojects/porcelain/src/*.js
   subprojects/zettel/bin/*.js
   subprojects/jsmcp/src/*.js
   subprojects/cli/bin/*.js
@@ -62,7 +60,7 @@ js_files=(
 )
 for file in "${js_files[@]}"; do node --check "$file"; done
 
-for file in bin/strap-runner subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
+for file in bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
   if [ -e "$file" ]; then
     printf 'Replaced legacy JS file should not exist: %s\n' "$file" >&2
     exit 1

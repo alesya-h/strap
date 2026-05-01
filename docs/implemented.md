@@ -14,12 +14,12 @@ This document records what `strap` currently implements.
 - Quoted context rendering with `strap context quote`.
 - One-shot-backed context summarization with `strap context summarize`.
 - Basic agent fork/fold commands.
-- Generic layered artifact model for command, tool, porcelain, model, agent, and skill artifacts.
+- Generic layered artifact model for command, tool, model, agent, and skill artifacts.
 - Markdown agent profiles as layered artifacts.
 - Skill instruction bundles as layered artifacts.
 - Model profiles as layered artifacts with symlinked `current.json` selection.
 - `strap status` reports roots, layers, zettel status, and visible artifact overlays.
-- `strap artifact workon/promote/discard/status` manages session/user/project/global/root overlays for commands, tools, porcelain, models, agents, and skills.
+- `strap artifact workon/promote/discard/status` manages session/user/project/global/root overlays for commands, tools, models, agents, and skills.
 
 ## CLIs
 
@@ -35,8 +35,7 @@ This document records what `strap` currently implements.
 - `strap model`: list, show, select, and fork model profiles.
 - `strap mcp`: run bundled stdio MCP servers.
 - `strap nu`: inspect installed Nushell module paths and generated `use` lines.
-- `strap porcelain`: discover and run Nushell porcelain modules.
-- `strap artifact`: inspect and manage layered command/tool/porcelain/model/agent/skill artifacts.
+- `strap artifact`: inspect and manage layered command/tool/model/agent/skill artifacts.
 - `strap status`: inspect active roots, layers, and overlay status.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.
 - `strap commands`: list and scaffold filesystem-discovered commands.
@@ -84,15 +83,6 @@ This document records what `strap` currently implements.
 - Tested Kagi search through jsmcp.
 - MCP servers use Content-Length stdio framing.
 
-## Porcelain
-
-- Stable Nushell plumbing in `nu/plumbing.nu`.
-- Ergonomic Nushell wrappers in `nu/strap.nu`.
-- Starter porcelain modules in `porcelain/`.
-- Porcelain is path/name-discovered, not centrally registered.
-- Porcelain can be run immediately as immutable state filters.
-- Basic trace/provenance helper exists in starter porcelain.
-
 ## Zettelkasten
 
 - `strap zk` is a self-contained Babashka capsule around markdown notes and a command-private SQLite/FTS/vector index helper.
@@ -127,7 +117,6 @@ This document records what `strap` currently implements.
 - `docs/commands.md`: command authoring, validation, and built-in command reference.
 - `docs/providers.md`: model profile and auth notes.
 - `docs/jsmcp.md`: jsmcp bridge and Kagi smoke test notes.
-- `docs/self-modifying-porcelain.md`: porcelain/plumbing self-modification model.
 - `docs/zettelkasten.md`: shared semantic memory usage.
 - `docs/reference-tool-ux.md`: reference harness/tool UX analysis.
 - `docs/aiden-notes.md`: notes from the older Ruby self-modifying harness.
@@ -137,4 +126,4 @@ This document records what `strap` currently implements.
 
 - `npm test` passes.
 - `npm run check` validates Node syntax and Nushell source loading.
-- Smoke tests cover canonical state transforms, provider request compilation, script tools, porcelain, and offline zettelkasten search.
+- Smoke tests cover canonical state transforms, provider request compilation, script tools, and offline zettelkasten search.

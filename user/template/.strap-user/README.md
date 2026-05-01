@@ -13,6 +13,5 @@ This directory contains user/agent-local runtime state. It should be ignored by 
 - `models/`: user-local model profile overlays.
 - `commands/`: temporary generated commands.
 - `tools/`: temporary generated script tools.
-- `porcelain/`: temporary generated Nushell porcelain.
 - `zettel/`: private/local memory source.
 - `config/`: user-local project config.

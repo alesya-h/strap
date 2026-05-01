@@ -82,7 +82,6 @@ config/strap/
   zettel/
   commands/
   tools/
-  porcelain/
 ```
 
 For global home-directory overlays, use `~/.config/strap` or set `STRAP_GLOBAL`.
@@ -98,7 +97,6 @@ my-project/.strap/
   models/
   commands/
   tools/
-  porcelain/
   zettel/
   config/
 ```
@@ -119,14 +117,13 @@ my-project/.strap-user/
   scratch/
   commands/
   tools/
-  porcelain/
   zettel/
   config/
 ```
 
-This directory should be ignored by the project VCS. It is where sessions, caches, logs, private memory, and project-user generated commands/tools/porcelain belong.
+This directory should be ignored by the project VCS. It is where sessions, caches, logs, private memory, and project-user generated commands/tools belong.
 
-Agents, skills, models, commands, tools, and porcelain use session/user/project/global/root overlays. Inspect overlays with `strap status` or `strap artifact status`, create working copies with `strap artifact workon <type> <name>`, and promote agent/skill/model/command/tool/porcelain artifacts one layer at a time with `strap artifact promote <type> <name>`. Zettel notes still use the user/project overlay through `strap zk promote <note>`.
+Agents, skills, models, commands, and tools use session/user/project/global/root overlays. Inspect overlays with `strap status` or `strap artifact status`, create working copies with `strap artifact workon <type> <name>`, and promote agent/skill/model/command/tool artifacts one layer at a time with `strap artifact promote <type> <name>`. Zettel notes still use the user/project overlay through `strap zk promote <note>`.
 
 `user/template/.strap` and `user/template/.strap-user` are checked-in templates for this split.
 

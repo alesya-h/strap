@@ -10,7 +10,7 @@ This document records the main pieces from the original `strap` vision that are 
 - No eBPF/seccomp/network restriction layer.
 - No formal propose/test/approve/install workflow for generated capabilities.
 
-Current state: generated porcelain can be written and run cheaply, and a basic bwrap command exists. Restricted modes should be enforced by the launch environment rather than command-owned metadata.
+Current state: generated commands/tools can be written and run cheaply, and a basic bwrap command exists. Restricted modes should be enforced by the launch environment rather than command-owned metadata.
 
 ## Branch, Fold, And Context-Pop Semantics
 
@@ -66,7 +66,7 @@ Remaining slices:
 2. Extract `artifact` and `status` into filesystem-oriented capsules and remove the shared artifact/status JS modules.
 3. Extract `session` and `history` into capsules, preserving the existing file layout and jj-backed history behavior.
 4. Extract tool execution (`run-calls` and tool registry behavior) into command/script-tool boundaries or another explicit capability surface.
-5. Extract or rationalize `loop`, `llm`, `mcp`, `jsmcp`, and `porcelain` last, after provider and tool boundaries are stable.
+5. Extract or rationalize `loop`, `llm`, `mcp`, and `jsmcp` last, after provider and tool boundaries are stable.
 
 Validation rule for each slice:
 
@@ -107,9 +107,9 @@ Current state: loops are usable for simple work, not yet a mature control plane.
 ## Self-Extension Provenance
 
 - Trace helper exists, but provenance is not automatic.
-- Generated porcelain/tool files are not tied to actor, source branch, validation command, or approval event by default.
+- Generated command/tool files are not tied to actor, source branch, validation command, or approval event by default.
 - There is no durable installed-capability registry.
-- There is no lifecycle distinction between temporary porcelain and approved installed capabilities.
+- There is no lifecycle distinction between temporary generated capabilities and approved installed capabilities.
 
 Current state: provenance can be recorded manually, but it is not enforced or systematized.
 
@@ -132,7 +132,7 @@ Current state: semantic memory is useful and shared, but it is an MVP.
 - No TUI/web dashboard.
 - No session browser.
 - No agent run inspector.
-- No convenient porcelain for common daily workflows beyond starter examples.
+- No convenient packaged workflows for common daily use beyond starter examples.
 - No first-class packaging/install story for humans outside the repo.
 
 Current state: the system is CLI-usable, but not polished as a daily product.
@@ -159,7 +159,7 @@ Current state: persistence is unix-explicit via files, `tee`, redirection, `save
 
 - `.strap` now represents project-shared harness artifacts.
 - `.strap-user` now represents user/agent-local runtime state.
-- `strap artifact promote` can move command/tool/porcelain/model/agent/skill overlays from session to user, user to project, project to global, and global to root, but promotion does not yet enforce diffs, provenance, validation hooks, or review.
+- `strap artifact promote` can move command/tool/model/agent/skill overlays from session to user, user to project, project to global, and global to root, but promotion does not yet enforce diffs, provenance, validation hooks, or review.
 - Basic jj-backed session history exists through `strap history`, but higher-level session branching/fold-back workflows are not built yet.
 - Markdown-source zettelkasten commands exist with overlay promotion and backlinks, but there is no migration strategy, chunking model, or conflict story yet.
 

@@ -12,12 +12,6 @@
     "$STRAP_CONFIG/tools",
     "$STRAP_ROOT/tools"
   ],
-  "porcelain_roots": [
-    "$STRAP_WORK/porcelain",
-    "$STRAP_PROJECT/porcelain",
-    "$STRAP_CONFIG/porcelain",
-    "$STRAP_ROOT/porcelain"
-  ],
   "agent_roots": [
     "$STRAP_WORK/agents",
     "$STRAP_PROJECT/agents",

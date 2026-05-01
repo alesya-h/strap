@@ -9,7 +9,6 @@
 - `tools/`: legacy location; active schemas/execution live under `cli/commands/tools` and `cli/commands/run-calls`.
 - `mcp/`: bundled stdio MCP servers.
 - `jsmcp/`: legacy stdio bridge location; active jsmcp integration uses the HTTP API from `run-calls`.
-- `porcelain/`: runner for model-editable Nushell porcelain modules.
 - `zettel/`: markdown-source zettelkasten, derived SQLite/FTS/vector index, and embedding helper.
 - `sessions/`: `.strap` project artifact and `.strap-user` local work/session CLIs.
 - `state-bb/`: Babashka pure-state prototype.

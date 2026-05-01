@@ -47,9 +47,9 @@ Memory is useful only when it is inspectable and attributable. Agents should use
 
 ### Use languages by role
 
-- Node: provider calls, OAuth, streaming, MCP/jsmcp, process and filesystem integration.
-- Nushell: editable porcelain, reference loops, JSON pipelines, and SQLite CLI orchestration.
-- Babashka/Clojure: currently a small pure-state prototype, not a required platform layer.
+- Nu: command orchestration, REST/JSON plumbing, reference loops, and SQLite CLI orchestration.
+- Babashka/Clojure: richer local data, auth, state, and router logic that gets awkward in Nu.
+- Node: MCP and real package/runtime pressure only.
 
 ## Non-goals For Now
 

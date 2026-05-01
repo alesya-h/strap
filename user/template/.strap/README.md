@@ -4,7 +4,6 @@ This directory contains project-shared harness artifacts. It may be committed wi
 
 - `commands/`: promoted project `strap <command>` directories.
 - `tools/`: project-local script tools.
-- `porcelain/`: project-local Nushell porcelain.
 - `agents/`: project-shared agent profiles.
 - `skills/`: project-shared skill instruction bundles.
 - `models/`: project-shared model profile overlays.

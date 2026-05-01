@@ -36,7 +36,7 @@ Use `strap paths` or `strap commands roots` to inspect resolution.
 
 ## Layered Artifacts
 
-Commands, script tools, and porcelain modules share a layered artifact model:
+Commands and tools share a layered artifact model:
 
 - `session`: current-session overlay under `$STRAP_SESSION/overlay`.
 - `user`: mutable user/agent overlay under `.strap-user`.
@@ -46,7 +46,7 @@ Commands, script tools, and porcelain modules share a layered artifact model:
 
 The session layer shadows lower layers when a current session exists. `strap artifact workon <type> <name>` copies a lower-layer artifact into the session layer, or into the user layer if there is no current session. `strap artifact promote <type> <name>` moves one layer down by default: session to user, user to project, project to global, and global to root. `strap artifact discard <type> <name>` removes the session overlay first, then user overlay.
 
-Supported artifact types are currently `command`, `tool`, `porcelain`, `model`, `agent`, and `skill`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
+Supported artifact types are currently `command`, `tool`, `model`, `agent`, and `skill`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
 
 ## Command Discovery
 
@@ -283,7 +283,6 @@ Code is grouped by capability:
 - `tools`: tool registry and built-in tools.
 - `mcp`: bundled stdio MCP servers.
 - `jsmcp`: bridge to installed `jsmcp`.
-- `porcelain`: Nushell porcelain runner.
 - `zettel`: legacy location; the active `zk` command now lives as a Babashka capsule under `subprojects/cli/commands/zk`.
 - `sessions`: project work and session CLIs.
 - `state-bb`: Babashka pure-state prototype.

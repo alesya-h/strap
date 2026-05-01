@@ -102,18 +102,6 @@ export function strapToolDirs() {
   ];
 }
 
-export function strapPorcelainDirs() {
-  const configured = (process.env.STRAP_PORCELAIN_PATH || "").split(path.delimiter).filter(Boolean);
-  return [
-    ...configured,
-    ...maybeJoin(strapSessionOverlayRoot(), "porcelain"),
-    path.join(strapWorkRoot(), "porcelain"),
-    path.join(strapProjectRoot(), "porcelain"),
-    path.join(strapGlobalRoot(), "porcelain"),
-    path.join(strapRoot(), "porcelain"),
-  ];
-}
-
 export function strapAgentDirs() {
   const configured = (process.env.STRAP_AGENT_PATH || "").split(path.delimiter).filter(Boolean);
   return [

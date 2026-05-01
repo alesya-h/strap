@@ -6,7 +6,7 @@
 
 (def layers ["session" "user" "project" "global" "root"])
 (def mutable-layers ["session" "user" "project" "global"])
-(def artifact-types ["command" "tool" "porcelain" "agent" "skill" "model"])
+(def artifact-types ["command" "tool" "agent" "skill" "model"])
 
 (defn env [name]
   (System/getenv name))

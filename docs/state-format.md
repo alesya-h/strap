@@ -222,7 +222,7 @@ Current code uses these event kinds:
 | `memory_context` | `harness` | Visible zettelkasten context from explicit memory/tool operations. |
 | `tool_budget_exhausted` | `harness` | Loop budget exhausted; assistant should answer without more tools. |
 
-Other porcelain or commands may add additional `kind` values. They should keep the same event shape.
+Other commands or tools may add additional `kind` values. They should keep the same event shape.
 
 ## Tool calls
 

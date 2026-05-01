@@ -17,13 +17,6 @@
      :global (c/path-str (c/env "STRAP_GLOBAL") "tools")
      :root (c/path-str (c/env "STRAP_ROOT") "tools")}
 
-    "porcelain"
-    {:session (c/maybe-path (c/env "STRAP_SESSION") "overlay" "porcelain")
-     :user (c/path-str (c/env "STRAP_WORK") "porcelain")
-     :project (c/path-str (c/env "STRAP_PROJECT") "porcelain")
-     :global (c/path-str (c/env "STRAP_GLOBAL") "porcelain")
-     :root (c/path-str (c/env "STRAP_ROOT") "porcelain")}
-
     "agent"
     {:session (c/maybe-path (c/env "STRAP_SESSION") "overlay" "agents")
      :user (c/path-str (c/env "STRAP_WORK") "agents")

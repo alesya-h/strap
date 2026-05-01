@@ -110,7 +110,7 @@ strap with-session my-session -- history log
 | --- | --- |
 | `agent` | Fork and fold agent state. |
 | `agents` | List, show, apply, and import markdown agent profiles. |
-| `artifact` | Inspect and manage layered command/tool/porcelain artifacts. |
+| `artifact` | Inspect and manage layered command/tool/profile artifacts. |
 | `carapace` | Install and serve shell completion integration. |
 | `commands` | List, inspect, validate, and scaffold command directories. |
 | `context` | Transform extracted context, including quoting and summarization. |
@@ -124,7 +124,6 @@ strap with-session my-session -- history log
 | `nu` | Inspect Nushell plumbing module paths. |
 | `one-shot` | Run an agent once until its first final answer. |
 | `paths` | Print resolved root/config/global/project/session/work/workspace paths. |
-| `porcelain` | List and run model-editable Nushell porcelain modules. |
 | `provider` | Run provider-specific operations and authentication. |
 | `run-calls` | Execute pending tool calls in canonical state. |
 | `sandbox` | Run a command through a bubblewrap sandbox profile. |
@@ -140,7 +139,7 @@ Run `strap help <command>` for command-local usage text.
 
 ## Layered Artifacts
 
-Commands, script tools, porcelain modules, model profiles, agent profiles, and skill bundles can be inspected and moved through the session/user/project/global/root overlay lifecycle:
+Commands, tools, model profiles, agent profiles, and skill bundles can be inspected and moved through the session/user/project/global/root overlay lifecycle:
 
 ```bash
 strap status
@@ -148,10 +147,10 @@ strap artifact status command
 strap artifact status agent
 strap artifact status skill
 strap artifact status model
-strap artifact workon porcelain basic
-strap artifact promote porcelain basic
-strap artifact promote porcelain basic --from project --to global
-strap artifact discard porcelain basic
+strap artifact workon tool json_echo
+strap artifact promote tool json_echo
+strap artifact promote tool json_echo --from project --to global
+strap artifact discard tool json_echo
 ```
 
 `workon` creates a session-layer working copy when a current session exists, otherwise a user-layer copy. `promote` moves one step down by default: session to user, user to project, project to global, and global to root. `discard` removes the session-layer copy first, then the user-layer copy.

@@ -29,21 +29,17 @@ STRAP_JSMCP_PROFILE=work
 
 ## Example
 
+Ask a model to call `jsmcp.list_servers`, then execute pending calls with:
+
 ```bash
-strap state init \
-| strap porcelain run basic request-tool jsmcp.list_servers '{}' \
-| strap run-calls --tools jsmcp
+strap run-calls --tools jsmcp < state-with-jsmcp-call.json
 ```
 
 ## Kagi Smoke Test
 
 The local jsmcp YAML config includes a `kagi` server. Tested flow:
 
-```bash
-strap state init \
-| strap porcelain run basic request-tool jsmcp.list_tools '{"server":"kagi"}' \
-| strap run-calls --tools jsmcp
-```
+Ask a model to call `jsmcp.list_tools` with `{"server":"kagi"}`, then run `strap run-calls --tools jsmcp`.
 
 Then execute a search:
 

@@ -9,6 +9,6 @@ my-project/.strap/
 my-project/.strap-user/
 ```
 
-The harness treats `.strap` as `STRAP_PROJECT`: promoted project commands, tools, porcelain, config, and shared memory live there.
+The harness treats `.strap` as `STRAP_PROJECT`: promoted project commands, tools, config, and shared memory live there.
 
-The harness treats `.strap-user` as `STRAP_WORK`: user/agent-local sessions, history, temporary commands/tools/porcelain, logs, cache, and private memory live there.
+The harness treats `.strap-user` as `STRAP_WORK`: user/agent-local sessions, history, temporary commands/tools, logs, cache, and private memory live there.

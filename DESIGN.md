@@ -22,7 +22,7 @@ The public interface is:
 strap <command> [args...]
 ```
 
-This makes the harness inspectable and editable by both humans and agents. A project can carry promoted commands, tools, porcelain, and shared memory under `.strap/`, while user/agent-local sessions, scratch work, caches, and project-user generated capabilities live under `.strap-user/`. Each session can carry its own overlay and history under its session directory.
+This makes the harness inspectable and editable by both humans and agents. A project can carry promoted commands, tools, and shared memory under `.strap/`, while user/agent-local sessions, scratch work, caches, and project-user generated capabilities live under `.strap-user/`. Each session can carry its own overlay and history under its session directory.
 
 ## Current Spine
 
@@ -60,9 +60,9 @@ Provider payloads are compiled projections. Provider-managed continuation state 
 
 ## Language Split
 
-- Node: provider calls, OAuth, streaming, MCP/jsmcp, filesystem/process glue.
-- Nushell: editable porcelain, reference loop, JSON pipeline composition, zettelkasten SQLite orchestration.
-- Babashka/Clojure: small pure-state prototype; not yet a required architectural layer.
+- Nu: command orchestration, REST/JSON plumbing, reference loops, and zettelkasten SQLite orchestration.
+- Babashka/Clojure: richer local data, auth, state, and router logic that gets awkward in Nu.
+- Node: MCP and real package/runtime pressure only.
 
 ## Isolation Direction
 

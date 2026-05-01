@@ -9,7 +9,6 @@
     "#strap/providers/*": "./subprojects/providers/src/*.js",
     "#strap/mcp/*": "./subprojects/mcp/src/*.js",
     "#strap/jsmcp/*": "./subprojects/jsmcp/src/*.js",
-    "#strap/porcelain/*": "./subprojects/porcelain/src/*.js",
     "#strap/loop/*": "./subprojects/loop/src/*.js"
   },
   "bin": {

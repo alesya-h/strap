@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-exec node "$STRAP_ROOT/subprojects/porcelain/bin/porcelain.js" "$@"
