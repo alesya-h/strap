@@ -11,8 +11,7 @@
     "strap": "./bin/strap"
   },
   "scripts": {
-    "check": "./scripts/check",
-    "test": "npm run check && ./bin/strap project-smoke"
+    "test": "./bin/strap project-test"
   },
   "engines": {
     "node": ">=20"

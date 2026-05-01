@@ -1,136 +1,119 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env nu
 
-cd "$STRAP_ROOT"
+cd $env.STRAP_ROOT
 
-shopt -s nullglob globstar
+const limit = 150
+const exceptions_file = ".strap/config/line-cap-exceptions.txt"
 
-check_line_cap() {
-  local limit=150
-  local exceptions_file=.strap/config/line-cap-exceptions.txt
-  local failed=0
-  local line_count
-    local files=(bin/strap scripts/check subprojects/strap-main/**/* subprojects/cli/commands/**/* tools/**/* .strap/commands/**/* .strap-user/commands/**/*)
-
-  for file in "${files[@]}"; do
-    [ -f "$file" ] || continue
-    case "$file" in *.json) continue ;; esac
-    line_count=$(wc -l < "$file")
-    if [ "$line_count" -le "$limit" ]; then continue; fi
-    if [ -f "$exceptions_file" ] && grep -Fxq -- "$file" "$exceptions_file"; then continue; fi
-    printf 'File exceeds %s-line cap: %s (%s lines)\n' "$limit" "$file" "$line_count" >&2
-    failed=1
-  done
-
-  if [ -f "$exceptions_file" ]; then
-    while IFS= read -r file; do
-      case "$file" in ''|'#'*) continue ;; esac
-      if [ ! -f "$file" ]; then
-        printf 'Line-cap exception no longer exists: %s\n' "$file" >&2
-        failed=1
-        continue
-      fi
-      line_count=$(wc -l < "$file")
-      if [ "$line_count" -le "$limit" ]; then
-        printf 'Stale line-cap exception under %s lines: %s (%s lines)\n' "$limit" "$file" "$line_count" >&2
-        failed=1
-      fi
-    done < "$exceptions_file"
-  fi
-
-  [ "$failed" -eq 0 ] || exit 1
+def fail [msg: string] {
+  print -e $msg
+  exit 1
 }
 
-check_line_cap
-js_files=(
-  subprojects/mcp/servers/*.js
-  subprojects/mcp/bin/*.js
-  subprojects/mcp/src/*.js
-)
-for file in "${js_files[@]}"; do node --check "$file"; done
-for file in bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/cli/bin subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
-  if [ -e "$file" ]; then
-    printf 'Replaced legacy JS file should not exist: %s\n' "$file" >&2
-    exit 1
-  fi
-done
-for file in subprojects/cli/commands/run-calls/src/**/*.js; do [ ! -e "$file" ] || { printf 'run-calls is a Babashka capsule; JS file should not exist: %s\n' "$file" >&2; exit 1; }; done
-for file in subprojects/cli/commands/run-calls/src/run_calls/*_tools.clj subprojects/cli/commands/run-calls/src/run_calls/jsmcp.clj subprojects/cli/commands/run-calls/src/run_calls/registry.clj subprojects/cli/commands/run-calls/src/run_calls/scripts.clj; do
-  if [ -e "$file" ]; then
-    printf 'run-calls must stay a thin router; concrete tool implementation should not exist here: %s\n' "$file" >&2
-    exit 1
-  fi
-done
-if compgen -G 'tools/*/src/run_calls/*' >/dev/null; then
-  printf 'Tool-local code should use tool.* namespaces, not run_calls paths.\n' >&2
-  exit 1
-fi
-if grep -R -n 'run-calls\.' tools --include='*.clj' >&2; then
-  printf 'Tool-local Clojure namespaces should not live under run-calls.*\n' >&2; exit 1
-fi
-if grep -R -nE '^\(require|babashka\.classpath|cp/add-classpath' tools --include='run' >&2; then
-  printf 'Babashka tool run scripts should be thin launchers for tool.main.\n' >&2
-  exit 1
-fi
-if grep -R -nE ':metadata|metadata[})]' tools subprojects/cli/commands/run-calls --include='*.clj' --include='*.js' --include='*.nu' >&2; then
-  printf 'Tool results must not use metadata; use equivalent content and structuredContent.\n' >&2; exit 1
-fi
-for file in tools/*; do [ ! -f "$file" ] || { printf 'Tool artifacts must be grouped directories, not flat files: %s\n' "$file" >&2; exit 1; }; done
-for file in subprojects/tools/src/registry.js subprojects/tools/src/agent-tools.js subprojects/tools/src/fs-tools.js subprojects/tools/src/process-tools.js subprojects/tools/src/script-tools.js subprojects/tools/src/web-tools.js; do
-  if [ -e "$file" ]; then
-    printf 'Replaced shared tool JS file should not exist: %s\n' "$file" >&2
-    exit 1
-  fi
-done
-if grep -R -n '#strap/tools' . --include='*.js' --include='*.json' --include='*.md' --exclude-dir=.git >&2; then
-  printf 'Shared #strap/tools imports are retired; use strap tools/run-calls boundaries.\n' >&2
-  exit 1
-fi
-if grep -R -nE '#strap/(core|providers|jsmcp|loop)|\^node' . --include='*.js' --include='*.json' --include='*.md' --include='*.nu' --include='*.clj' --include='*.sh' --exclude-dir=.git --exclude-dir=subprojects/mcp >&2; then
-  printf 'Non-MCP Node surfaces are retired; use Nu/Babashka command boundaries instead.\n' >&2
-  exit 1
-fi
+def files-for [patterns: list<string>] {
+  $patterns | reduce --fold [] {|pattern, acc| $acc ++ (glob --no-dir $pattern) } | uniq | sort
+}
 
-nu --commands 'use nu/strap; use nu/plumbing.nu *'
+def exception-lines [] {
+  if not ($exceptions_file | path exists) { return [] }
+  open --raw $exceptions_file | lines | where {|line| ($line | str trim) != "" and not ($line | str starts-with "#") }
+}
 
-command_files=(subprojects/cli/commands/*/run subprojects/cli/commands/*/inner/* .strap/commands/*/run .strap-user/commands/*/run)
-for file in "${command_files[@]}"; do
-  read -r shebang < "$file" || shebang=""
-  case "$shebang" in
-    *bash*) bash -n "$file" ;;
-    *node*) node --check "$file" ;;
-    *nu*) nu --ide-check 20 "$file" >/dev/null ;;
-  esac
-done
-for file in subprojects/cli/commands/provider-*/main.nu; do
-  [ -f "$file" ] && nu --ide-check 20 "$file" >/dev/null
-done
+def check-line-cap [] {
+  let exceptions = (exception-lines)
+  mut failed = false
+  let files = (files-for [bin/strap "subprojects/strap-main/**/*" "subprojects/cli/commands/**/*" "tools/**/*" ".strap/commands/**/*" ".strap-user/commands/**/*"])
+  for file in $files {
+    if ($file | str ends-with ".json") { continue }
+    let n = (open --raw $file | lines | length)
+    if $n <= $limit { continue }
+    if ($file in $exceptions) { continue }
+    print -e $"File exceeds ($limit)-line cap: ($file) \(($n) lines)"
+    $failed = true
+  }
+  for file in $exceptions {
+    if not ($file | path exists) { print -e $"Line-cap exception no longer exists: ($file)"; $failed = true; continue }
+    let n = (open --raw $file | lines | length)
+    if $n <= $limit { print -e $"Stale line-cap exception under ($limit) lines: ($file) \(($n) lines)"; $failed = true }
+  }
+  if $failed { exit 1 }
+}
 
-capsule_files=()
-for dir in .strap/commands/* .strap-user/commands/*; do
-  [ -d "$dir" ] || continue
-  name="$(basename "$dir")"
-  case "$name" in project-*) continue ;; esac
-  [ -f "$dir/run" ] && capsule_files+=("$dir/run")
-  if [ -d "$dir/inner" ]; then
-    for inner in "$dir"/inner/*; do [ -f "$inner" ] && capsule_files+=("$inner"); done
-  fi
-done
-if [ "${#capsule_files[@]}" -gt 0 ]; then
-  if grep -nE '#strap/|exec node "?\$STRAP_ROOT/subprojects|subprojects/.*/(src|bin)/.*\.js' "${capsule_files[@]}" >&2; then
-    printf 'Capsule command violation: commands must not import #strap/* or exec repo-local JS implementation files. Compose through strap commands instead.\n' >&2
-    exit 1
-  fi
-fi
-jq empty package.json config/strap/config.json config/strap/models/*.json config/strap/tool-groups/*.json config/strap/zettel/config.json
-expect_exit2() { "$@" >/tmp/strap-check-help.txt 2>&1 || [ "$?" = 2 ]; }
-expect_exit2 bb -cp subprojects/state-bb/src -m strap.state --help
-expect_exit2 bb subprojects/cli/commands/zk/run --help
-expect_exit2 bb subprojects/cli/commands/zk/inner/index --help
-expect_exit2 bb -cp subprojects/cli/commands/provider-chatgpt/src -m provider.chatgpt
-expect_exit2 bb -cp subprojects/cli/commands/artifact/src -m artifact.main --help
-bb -cp subprojects/strap-main/src -e "(require 'main)"
-bb -cp subprojects/cli/commands/run-calls/src -e "(require 'run-calls.main)"
-expect_exit2 bb subprojects/cli/commands/status/run --help
-printf '{"texts":["check"]}' | bb subprojects/cli/commands/embed/run --provider hash | jq empty
-${STRAP_BIN:-./bin/strap} tool-contract-check
+def require-missing [paths: list<string>] {
+  for file in $paths {
+    if ($file | path exists) { fail $"Replaced legacy path should not exist: ($file)" }
+  }
+}
+
+def rg-forbid [message: string, pattern: string, args: list<string>] {
+  let result = (run-external rg ...(["-n", $pattern] ++ $args) | complete)
+  if $result.exit_code == 0 { print -e $result.stdout; fail $message }
+  if $result.exit_code > 1 { print -e $result.stderr; fail $"rg failed while checking: ($message)" }
+}
+
+def check-no-retired-surfaces [] {
+  require-missing [
+    bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md
+    subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/cli/bin
+    subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu
+  ]
+  if not (glob --no-dir "subprojects/cli/commands/run-calls/src/**/*.js" | is-empty) { fail "run-calls is a Babashka capsule; JS files must not exist there." }
+  require-missing (files-for ["subprojects/cli/commands/run-calls/src/run_calls/*_tools.clj" "subprojects/cli/commands/run-calls/src/run_calls/jsmcp.clj" "subprojects/cli/commands/run-calls/src/run_calls/registry.clj" "subprojects/cli/commands/run-calls/src/run_calls/scripts.clj"])
+  if not (glob --no-dir "tools/*/src/run_calls/*" | is-empty) { fail "Tool-local code should use tool.* namespaces, not run_calls paths." }
+  for file in (glob "tools/*") { if (($file | path type) == "file") { fail $"Tool artifacts must be grouped directories, not flat files: ($file)" } }
+}
+
+def check-content-guards [] {
+  rg-forbid "Tool-local Clojure namespaces should not live under run-calls.*" "run-calls[.]" [tools "--glob" "*.clj"]
+  rg-forbid "Babashka tool run scripts should be thin launchers for tool.main." '^\(require|babashka[.]classpath|cp/add-classpath' [tools "--glob" run]
+  rg-forbid "Tool results must not use metadata; use equivalent content and structuredContent." ':metadata|metadata[})]' [tools subprojects/cli/commands/run-calls "--glob" "*.clj" "--glob" "*.js" "--glob" "*.nu"]
+  rg-forbid "Shared #strap/tools imports are retired; use strap tools/run-calls boundaries." "#strap/tools" ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "!.git/**"]
+  rg-forbid "Non-MCP Node surfaces are retired; use Nu/Babashka command boundaries instead." '#strap/(core|providers|jsmcp|loop)|\^node' ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "*.nu" "--glob" "*.clj" "--glob" "*.sh" "--glob" "!.git/**" "--glob" "!subprojects/mcp/**"]
+}
+
+def check-command-syntax [] {
+  for file in (files-for ["subprojects/cli/commands/*/run" "subprojects/cli/commands/*/inner/*" ".strap/commands/*/run" ".strap-user/commands/*/run"]) {
+    let shebang = (open --raw $file | lines | first | default "")
+    if ($shebang | str contains "bash") { run-external bash ...[-n $file] }
+    if ($shebang | str contains "node") { run-external node ...[--check $file] }
+    if ($shebang | str contains "nu") { run-external nu ...[--ide-check 20 $file] | ignore }
+  }
+  for file in (glob --no-dir "subprojects/cli/commands/provider-*/main.nu") { run-external nu ...[--ide-check 20 $file] | ignore }
+}
+
+def check-capsule-files [] {
+  mut files = []
+  for dir in (files-for [".strap/commands/*" ".strap-user/commands/*"]) {
+    if (($dir | path basename) | str starts-with "project-") { continue }
+    if (($dir | path join run) | path exists) { $files = ($files | append ($dir | path join run)) }
+    if (($dir | path join inner) | path exists) { $files = ($files | append (glob --no-dir ($dir | path join inner "*"))) }
+  }
+  if ($files | is-empty) { return }
+  let result = (run-external rg ...(["-n", '#strap/|exec node "?[$]STRAP_ROOT/subprojects|subprojects/.*/(src|bin)/.*[.]js'] ++ $files) | complete)
+  if $result.exit_code == 0 { print -e $result.stdout; fail "Capsule command violation: compose through strap commands or strap inner." }
+  if $result.exit_code > 1 { print -e $result.stderr; fail "rg failed while checking capsule files" }
+}
+
+def expect-exit2 [args: list<string>] {
+  let result = (run-external ...$args | complete)
+  if $result.exit_code != 2 { print -e $result.stderr; print -e $result.stdout; fail $"Expected exit 2: ($args | str join ' ')" }
+}
+
+check-line-cap
+for file in (files-for ["subprojects/mcp/servers/*.js" "subprojects/mcp/bin/*.js" "subprojects/mcp/src/*.js"]) { run-external node ...[--check $file] }
+check-no-retired-surfaces
+check-content-guards
+run-external nu ...[--commands "use nu/strap; use nu/plumbing.nu *"]
+check-command-syntax
+check-capsule-files
+run-external jq empty package.json config/strap/config.json ...((glob --no-dir "config/strap/models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
+expect-exit2 [bb -cp subprojects/state-bb/src -m strap.state --help]
+with-env { STRAP_CMD_DIR: "subprojects/cli/commands/zk" } { expect-exit2 [bb subprojects/cli/commands/zk/run --help] }
+with-env { STRAP_CMD_DIR: "subprojects/cli/commands/zk" } { expect-exit2 [bb subprojects/cli/commands/zk/inner/index --help] }
+expect-exit2 [bb -cp subprojects/cli/commands/provider-chatgpt/src -m provider.chatgpt]
+expect-exit2 [bb -cp subprojects/cli/commands/artifact/src -m artifact.main --help]
+run-external bb ...[-cp subprojects/strap-main/src -e "(require 'main)"]
+run-external bb ...[-cp subprojects/cli/commands/run-calls/src -e "(require 'run-calls.main)"]
+with-env { STRAP_CMD_DIR: "subprojects/cli/commands/status" } { expect-exit2 [bb subprojects/cli/commands/status/run --help] }
+'{"texts":["check"]}' | run-external bb ...[subprojects/cli/commands/embed/run --provider hash] | from json | ignore
+run-external ($env.STRAP_BIN? | default "./bin/strap") tool-contract-check
