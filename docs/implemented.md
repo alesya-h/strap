@@ -45,7 +45,6 @@ This document records what `strap` currently implements.
 - `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
 - `strap session`: create, copy, update, show, save, list, and trace sessions.
 - `strap sandbox`: run commands through bubblewrap profiles.
-- `strap state-bb`: Babashka prototype for pure state transforms.
 
 ## Providers
 

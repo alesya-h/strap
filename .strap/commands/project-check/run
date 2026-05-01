@@ -54,7 +54,7 @@ def rg-forbid [message: string, pattern: string, args: list<string>] {
 def check-no-retired-surfaces [] {
   require-missing [
     bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md
-    subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/mcp subprojects/cli
+    subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/mcp subprojects/cli subprojects/state-bb commands/state-bb
     subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu
   ]
   if not (glob --no-dir "commands/run-calls/src/**/*.js" | is-empty) { fail "run-calls is a Babashka capsule; JS files must not exist there." }
@@ -108,7 +108,6 @@ run-external nu ...[--commands "use nu/strap; use nu/plumbing.nu *"]
 check-command-syntax
 check-capsule-files
 run-external jq empty commands/mcp/package.json config/strap/config.json ...((glob --no-dir "config/strap/models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
-expect-exit2 [bb -cp subprojects/state-bb/src -m strap.state --help]
 with-env { STRAP_CMD_DIR: "commands/zk" } { expect-exit2 [bb commands/zk/run --help] }
 with-env { STRAP_CMD_DIR: "commands/zk" } { expect-exit2 [bb commands/zk/inner/index --help] }
 expect-exit2 [bb -cp commands/provider-chatgpt/src -m provider.chatgpt]

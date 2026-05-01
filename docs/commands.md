@@ -130,7 +130,6 @@ strap with-session my-session -- history log
 | `session` | Create, inspect, update, save, list, and trace user-local project sessions. |
 | `skills` | List, show, apply, and import skill instruction bundles. |
 | `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
-| `state-bb` | Run the Babashka pure-state prototype. |
 | `status` | Show roots, layers, and overlayed artifact status. |
 | `work` | Initialize or inspect `.strap` project artifacts and `.strap-user` local work. |
 | `zk` | Use the shared markdown-source zettelkasten with a derived SQLite/FTS/vector index. |

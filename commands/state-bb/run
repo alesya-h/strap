@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-exec bb -cp "$STRAP_ROOT/subprojects/state-bb/src" -m strap.state "$@"

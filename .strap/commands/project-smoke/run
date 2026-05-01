@@ -102,7 +102,6 @@ let bm_session = (open /tmp/strap-session-bookmarked.json | get root.children.0.
 save-call $strap [session copy "smoke copied session" --at $bm_session] /tmp/strap-session-copy.json
 save-call $strap [session show] /tmp/strap-session-show.json
 save-call $strap [session state] /tmp/strap-session-state.txt
-save-call $strap [state-bb init] /tmp/strap-state-bb.json
 save-call $strap [history snapshot --message "smoke session state"] /tmp/strap-history-snapshot.json
 
 run-external $strap ...[state init] | from json | update root.children { append { type: "event", from: "assistant", to: ["harness"], kind: "tool_request", calls: [{ id: "echo", tool: "json_echo.echo", input: { value: "ok" } }] } } | to json | run-external $strap ...[run-calls --tools json_echo] | save -f /tmp/strap-json-echo-tool.json

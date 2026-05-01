@@ -278,7 +278,6 @@ Code is grouped by capability:
 
 - `strap-main`: Babashka main command dispatcher behind `bin/strap`.
 - `cli`: built-in command capsules.
-- `state-bb`: Babashka pure-state prototype.
 
 ## Validation
 

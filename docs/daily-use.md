@@ -96,13 +96,6 @@ strap skills list
 open state.json | strap agents apply chat-concise | strap skills apply concise | save -f concise-state.json
 ```
 
-Use the Babashka data-layer prototype:
-
-```bash
-strap state-bb init
-strap state-bb init | strap state-bb add-user "hello"
-```
-
 Use Nu plumbing for local structured state work:
 
 ```nu
