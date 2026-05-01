@@ -1,104 +1,127 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env nu
 
-cd "$STRAP_ROOT"
+cd $env.STRAP_ROOT
 
-strap=./bin/strap
-export STRAP_COMMAND_PATH="$STRAP_ROOT/.strap/commands${STRAP_COMMAND_PATH:+:$STRAP_COMMAND_PATH}"
-export STRAP_WORK=/tmp/strap-work-smoke
-export STRAP_PROJECT=/tmp/strap-project-smoke
-rm -rf "$STRAP_WORK" "$STRAP_PROJECT"
+let strap = ($env.STRAP_ROOT | path join bin strap)
+let project_commands = ($env.STRAP_ROOT | path join .strap commands)
+let old_command_path = ($env.STRAP_COMMAND_PATH? | default "")
+$env.STRAP_COMMAND_PATH = if $old_command_path == "" { $project_commands } else { $"($project_commands):($old_command_path)" }
+$env.STRAP_WORK = "/tmp/strap-work-smoke"
+$env.STRAP_PROJECT = "/tmp/strap-project-smoke"
+hide-env STRAP_SESSION
+rm -rf $env.STRAP_WORK $env.STRAP_PROJECT
 
-$strap state init > /tmp/strap-smoke.json
-$strap state add-user 'hello' < /tmp/strap-smoke.json > /tmp/strap-smoke-2.json
-$strap state add-assistant 'world' < /tmp/strap-smoke-2.json > /tmp/strap-smoke-3.json
-$strap state bookmark add --text 'hello' --label smoke-start < /tmp/strap-smoke-3.json > /tmp/strap-smoke-bm-1.json 2> /tmp/strap-smoke-bm-1.log
-$strap state bookmark add --text 'world' --label smoke-end < /tmp/strap-smoke-bm-1.json > /tmp/strap-smoke-bm-2.json 2> /tmp/strap-smoke-bm-2.log
-$strap state bookmark list < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-bookmarks.json
-bm_start="$(jq -r '.root.children[0].bookmarks[0].id' /tmp/strap-smoke-bm-2.json)"
-bm_end="$(jq -r '.root.children[1].bookmarks[0].id' /tmp/strap-smoke-bm-2.json)"
-$strap state fold --from "$bm_start" --to "$bm_end" --summary 'smoke folded hello/world' < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-folded-range.json
-$strap state extract --from "$bm_start" --to "$bm_end" < /tmp/strap-smoke-bm-2.json > /tmp/strap-smoke-context.json
-$strap context quote < /tmp/strap-smoke-context.json > /tmp/strap-smoke-quote.json
-$strap one-shot run 'Summarize quoted smoke context' --agent chat-concise --skill concise --dry-run --tools none < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-one-shot.json
-$strap context summarize 'Summarize quoted smoke context' --agent chat-concise --skill concise --dry-run < /tmp/strap-smoke-quote.json > /tmp/strap-smoke-context-summary.json
-$strap state tree --hidden < /tmp/strap-smoke-folded-range.json > /tmp/strap-smoke-tree.txt
-$strap llm compile --model gpt-5.1-openai < /tmp/strap-smoke-2.json > /tmp/strap-model-openai.json
-$strap llm compile --model openai-gpt-5.1-openrouter < /tmp/strap-smoke-2.json > /tmp/strap-model-openrouter.json
-$strap llm compile --model claude-sonnet-4.5-anthropic < /tmp/strap-smoke-2.json > /tmp/strap-model-anthropic.json
-$strap llm compile < /tmp/strap-smoke-2.json > /tmp/strap-model-current.json
-$strap provider list > /tmp/strap-provider-list.json
-$strap provider chatgpt compile < /tmp/strap-smoke-2.json > /tmp/strap-provider-chatgpt-compile.json
-$strap provider openai compile --model gpt-5.1-openai < /tmp/strap-smoke-2.json > /tmp/strap-provider-openai-compile.json
-$strap agent fork --prompt 'inspect docs' < /tmp/strap-smoke-2.json > /tmp/strap-child.json
-$strap agent fold --child /tmp/strap-child.json --summary 'child result' < /tmp/strap-smoke-2.json > /tmp/strap-folded.json
-$strap state init | $strap loop --max-turns 0 --finalize false > /tmp/strap-loop-noop.json
+def save-call [strap: string, args: list<any>, out: string] {
+  run-external $strap ...($args | each {|arg| $arg | into string }) | save -f $out
+}
+
+def save-filter [strap: string, input_file: string, args: list<any>, out: string] {
+  open --raw $input_file | run-external $strap ...($args | each {|arg| $arg | into string }) | save -f $out
+}
+
+def save-filter-log [strap: string, input_file: string, args: list<any>, out: string, err: string] {
+  open --raw $input_file | run-external $strap ...($args | each {|arg| $arg | into string }) e> $err | save -f $out
+}
+
+def with-hash [block: closure] {
+  with-env { STRAP_ZK_EMBED_PROVIDER: "hash" } $block
+}
+
+save-call $strap [state init] /tmp/strap-smoke.json
+save-filter $strap /tmp/strap-smoke.json [state add-user hello] /tmp/strap-smoke-2.json
+save-filter $strap /tmp/strap-smoke-2.json [state add-assistant world] /tmp/strap-smoke-3.json
+save-filter-log $strap /tmp/strap-smoke-3.json [state bookmark add --text hello --label smoke-start] /tmp/strap-smoke-bm-1.json /tmp/strap-smoke-bm-1.log
+save-filter-log $strap /tmp/strap-smoke-bm-1.json [state bookmark add --text world --label smoke-end] /tmp/strap-smoke-bm-2.json /tmp/strap-smoke-bm-2.log
+save-filter $strap /tmp/strap-smoke-bm-2.json [state bookmark list] /tmp/strap-smoke-bookmarks.json
+let bm_start = (open /tmp/strap-smoke-bm-2.json | get root.children.0.bookmarks.0.id)
+let bm_end = (open /tmp/strap-smoke-bm-2.json | get root.children.1.bookmarks.0.id)
+save-filter $strap /tmp/strap-smoke-bm-2.json [state fold --from $bm_start --to $bm_end --summary "smoke folded hello/world"] /tmp/strap-smoke-folded-range.json
+save-filter $strap /tmp/strap-smoke-bm-2.json [state extract --from $bm_start --to $bm_end] /tmp/strap-smoke-context.json
+save-filter $strap /tmp/strap-smoke-context.json [context quote] /tmp/strap-smoke-quote.json
+save-filter $strap /tmp/strap-smoke-quote.json [one-shot run "Summarize quoted smoke context" --agent chat-concise --skill concise --dry-run --tools none] /tmp/strap-smoke-one-shot.json
+save-filter $strap /tmp/strap-smoke-quote.json [context summarize "Summarize quoted smoke context" --agent chat-concise --skill concise --dry-run] /tmp/strap-smoke-context-summary.json
+save-filter $strap /tmp/strap-smoke-folded-range.json [state tree --hidden] /tmp/strap-smoke-tree.txt
+save-filter $strap /tmp/strap-smoke-2.json [llm compile --model gpt-5.1-openai] /tmp/strap-model-openai.json
+save-filter $strap /tmp/strap-smoke-2.json [llm compile --model openai-gpt-5.1-openrouter] /tmp/strap-model-openrouter.json
+save-filter $strap /tmp/strap-smoke-2.json [llm compile --model claude-sonnet-4.5-anthropic] /tmp/strap-model-anthropic.json
+save-filter $strap /tmp/strap-smoke-2.json [llm compile] /tmp/strap-model-current.json
+save-call $strap [provider list] /tmp/strap-provider-list.json
+save-filter $strap /tmp/strap-smoke-2.json [provider chatgpt compile] /tmp/strap-provider-chatgpt-compile.json
+save-filter $strap /tmp/strap-smoke-2.json [provider openai compile --model gpt-5.1-openai] /tmp/strap-provider-openai-compile.json
+save-filter $strap /tmp/strap-smoke-2.json [agent fork --prompt "inspect docs"] /tmp/strap-child.json
+save-filter $strap /tmp/strap-smoke-2.json [agent fold --child /tmp/strap-child.json --summary "child result"] /tmp/strap-folded.json
+run-external $strap ...[state init] | run-external $strap ...[loop --max-turns 0 --finalize false] | save -f /tmp/strap-loop-noop.json
+
 nu --commands 'use nu/plumbing.nu *; open /tmp/strap-smoke-bm-2.json | with-events {|events| $events | where from == user | length } | save -f /tmp/strap-nu-with-events.json'
 nu --commands 'use nu/plumbing.nu *; let state = (open /tmp/strap-smoke-bm-2.json); let ids = ($state | bookmarks | get id); $state | with-extract ($ids | first) ($ids | last) {|ctx| $ctx.events | get text } | save -f /tmp/strap-nu-with-extract.json'
-$strap nu modules > /tmp/strap-nu-modules.json
-$strap nu path plumbing > /tmp/strap-nu-path.txt
-$strap nu lib-dir > /tmp/strap-nu-lib-dir.txt
-$strap nu env-line > /tmp/strap-nu-env-line.txt
-$strap nu use-line plumbing > /tmp/strap-nu-use-line.txt
-$strap nu use-line strap > /tmp/strap-nu-strap-use-line.txt
-STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap state init | strap agents apply chat-concise | strap skills apply concise | get actors.assistant.skills | save -f /tmp/strap-nu-module-skills.json"
-STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap model current | get model_id | save -f /tmp/strap-nu-model-current.json"
-STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap state init | strap add-user hello | strap provider chatgpt compile | get model | save -f /tmp/strap-nu-provider-compile.json"
-NU_LIB_DIRS="$($strap nu lib-dir)" STRAP_BIN=./bin/strap nu --commands 'use strap; strap init | strap add-user "hello from use strap" | strap events | get text | save -f /tmp/strap-nu-use-strap.json'
-$strap commands list --json > /tmp/strap-commands.json
-$strap commands validate --json > /tmp/strap-commands-validate.json
-$strap agents list > /tmp/strap-agents-list.json
-$strap agents show chat-concise > /tmp/strap-agents-show.json
-$strap state init | $strap agents apply chat-concise > /tmp/strap-agents-apply.json
-$strap skills list > /tmp/strap-skills-list.json
-$strap skills show concise > /tmp/strap-skills-show.json
-$strap state init | $strap agents apply chat-concise | $strap skills apply concise > /tmp/strap-skills-apply.json
-$strap model list > /tmp/strap-model-list.json
-$strap model show current > /tmp/strap-model-current-show.json
-$strap model fork current smoke-chatgpt --set-model-id smoke-model > /tmp/strap-model-fork.json
-$strap model use smoke-chatgpt > /tmp/strap-model-use.json
-$strap status > /tmp/strap-status.json
-$strap artifact status command > /tmp/strap-artifact-command-status.json
-$strap artifact status agent > /tmp/strap-artifact-agent-status.json
-$strap artifact status skill > /tmp/strap-artifact-skill-status.json
-$strap artifact status model > /tmp/strap-artifact-model-status.json
-$strap artifact workon tool json_echo > /tmp/strap-artifact-workon.json
-$strap artifact discard tool json_echo > /tmp/strap-artifact-discard.json
-$strap work init > /tmp/strap-work-init.json
-$strap session new 'smoke session' > /tmp/strap-session-new.json
-session_dir="$(jq -r '.dir' /tmp/strap-session-new.json)"
-session_name="$(basename "$session_dir")"
-$strap with-session "$session_name" -- session path > /tmp/strap-with-session-path.txt
-STRAP_BIN=./bin/strap nu --commands "$(./bin/strap nu use-line strap); strap session clear; strap session select $session_name | save -f /tmp/strap-nu-session-select.txt; \$env.STRAP_SESSION | save -f /tmp/strap-nu-session-env.txt"
-$strap history init > /tmp/strap-history-init.json
-$strap session ask 'remember this smoke question' > /tmp/strap-session-ask.json
-$strap session show > /tmp/strap-session-before-copy.json
-$strap state bookmark add --text 'remember this smoke question' --label session-copy-point < /tmp/strap-session-before-copy.json > /tmp/strap-session-bookmarked.json 2> /tmp/strap-session-bookmark.log
-$strap session save < /tmp/strap-session-bookmarked.json > /tmp/strap-session-save-bookmarked.json
-bm_session="$(jq -r '.root.children[0].bookmarks[0].id' /tmp/strap-session-bookmarked.json)"
-$strap session copy 'smoke copied session' --at "$bm_session" > /tmp/strap-session-copy.json
-$strap session show > /tmp/strap-session-show.json
-$strap session state > /tmp/strap-session-state.txt
-$strap state-bb init > /tmp/strap-state-bb.json
-$strap history snapshot --message 'smoke session state' > /tmp/strap-history-snapshot.json
+save-call $strap [nu modules] /tmp/strap-nu-modules.json
+save-call $strap [nu path plumbing] /tmp/strap-nu-path.txt
+save-call $strap [nu lib-dir] /tmp/strap-nu-lib-dir.txt
+save-call $strap [nu env-line] /tmp/strap-nu-env-line.txt
+save-call $strap [nu use-line plumbing] /tmp/strap-nu-use-line.txt
+save-call $strap [nu use-line strap] /tmp/strap-nu-strap-use-line.txt
 
-$strap state init | jq '.root.children += [{"type":"event","from":"assistant","to":["harness"],"kind":"tool_request","calls":[{"id":"echo","tool":"json_echo.echo","input":{"value":"ok"}}]}]' | $strap run-calls --tools json_echo > /tmp/strap-json-echo-tool.json
+let strap_use = (run-external $strap ...[nu use-line strap] | str trim)
+with-env { STRAP_BIN: "./bin/strap" } { nu --commands $"($strap_use); strap state init | strap agents apply chat-concise | strap skills apply concise | get actors.assistant.skills | save -f /tmp/strap-nu-module-skills.json" }
+with-env { STRAP_BIN: "./bin/strap" } { nu --commands $"($strap_use); strap model current | get model_id | save -f /tmp/strap-nu-model-current.json" }
+with-env { STRAP_BIN: "./bin/strap" } { nu --commands $"($strap_use); strap state init | strap add-user hello | strap provider chatgpt compile | get model | save -f /tmp/strap-nu-provider-compile.json" }
+let nu_lib_dirs = (run-external $strap ...[nu lib-dir] | str trim)
+with-env { NU_LIB_DIRS: $nu_lib_dirs, STRAP_BIN: "./bin/strap" } { nu --commands 'use strap; strap init | strap add-user "hello from use strap" | strap events | get text | save -f /tmp/strap-nu-use-strap.json' }
+
+save-call $strap [commands list --json] /tmp/strap-commands.json
+save-call $strap [commands validate --json] /tmp/strap-commands-validate.json
+save-call $strap [agents list] /tmp/strap-agents-list.json
+save-call $strap [agents show chat-concise] /tmp/strap-agents-show.json
+run-external $strap ...[state init] | run-external $strap ...[agents apply chat-concise] | save -f /tmp/strap-agents-apply.json
+save-call $strap [skills list] /tmp/strap-skills-list.json
+save-call $strap [skills show concise] /tmp/strap-skills-show.json
+run-external $strap ...[state init] | run-external $strap ...[agents apply chat-concise] | run-external $strap ...[skills apply concise] | save -f /tmp/strap-skills-apply.json
+save-call $strap [model list] /tmp/strap-model-list.json
+save-call $strap [model show current] /tmp/strap-model-current-show.json
+save-call $strap [model fork current smoke-chatgpt --set-model-id smoke-model] /tmp/strap-model-fork.json
+save-call $strap [model use smoke-chatgpt] /tmp/strap-model-use.json
+save-call $strap [status] /tmp/strap-status.json
+save-call $strap [artifact status command] /tmp/strap-artifact-command-status.json
+save-call $strap [artifact status agent] /tmp/strap-artifact-agent-status.json
+save-call $strap [artifact status skill] /tmp/strap-artifact-skill-status.json
+save-call $strap [artifact status model] /tmp/strap-artifact-model-status.json
+save-call $strap [artifact workon tool json_echo] /tmp/strap-artifact-workon.json
+save-call $strap [artifact discard tool json_echo] /tmp/strap-artifact-discard.json
+save-call $strap [work init] /tmp/strap-work-init.json
+save-call $strap [session new "smoke session"] /tmp/strap-session-new.json
+let session_dir = (open /tmp/strap-session-new.json | get dir)
+let session_name = ($session_dir | path basename)
+save-call $strap [with-session $session_name -- session path] /tmp/strap-with-session-path.txt
+with-env { STRAP_BIN: "./bin/strap" } { nu --commands $"($strap_use); strap session clear; strap session select ($session_name) | save -f /tmp/strap-nu-session-select.txt; $env.STRAP_SESSION | save -f /tmp/strap-nu-session-env.txt" }
+save-call $strap [history init] /tmp/strap-history-init.json
+save-call $strap [session ask "remember this smoke question"] /tmp/strap-session-ask.json
+save-call $strap [session show] /tmp/strap-session-before-copy.json
+save-filter-log $strap /tmp/strap-session-before-copy.json [state bookmark add --text "remember this smoke question" --label session-copy-point] /tmp/strap-session-bookmarked.json /tmp/strap-session-bookmark.log
+save-filter $strap /tmp/strap-session-bookmarked.json [session save] /tmp/strap-session-save-bookmarked.json
+let bm_session = (open /tmp/strap-session-bookmarked.json | get root.children.0.bookmarks.0.id)
+save-call $strap [session copy "smoke copied session" --at $bm_session] /tmp/strap-session-copy.json
+save-call $strap [session show] /tmp/strap-session-show.json
+save-call $strap [session state] /tmp/strap-session-state.txt
+save-call $strap [state-bb init] /tmp/strap-state-bb.json
+save-call $strap [history snapshot --message "smoke session state"] /tmp/strap-history-snapshot.json
+
+run-external $strap ...[state init] | from json | update root.children { append { type: "event", from: "assistant", to: ["harness"], kind: "tool_request", calls: [{ id: "echo", tool: "json_echo.echo", input: { value: "ok" } }] } } | to json | run-external $strap ...[run-calls --tools json_echo] | save -f /tmp/strap-json-echo-tool.json
 
 rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope user --title 'Local hash memory' --body 'Offline smoke indexing works without network.' --tags smoke > /tmp/strap-zk-create.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope project --title 'Smoke linked memory' --body 'Linked target.' --tags smoke > /tmp/strap-zk-linked-create.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk update 'Local hash memory' --body 'Offline smoke indexing works without network. See [[Smoke linked memory]].' > /tmp/strap-zk-update.json
-$strap zk backlinks 'Smoke linked memory' > /tmp/strap-zk-backlinks.json
-$strap zk links 'Local hash memory' > /tmp/strap-zk-links.json
-$strap zk workon 'Smoke linked memory' > /tmp/strap-zk-workon.json
-$strap zk promote 'Smoke linked memory' > /tmp/strap-zk-promote.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-zk-smoke.sqlite 'offline indexing' > /tmp/strap-zk-search.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk list --scope all > /tmp/strap-zk-list.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk tags > /tmp/strap-zk-tags.json
-$strap state init | jq '.root.children += [{"type":"event","from":"assistant","to":["harness"],"kind":"tool_request","calls":[{"id":"zk","tool":"zk.search_hybrid","input":{"db":"/tmp/strap-zk-smoke.sqlite","query":"offline indexing","limit":2}}]}]' | STRAP_ZK_EMBED_PROVIDER=hash $strap run-calls --tools zk > /tmp/strap-zk-tool.json
+with-hash { save-call $strap [zk create --scope user --title "Local hash memory" --body "Offline smoke indexing works without network." --tags smoke] /tmp/strap-zk-create.json }
+with-hash { save-call $strap [zk create --scope project --title "Smoke linked memory" --body "Linked target." --tags smoke] /tmp/strap-zk-linked-create.json }
+with-hash { save-call $strap [zk update "Local hash memory" --body "Offline smoke indexing works without network. See [[Smoke linked memory]]."] /tmp/strap-zk-update.json }
+save-call $strap [zk backlinks "Smoke linked memory"] /tmp/strap-zk-backlinks.json
+save-call $strap [zk links "Local hash memory"] /tmp/strap-zk-links.json
+save-call $strap [zk workon "Smoke linked memory"] /tmp/strap-zk-workon.json
+save-call $strap [zk promote "Smoke linked memory"] /tmp/strap-zk-promote.json
+with-hash { save-call $strap [zk search-hybrid --db /tmp/strap-zk-smoke.sqlite "offline indexing"] /tmp/strap-zk-search.json }
+with-hash { save-call $strap [zk list --scope all] /tmp/strap-zk-list.json }
+with-hash { save-call $strap [zk tags] /tmp/strap-zk-tags.json }
+run-external $strap ...[state init] | from json | update root.children { append { type: "event", from: "assistant", to: ["harness"], kind: "tool_request", calls: [{ id: "zk", tool: "zk.search_hybrid", input: { db: "/tmp/strap-zk-smoke.sqlite", query: "offline indexing", limit: 2 } }] } } | to json | with-env { STRAP_ZK_EMBED_PROVIDER: "hash" } { run-external $strap ...[run-calls --tools zk] } | save -f /tmp/strap-zk-tool.json
 
 rm -f /tmp/strap-md-zk-smoke.sqlite /tmp/strap-md-zk-smoke.sqlite-shm /tmp/strap-md-zk-smoke.sqlite-wal
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk create --scope user --title 'Markdown smoke memory' --body 'Markdown zettel source can rebuild the sqlite index.' --tags smoke,markdown > /tmp/strap-zk-md-create.json
-$strap zk search 'Markdown zettel' > /tmp/strap-zk-md-search.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk reindex --scope user --db /tmp/strap-md-zk-smoke.sqlite > /tmp/strap-zk-md-reindex.json
-STRAP_ZK_EMBED_PROVIDER=hash $strap zk search-hybrid --db /tmp/strap-md-zk-smoke.sqlite 'rebuild sqlite index' > /tmp/strap-zk-md-index-search.json
+with-hash { save-call $strap [zk create --scope user --title "Markdown smoke memory" --body "Markdown zettel source can rebuild the sqlite index." --tags "smoke,markdown"] /tmp/strap-zk-md-create.json }
+save-call $strap [zk search "Markdown zettel"] /tmp/strap-zk-md-search.json
+with-hash { save-call $strap [zk reindex --scope user --db /tmp/strap-md-zk-smoke.sqlite] /tmp/strap-zk-md-reindex.json }
+with-hash { save-call $strap [zk search-hybrid --db /tmp/strap-md-zk-smoke.sqlite "rebuild sqlite index"] /tmp/strap-zk-md-index-search.json }

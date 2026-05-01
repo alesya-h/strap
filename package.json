@@ -12,8 +12,7 @@
   },
   "scripts": {
     "check": "./scripts/check",
-    "smoke": "./scripts/smoke",
-    "test": "npm run check && npm run smoke"
+    "test": "npm run check && ./bin/strap project-smoke"
   },
   "engines": {
     "node": ">=20"
