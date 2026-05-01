@@ -1,4 +1,5 @@
-#!/usr/bin/env node
-import { main } from "./strap-runner/main.js";
+#!/usr/bin/env bash
+set -euo pipefail
 
-await main(process.argv.slice(2));
+bin_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+exec "$bin_dir/../subprojects/strap-main/run" "$@"

@@ -1,0 +1,3 @@
+Main Strap command dispatcher.
+
+Finds command capsules, prepares the standard Strap environment, and runs the selected command's `run` executable.

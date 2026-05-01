@@ -53,7 +53,7 @@ Current state: enough provider support exists for working agent loops, but the o
 
 Completed slices:
 
-- `bin/strap` is self-contained and no longer imports shared `#strap/*` libraries.
+- `bin/strap` is a shell exec wrapper into the Babashka `subprojects/strap-main` runner and no longer imports shared `#strap/*` libraries.
 - Several root commands have Nu capsule implementations: `agent`, `agents`, `commands`, `context`, `model`, `nu`, `one-shot`, `paths`, `skills`, `state`, and `work`.
 - `zk` is now a self-contained Babashka capsule over markdown notes, with a command-private Babashka SQLite/FTS/vector helper at `strap inner zk index`.
 - `embed` exists as a public embedding facade. Local hash embeddings are implemented in the command; provider-backed embeddings route to `strap provider <name> embed`.

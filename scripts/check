@@ -7,7 +7,7 @@ check_line_cap() {
   local exceptions_file=.strap/config/line-cap-exceptions.txt
   local failed=0
   local line_count
-  local files=(bin/strap bin/strap-runner/**/* scripts/check scripts/smoke subprojects/cli/commands/**/* tools/**/*)
+  local files=(bin/strap scripts/check scripts/smoke subprojects/strap-main/**/* subprojects/cli/commands/**/* tools/**/*)
 
   for file in "${files[@]}"; do
     [ -f "$file" ] || continue
@@ -41,8 +41,6 @@ check_line_cap() {
 check_line_cap
 
 js_files=(
-  bin/strap
-  bin/strap-runner/*.js
   subprojects/mcp/servers/*.js
   subprojects/core/bin/*.js
   subprojects/core/src/*.js
@@ -64,7 +62,7 @@ js_files=(
 )
 for file in "${js_files[@]}"; do node --check "$file"; done
 
-for file in subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
+for file in bin/strap-runner subprojects/core/bin/artifact.js subprojects/core/bin/status.js subprojects/core/src/artifacts.js subprojects/sessions/bin/session.js subprojects/sessions/bin/history.js subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu; do
   if [ -e "$file" ]; then
     printf 'Replaced legacy JS file should not exist: %s\n' "$file" >&2
     exit 1
@@ -134,6 +132,7 @@ expect_exit2 bb subprojects/cli/commands/zk/run --help
 expect_exit2 bb subprojects/cli/commands/zk/inner/index --help
 expect_exit2 bb -cp subprojects/cli/commands/provider-chatgpt/src -m provider.chatgpt
 expect_exit2 bb -cp subprojects/cli/commands/artifact/src -m artifact.main --help
+bb -cp subprojects/strap-main/src -e "(require 'main)"
 bb -cp subprojects/cli/commands/run-calls/src -e "(require 'run-calls.main)"
 expect_exit2 bb subprojects/cli/commands/status/run --help
 printf '{"texts":["check"]}' | bb subprojects/cli/commands/embed/run --provider hash | jq empty
