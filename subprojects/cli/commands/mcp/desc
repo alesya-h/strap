@@ -3,4 +3,6 @@ Run bundled stdio MCP servers.
 Usage:
   strap mcp fs
   strap mcp process
-  strap mcp scripts
+  strap mcp web
+  strap mcp agent
+  strap mcp all

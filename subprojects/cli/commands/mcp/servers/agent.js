@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-import { startMcpServer } from "#strap/mcp/stdio";
+import { startMcpServer } from "../src/stdio.js";
 startMcpServer({ name: "strap-agent-tools", group: "agent" });

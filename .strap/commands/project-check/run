@@ -54,7 +54,7 @@ def rg-forbid [message: string, pattern: string, args: list<string>] {
 def check-no-retired-surfaces [] {
   require-missing [
     bin/strap-runner subprojects/cli/commands/porcelain subprojects/porcelain porcelain docs/self-modifying-porcelain.md
-    subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/cli/bin
+    subprojects/core subprojects/providers subprojects/jsmcp subprojects/loop subprojects/tools subprojects/zettel subprojects/sessions subprojects/mcp subprojects/cli/bin
     subprojects/tools/bin/run-calls.js subprojects/loop/bin/node-loop.js subprojects/providers/bin/llm.js porcelain/loop.nu
   ]
   if not (glob --no-dir "subprojects/cli/commands/run-calls/src/**/*.js" | is-empty) { fail "run-calls is a Babashka capsule; JS files must not exist there." }
@@ -101,13 +101,13 @@ def expect-exit2 [args: list<string>] {
 }
 
 check-line-cap
-for file in (files-for ["subprojects/mcp/servers/*.js" "subprojects/mcp/bin/*.js" "subprojects/mcp/src/*.js"]) { run-external node ...[--check $file] }
+for file in (files-for ["subprojects/cli/commands/mcp/servers/*.js" "subprojects/cli/commands/mcp/bin/*.js" "subprojects/cli/commands/mcp/src/*.js"]) { run-external node ...[--check $file] }
 check-no-retired-surfaces
 check-content-guards
 run-external nu ...[--commands "use nu/strap; use nu/plumbing.nu *"]
 check-command-syntax
 check-capsule-files
-run-external jq empty subprojects/mcp/package.json config/strap/config.json ...((glob --no-dir "config/strap/models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
+run-external jq empty subprojects/cli/commands/mcp/package.json config/strap/config.json ...((glob --no-dir "config/strap/models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
 expect-exit2 [bb -cp subprojects/state-bb/src -m strap.state --help]
 with-env { STRAP_CMD_DIR: "subprojects/cli/commands/zk" } { expect-exit2 [bb subprojects/cli/commands/zk/run --help] }
 with-env { STRAP_CMD_DIR: "subprojects/cli/commands/zk" } { expect-exit2 [bb subprojects/cli/commands/zk/inner/index --help] }
