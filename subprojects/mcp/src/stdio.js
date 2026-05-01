@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 
-const LOCAL_GROUPS = ["fs", "process", "web", "agent", "json_echo", "zk"];
+const LOCAL_GROUPS = ["fs", "process", "web", "kagi", "agent", "json_echo", "zk"];
 
 function encodeMessage(message) {
   const json = JSON.stringify(message);
