@@ -1,28 +1,5 @@
-#!/usr/bin/env bb
+#!/usr/bin/env bash
+set -euo pipefail
 
-(require '[babashka.classpath :as cp]
-         '[babashka.fs :as fs]
-         '[cheshire.core :as json])
-
-(cp/add-classpath (str (fs/path (fs/parent *file*) "src")))
-(require '[tool.web :as tools])
-
-(defn read-json []
-  (json/parse-string (slurp *in*) true))
-
-(defn write-json [value]
-  (println (json/generate-string value {:pretty true})))
-
-(defn run-action [action]
-  (let [envelope (read-json)
-        f (get tools/tools action)]
-    (when-not f
-      (throw (ex-info (str "Unknown web action: " action) {})))
-    (write-json {:result (f (:arguments envelope) {})})))
-
-(defn -main [& args]
-  (if-let [action (first args)]
-    (run-action action)
-    (write-json (sort (keys tools/tools)))))
-
-(apply -main *command-line-args*)
+dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+exec bb -cp "$dir/src" -m tool.main "$@"

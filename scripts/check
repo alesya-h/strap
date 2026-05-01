@@ -89,6 +89,10 @@ fi
 if grep -R -n 'run-calls\.' tools --include='*.clj' >&2; then
   printf 'Tool-local Clojure namespaces should not live under run-calls.*\n' >&2; exit 1
 fi
+if grep -R -nE '^\(require|babashka\.classpath|cp/add-classpath' tools --include='run' >&2; then
+  printf 'Babashka tool run scripts should be thin launchers for tool.main.\n' >&2
+  exit 1
+fi
 for file in tools/*; do
   if [ -f "$file" ]; then
     printf 'Tool artifacts must be grouped directories, not flat files: %s\n' "$file" >&2

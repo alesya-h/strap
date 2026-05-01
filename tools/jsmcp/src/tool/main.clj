@@ -1,0 +1,30 @@
+(ns tool.main
+  (:require [cheshire.core :as json]
+            [tool.jsmcp :as jsmcp]))
+
+(defn read-json []
+  (json/parse-string (slurp *in*) true))
+
+(defn write-json [value]
+  (println (json/generate-string value {:pretty true})))
+
+(defn own-state-atom [envelope]
+  (atom {:runtime {:jsmcp (or (:own_state envelope) {})}}))
+
+(defn run-action [action]
+  (let [envelope (read-json)
+        state (own-state-atom envelope)
+        f (get jsmcp/tools action)]
+    (when-not f
+      (throw (ex-info (str "Unknown jsmcp action: " action) {})))
+    (try
+      (write-json {:result (f (:arguments envelope) {:state state})
+                   :own_state (get-in @state [:runtime :jsmcp])})
+      (catch Exception e
+        (write-json {:error (.getMessage e)
+                     :own_state (get-in @state [:runtime :jsmcp])})))))
+
+(defn -main [& args]
+  (if-let [action (first args)]
+    (run-action action)
+    (write-json (sort (keys jsmcp/tools)))))
