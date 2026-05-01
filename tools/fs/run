@@ -1,13 +1,28 @@
-#!/usr/bin/env bash
-set -euo pipefail
-exec bb -cp "$(dirname "$0")/src" -e '
-(require (quote [cheshire.core :as json]) (quote [run-calls.fs-tools :as tools]))
-(defn read-json [] (json/parse-string (slurp *in*) true))
-(defn write-json [x] (println (json/generate-string x {:pretty true})))
-(let [args *command-line-args*]
-  (if (empty? args)
-    (write-json (sort (keys tools/tools)))
-    (let [action (first args) env (read-json) f (get tools/tools action)]
-      (when-not f (throw (ex-info (str "Unknown fs action: " action) {})))
-      (write-json {:result (f (:arguments env) {})}))))
-' -- "$@"
+#!/usr/bin/env bb
+
+(require '[babashka.classpath :as cp]
+         '[babashka.fs :as fs]
+         '[cheshire.core :as json])
+
+(cp/add-classpath (str (fs/path (fs/parent *file*) "src")))
+(require '[run-calls.fs-tools :as tools])
+
+(defn read-json []
+  (json/parse-string (slurp *in*) true))
+
+(defn write-json [value]
+  (println (json/generate-string value {:pretty true})))
+
+(defn run-action [action]
+  (let [envelope (read-json)
+        f (get tools/tools action)]
+    (when-not f
+      (throw (ex-info (str "Unknown fs action: " action) {})))
+    (write-json {:result (f (:arguments envelope) {})})))
+
+(defn -main [& args]
+  (if-let [action (first args)]
+    (run-action action)
+    (write-json (sort (keys tools/tools)))))
+
+(apply -main *command-line-args*)

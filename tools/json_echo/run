@@ -1,8 +1,22 @@
-#!/usr/bin/env bb
-(require '[cheshire.core :as json])
-(defn -main [& args]
-  (if (empty? args)
-    (println (json/generate-string ["echo"] {:pretty true}))
-    (let [env (json/parse-string (slurp *in*) true)]
-      (println (json/generate-string {:result {:content [{:type "text" :text (json/generate-string (:arguments env))}]}} {:pretty true})))))
-(apply -main *command-line-args*)
+#!/usr/bin/env nu
+
+def main [action?: string] {
+  if ($action | is-empty) {
+    print ([echo] | to json)
+    return
+  }
+
+  if $action != "echo" {
+    error make {msg: $"Unknown json_echo action: ($action)"}
+  }
+
+  let envelope = (^cat | from json)
+  let arguments = ($envelope.arguments? | default {})
+  let text = ($arguments | to json --raw)
+
+  {
+    result: {
+      content: [{type: "text", text: $text}]
+    }
+  } | to json | print
+}

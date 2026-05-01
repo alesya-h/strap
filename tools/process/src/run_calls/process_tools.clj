@@ -4,39 +4,81 @@
             [run-calls.common :as c]))
 
 (defn proc [cmd args opts]
-  (let [r (apply p/shell (merge {:out :string :err :string :continue true} opts) cmd args)]
-    {:stdout (:out r) :stderr (:err r) :code (:exit r)}))
+  (let [result (apply p/shell
+                      (merge {:out :string :err :string :continue true} opts)
+                      cmd
+                      args)]
+    {:stdout (:out result)
+     :stderr (:err result)
+     :code (:exit result)}))
 
-(defn combine [r]
-  (str (:stdout r) (when-not (str/blank? (:stderr r)) (str "\n[stderr]\n" (:stderr r)))))
+(defn combine [result]
+  (str (:stdout result)
+       (when-not (str/blank? (:stderr result))
+         (str "\n[stderr]\n" (:stderr result)))))
+
+(defn limited-result [result args & [extra-metadata]]
+  (let [limited (c/truncate (combine result)
+                            (long (or (:max_output_bytes args) 40000)))]
+    (c/tool-result (:text limited)
+                   (merge {:exitCode (:code result)
+                           :signal nil
+                           :truncated (:truncated limited)}
+                          extra-metadata))))
+
+(defn shell-runner [cwd command read-only?]
+  (if read-only?
+    ["bwrap" ["--ro-bind" "/" "/"
+               "--dev" "/dev"
+               "--proc" "/proc"
+               "--tmpfs" "/tmp"
+               "--chdir" cwd
+               "bash" "-lc" command]]
+    ["bash" ["-lc" command]]))
 
 (defn shell [args _]
   (let [cwd (c/resolve-workspace (or (:workdir args) "."))
         command (str (or (:command args) ""))
-        [runner rargs] (if (:read_only_filesystem args)
-                         ["bwrap" ["--ro-bind" "/" "/" "--dev" "/dev" "--proc" "/proc" "--tmpfs" "/tmp" "--chdir" cwd "bash" "-lc" command]]
-                         ["bash" ["-lc" command]])
-        r (proc runner rargs {:dir cwd})
-        limited (c/truncate (combine r) (long (or (:max_output_bytes args) 40000)))]
-    (c/tool-result (:text limited) {:exitCode (:code r) :signal nil :truncated (:truncated limited) :description (or (:description args) "")})))
+        [runner runner-args] (shell-runner cwd command (:read_only_filesystem args))
+        result (proc runner runner-args {:dir cwd})]
+    (limited-result result args {:description (or (:description args) "")})))
 
 (defn nu-eval [args _]
-  (let [r (proc "nu" ["-c" (str (or (:command args) ""))] {:dir (c/resolve-workspace (or (:workdir args) "."))})
-        limited (c/truncate (combine r) (long (or (:max_output_bytes args) 40000)))]
-    (c/tool-result (:text limited) {:exitCode (:code r) :signal nil :truncated (:truncated limited)})))
+  (let [cwd (c/resolve-workspace (or (:workdir args) "."))
+        command (str (or (:command args) ""))
+        result (proc "nu" ["-c" command] {:dir cwd})]
+    (limited-result result args)))
+
+(defn tmux-args [args]
+  (into [(str (or (:subcommand args) ""))]
+        (remove str/blank? (str/split (str (or (:arguments args) "")) #" "))))
 
 (defn tmux [args _]
-  (let [r (proc "tmux" (into [(str (or (:subcommand args) ""))] (remove str/blank? (str/split (str (or (:arguments args) "")) #" "))) {})]
-    (c/tool-result (combine r) {:exitCode (:code r) :signal nil})))
+  (let [result (proc "tmux" (tmux-args args) {})]
+    (c/tool-result (combine result) {:exitCode (:code result) :signal nil})))
 
 (defn tmux-capture [args _]
   (let [base ["capture-pane" "-p" "-S" (str "-" (or (:lines args) 200))]
-        r (proc "tmux" (cond-> base (:target args) (conj "-t" (str (:target args)))) {})]
-    (c/tool-result (or (:stdout r) (:stderr r)) {:exitCode (:code r) :signal nil})))
+        tmux-args (cond-> base (:target args) (conj "-t" (str (:target args))))
+        result (proc "tmux" tmux-args {})]
+    (c/tool-result (or (:stdout result) (:stderr result))
+                   {:exitCode (:code result) :signal nil})))
 
 (defn tmux-send [args _]
-  (let [base (cond-> ["send-keys"] (:target args) (conj "-t" (str (:target args))))
-        r (proc "tmux" (cond-> (conj base (str (or (:text args) ""))) (not= false (:enter args)) (conj "Enter")) {})]
-    (c/tool-result (or (not-empty (:stdout r)) (not-empty (:stderr r)) "sent") {:exitCode (:code r) :signal nil})))
+  (let [base (cond-> ["send-keys"]
+               (:target args) (conj "-t" (str (:target args))))
+        text (str (or (:text args) ""))
+        tmux-args (cond-> (conj base text)
+                    (not= false (:enter args)) (conj "Enter"))
+        result (proc "tmux" tmux-args {})]
+    (c/tool-result (or (not-empty (:stdout result))
+                       (not-empty (:stderr result))
+                       "sent")
+                   {:exitCode (:code result) :signal nil})))
 
-(def tools {"shell" shell "nu_eval" nu-eval "tmux" tmux "tmux_capture" tmux-capture "tmux_send" tmux-send})
+(def tools
+  {"shell" shell
+   "nu_eval" nu-eval
+   "tmux" tmux
+   "tmux_capture" tmux-capture
+   "tmux_send" tmux-send})
