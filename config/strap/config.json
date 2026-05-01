@@ -4,7 +4,7 @@
     "$STRAP_WORK/commands",
     "$STRAP_PROJECT/commands",
     "$STRAP_CONFIG/commands",
-    "$STRAP_ROOT/subprojects/cli/commands"
+    "$STRAP_ROOT/commands"
   ],
   "tool_roots": [
     "$STRAP_WORK/tools",

@@ -58,7 +58,7 @@ $STRAP_SESSION/overlay/commands
 $STRAP_WORK/commands
 $STRAP_PROJECT/commands
 $STRAP_GLOBAL/commands
-$STRAP_ROOT/subprojects/cli/commands
+$STRAP_ROOT/commands
 ```
 
 The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/global commands can override built-ins.

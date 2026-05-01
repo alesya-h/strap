@@ -8,7 +8,7 @@
      :user (c/path-str (c/env "STRAP_WORK") "commands")
      :project (c/path-str (c/env "STRAP_PROJECT") "commands")
      :global (c/path-str (c/env "STRAP_GLOBAL") "commands")
-     :root (c/path-str (c/env "STRAP_ROOT") "subprojects" "cli" "commands")}
+     :root (c/path-str (c/env "STRAP_ROOT") "commands")}
 
     "tool"
     {:session (c/maybe-path (c/env "STRAP_SESSION") "overlay" "tools")

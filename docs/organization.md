@@ -51,7 +51,7 @@ $STRAP_SESSION/overlay/commands
 $STRAP_WORK/commands
 $STRAP_PROJECT/commands
 $STRAP_GLOBAL/commands
-$STRAP_ROOT/subprojects/cli/commands
+$STRAP_ROOT/commands
 ```
 
 Useful commands:

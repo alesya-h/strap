@@ -5,10 +5,8 @@ def module-path [name: string] {
     "plumbing" => { $env.STRAP_ROOT | path join nu plumbing.nu }
     "strap" => { $env.STRAP_ROOT | path join nu strap }
     "wrappers" | "legacy" => { $env.STRAP_ROOT | path join nu strap.nu }
-    "loop" => { $env.STRAP_ROOT | path join porcelain loop.nu }
-    "basic" => { $env.STRAP_ROOT | path join porcelain basic.nu }
     _ => {
-      print -e "Usage: strap nu path <plumbing|strap|wrappers|loop|basic>"
+      print -e "Usage: strap nu path <plumbing|strap|wrappers>"
       exit 2
     }
   }
@@ -21,8 +19,6 @@ def main [command?: string, module?: string] {
         { name: "strap", kind: "module", path: ($env.STRAP_ROOT | path join nu strap) }
         { name: "plumbing", kind: "plumbing", path: ($env.STRAP_ROOT | path join nu plumbing.nu) }
         { name: "wrappers", kind: "adapter", path: ($env.STRAP_ROOT | path join nu strap.nu) }
-        { name: "loop", kind: "porcelain", path: ($env.STRAP_ROOT | path join porcelain loop.nu) }
-        { name: "basic", kind: "porcelain", path: ($env.STRAP_ROOT | path join porcelain basic.nu) }
       ] | to json --indent 2 | print
     }
     "path" => { print (module-path ($module | default "")) }

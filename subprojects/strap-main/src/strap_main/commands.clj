@@ -16,7 +16,7 @@
             [(str (fs/path (env/strap-work-root) "commands"))
              (str (fs/path (env/strap-project-root) "commands"))
              (str (fs/path (env/strap-global-root) "commands"))
-             (str (fs/path (env/strap-root) "subprojects" "cli" "commands"))])))
+             (str (fs/path (env/strap-root) "commands"))])))
 
 (defn command-dir [name]
   (when name
