@@ -9,4 +9,4 @@ Usage:
   strap artifact promote tool my_tool --from project --to global
   strap artifact discard porcelain draft
 
-Layer order is session, user, project, global, root. `workon` writes to the session layer when a current session exists, otherwise to the user layer. `promote` moves one layer down by default: session to user, user to project, project to global, global to root. Use `--from` and `--to` for explicit layer moves.
+Layer order is session, user, project, global, root. `workon` writes to the session layer when `STRAP_SESSION` is set, otherwise to the user layer. `promote` moves one layer down by default: session to user, user to project, project to global, global to root. Use `--from` and `--to` for explicit layer moves.

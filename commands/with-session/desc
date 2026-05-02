@@ -9,4 +9,4 @@ Examples:
 
 The selector may be an absolute session path, an exact session directory name, or a unique substring of a session directory under `$STRAP_WORK/sessions`.
 
-This is a one-command override and does not change `$STRAP_WORK/sessions/current`.
+This is a one-command override and does not export `STRAP_SESSION` in the parent shell.

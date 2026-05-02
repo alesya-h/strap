@@ -14,7 +14,6 @@
         dir (files/create-session title)]
     (c/record-trace dir {:kind "session_new" :title title})
     (c/snapshot-history dir (str "session new: " title))
-    (c/set-current dir)
     (c/json-out {:ok true :dir dir :state (c/state-path dir)})))
 
 (defn command-copy [args]
@@ -25,7 +24,6 @@
         dir (files/copy-session source title at)]
     (c/record-trace dir (cond-> {:kind "session_copy" :copied_from source :title title} at (assoc :at at)))
     (c/snapshot-history dir (str "session copy: " title))
-    (c/set-current dir)
     (c/json-out (cond-> {:ok true :dir dir :state (c/state-path dir) :copied_from source} at (assoc :copied_at at)))))
 
 (defn command-list []

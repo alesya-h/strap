@@ -26,7 +26,7 @@ The runner resolves command directories, builds a standard environment, then spa
 | `STRAP_CONFIG` | Static harness config | `config/strap` when present, otherwise `$STRAP_GLOBAL` |
 | `STRAP_GLOBAL` | Global home-directory artifacts | `$XDG_CONFIG_HOME/strap` |
 | `STRAP_PROJECT` | Project-shared harness artifacts | nearest `.strap`, otherwise `$STRAP_WORKSPACE/.strap` |
-| `STRAP_SESSION` | Active session directory | explicit env var; the root `cli` runner fills it from `$STRAP_WORK/sessions/current` only as an outer convenience |
+| `STRAP_SESSION` | Active session directory | explicit env var; session-aware commands fail when it is absent |
 | `STRAP_WORK` | User/agent-local mutable state | nearest `.strap-user`, otherwise `$STRAP_WORKSPACE/.strap-user` |
 | `STRAP_WORKSPACE` | Filesystem workspace for tools | current working directory |
 
@@ -38,13 +38,13 @@ Use `strap paths` or `strap commands roots` to inspect resolution.
 
 Commands and tools share a layered artifact model:
 
-- `session`: current-session overlay under `$STRAP_SESSION/overlay`.
+- `session`: active-session overlay under `$STRAP_SESSION/overlay`.
 - `user`: mutable user/agent overlay under `.strap-user`.
 - `project`: shared project artifacts under `.strap`.
 - `global`: home-directory artifacts under `$STRAP_GLOBAL`.
 - `root`: installed harness defaults.
 
-The session layer shadows lower layers when a current session exists. `strap artifact workon <type> <name>` copies a lower-layer artifact into the session layer, or into the user layer if there is no current session. `strap artifact promote <type> <name>` moves one layer down by default: session to user, user to project, project to global, and global to root. `strap artifact discard <type> <name>` removes the session overlay first, then user overlay.
+The session layer shadows lower layers when `STRAP_SESSION` is set. `strap artifact workon <type> <name>` copies a lower-layer artifact into the session layer, or into the user layer if `STRAP_SESSION` is unset. `strap artifact promote <type> <name>` moves one layer down by default: session to user, user to project, project to global, and global to root. `strap artifact discard <type> <name>` removes the session overlay first, then user overlay.
 
 Supported artifact types are currently `command`, `tool`, `model`, `agent`, and `skill`. Zettelkasten notes use the same overlay grammar through `strap zk workon/promote/discard/status` because note identity and tombstones need note-specific handling.
 
@@ -260,9 +260,9 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 
 `strap session copy <name>` copies the active session into a new session. With `--at <bookmark>`, the copied state is truncated after that visible bookmark so the conversation can continue in a different direction from a specific point.
 
-Actual session-aware commands rely on `STRAP_SESSION`. The root `cli` runner reads `$STRAP_WORK/sessions/current` only when `STRAP_SESSION` is absent, then exports `STRAP_SESSION` to the command it launches. Use `strap with-session <session> <command>` for one-off selection without changing the pointer. In Nushell, `strap session select <session>` is `def --env` and sets `$env.STRAP_SESSION` in the current shell.
+Actual session-aware commands rely on `STRAP_SESSION`. There is no current-session pointer fallback; commands that need a session fail when the env var is absent. Use `strap with-session <session> <command>` for one-off selection. In Nushell, `strap session select <session>` is `def --env` and sets `$env.STRAP_SESSION` in the current shell.
 
-Session mutations create jj snapshots in the session directory. `strap history` operates on the current session rather than the project-user work root, and `strap history ui` launches `jjui` there.
+Session mutations create jj snapshots in the session directory selected by `STRAP_SESSION`. `strap history` operates on that session directory rather than the project-user work root, and `strap history ui` launches `jjui` there.
 
 Memory is explicit: agents and humans use `strap zk` or the `zk` script tool to search, create, and update zettelkasten notes. Session commands do not implicitly inject or write memory.
 
@@ -270,7 +270,7 @@ Memory is explicit: agents and humans use `strap zk` or the `zk` script tool to 
 
 The zettelkasten is a self-contained Babashka command capsule because markdown overlays, wikilinks, tombstones, search/index rebuilds, and tool-mode JSON handling are one conceptual subsystem. Its SQLite/FTS/vector index helper is command-private and reached through `strap inner zk index`; it is not part of the public command surface.
 
-`strap history` wraps the current session directory as a jj repo. Project-user overlays and private memory remain under `$STRAP_WORK`, but session-local state and session overlays get per-session history without touching the project workspace history.
+`strap history` wraps the session directory selected by `STRAP_SESSION` as a jj repo. Project-user overlays and private memory remain under `$STRAP_WORK`, but session-local state and session overlays get per-session history without touching the project workspace history.
 
 ## Subprojects
 

@@ -15,7 +15,7 @@
 (defn session []
   (let [root (System/getenv "STRAP_SESSION")]
     (when (str/blank? (str root))
-      (throw (ex-info "No current session. Run `strap session new <name>` first." {})))
+      (throw (ex-info "No active session. Set STRAP_SESSION or use `strap with-session <session> <command>`." {})))
     (fs/create-dirs root)
     root))
 

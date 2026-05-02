@@ -19,7 +19,6 @@
     (fs/create-dirs root)
     (str root)))
 
-(defn current-file [] (str (fs/path (sessions-root) "current")))
 (declare current-dir)
 (defn state-path ([dir] (str (fs/path dir "state.json"))) ([] (state-path (current-dir))))
 (defn trace-path ([dir] (str (fs/path dir "trace.jsonl"))) ([] (trace-path (current-dir))))
@@ -29,9 +28,6 @@
     (when (str/blank? (str dir))
       (throw (ex-info "No active session. Set STRAP_SESSION, run `strap session new <name>`, or use `strap with-session <session> <command>`." {})))
     (str (fs/absolutize dir))))
-
-(defn set-current [dir]
-  (spit (current-file) (str dir "\n")))
 
 (defn record-trace [dir event]
   (spit (trace-path dir) (str (json/generate-string (merge {:at (now)} event)) "\n") :append true))

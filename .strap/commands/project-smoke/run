@@ -8,7 +8,7 @@ let old_command_path = ($env.STRAP_COMMAND_PATH? | default "")
 $env.STRAP_COMMAND_PATH = if $old_command_path == "" { $project_commands } else { $"($project_commands):($old_command_path)" }
 $env.STRAP_WORK = "/tmp/strap-work-smoke"
 $env.STRAP_PROJECT = "/tmp/strap-project-smoke"
-hide-env STRAP_SESSION
+if (($env.STRAP_SESSION? | default "") != "") { hide-env STRAP_SESSION }
 rm -rf $env.STRAP_WORK $env.STRAP_PROJECT
 
 def save-call [strap: string, args: list<any>, out: string] {
@@ -93,6 +93,7 @@ let session_dir = (open /tmp/strap-session-new.json | get dir)
 let session_name = ($session_dir | path basename)
 save-call $strap [with-session $session_name $strap session path] /tmp/strap-with-session-path.txt
 with-env { STRAP_BIN: "./bin/strap" } { nu --commands $"($strap_use); strap session clear; strap session select ($session_name) | save -f /tmp/strap-nu-session-select.txt; $env.STRAP_SESSION | save -f /tmp/strap-nu-session-env.txt" }
+$env.STRAP_SESSION = $session_dir
 save-call $strap [history init] /tmp/strap-history-init.json
 save-call $strap [session ask "remember this smoke question"] /tmp/strap-session-ask.json
 save-call $strap [session show] /tmp/strap-session-before-copy.json
@@ -100,6 +101,7 @@ save-filter-log $strap /tmp/strap-session-before-copy.json [state bookmark add -
 save-filter $strap /tmp/strap-session-bookmarked.json [session save] /tmp/strap-session-save-bookmarked.json
 let bm_session = (open /tmp/strap-session-bookmarked.json | get root.children.0.bookmarks.0.id)
 save-call $strap [session copy "smoke copied session" --at $bm_session] /tmp/strap-session-copy.json
+$env.STRAP_SESSION = (open /tmp/strap-session-copy.json | get dir)
 save-call $strap [session show] /tmp/strap-session-show.json
 save-call $strap [session state] /tmp/strap-session-state.txt
 save-call $strap [history snapshot --message "smoke session state"] /tmp/strap-history-snapshot.json

@@ -14,6 +14,7 @@ strap provider chatgpt auth import-codex
 ```bash
 strap work init
 strap session new "repo analysis"
+# set STRAP_SESSION to the printed session dir before running session-aware commands
 strap session ask "Analyze this repo"
 strap session show \
 | strap loop --tools all --max-turns 6 \
@@ -42,7 +43,7 @@ strap zk list
 strap zk tags
 ```
 
-Inspect or explicitly snapshot current-session state with jj:
+Inspect or explicitly snapshot active-session state with jj:
 
 ```bash
 strap history log

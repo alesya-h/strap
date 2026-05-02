@@ -1,4 +1,4 @@
-Manage jj-backed current-session strap history.
+Manage jj-backed active-session Strap history.
 
 Usage:
   strap history init
@@ -9,4 +9,4 @@ Usage:
   strap history restore <rev>
   strap history ui
 
-History is stored in the current session directory. Session mutations automatically snapshot with jj; `snapshot` remains available for explicit checkpoints. `ui` launches jjui in the current session.
+History is stored in the session directory selected by `STRAP_SESSION`. Session mutations automatically snapshot with jj; `snapshot` remains available for explicit checkpoints. `ui` launches jjui in that session directory.

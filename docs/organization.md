@@ -8,7 +8,7 @@
 - `STRAP_CONFIG`: static harness config. Defaults to `config/strap` in this repo when present.
 - `STRAP_GLOBAL`: global home-directory artifacts. Defaults to `$XDG_CONFIG_HOME/strap`.
 - `STRAP_PROJECT`: project-shared harness artifacts. Defaults to nearest `.strap`, or `$STRAP_WORKSPACE/.strap`.
-- `STRAP_SESSION`: active session directory. The outer runner fills this from `$STRAP_WORK/sessions/current` only when the env var is absent.
+- `STRAP_SESSION`: active session directory. Session-aware commands require this env var and fail when it is absent.
 - `STRAP_WORK`: user/agent-local mutable work directory. Defaults to nearest `.strap-user`, or `$STRAP_WORKSPACE/.strap-user`.
 
 `STRAP_WORKSPACE` remains the filesystem workspace that tools operate in. It defaults to the current working directory.

@@ -41,7 +41,7 @@ This document records what `strap` currently implements.
 - `strap commands`: list and scaffold filesystem-discovered commands.
 - `strap context`: render or quote extracted context.
 - `strap provider`: run provider-specific operations and ChatGPT auth.
-- `strap history`: manage jj-backed current-session state and overlay history.
+- `strap history`: manage jj-backed active-session state and overlay history.
 - `strap work`: initialize and inspect project-shared `.strap` and user-local `.strap-user` directories.
 - `strap session`: create, copy, update, show, save, list, and trace sessions.
 - `strap sandbox`: run commands through bubblewrap profiles.

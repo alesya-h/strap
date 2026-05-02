@@ -1,8 +1,5 @@
 (ns cli.env
-  (:require [babashka.fs :as fs]
-            [clojure.string :as str]))
-
-(def session-override (atom nil))
+  (:require [babashka.fs :as fs]))
 
 (defn env [name]
   (System/getenv name))
@@ -63,18 +60,7 @@
         (strap-global-root)))))
 
 (defn strap-session-root []
-  (some-> (or @session-override (env "STRAP_SESSION")) abs))
-
-(defn set-session! [session]
-  (reset! session-override session))
-
-(defn resolve-session-env-from-pointer []
-  (when-not (env "STRAP_SESSION")
-    (let [current (fs/path (strap-work-root) "sessions" "current")]
-      (when (fs/exists? current)
-        (let [session (str/trim (slurp (str current)))]
-          (when-not (str/blank? session)
-            (set-session! (abs session))))))))
+  (some-> (env "STRAP_SESSION") abs))
 
 (defn env-for [name dir]
   (cond-> (into {} (System/getenv))

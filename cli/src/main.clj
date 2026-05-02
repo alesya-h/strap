@@ -1,7 +1,6 @@
 (ns main
   (:require [babashka.fs :as fs]
             [cli.commands :as commands]
-            [cli.env :as env]
             [cli.execute :as execute]))
 
 (defn die [message]
@@ -33,7 +32,6 @@
     (execute/run-executable (str file) name dir args)))
 
 (defn -main [& argv]
-  (env/resolve-session-env-from-pointer)
   (let [[command & args] argv]
     (cond
       (or (nil? command) (contains? #{"-h" "--help"} command)) (commands/pretty-commands false)

@@ -75,7 +75,7 @@ Examples:
 - `strap zk` is public; `strap inner zk index ...` is a private implementation boundary for its derived index.
 - REST-only provider commands are Nu capsules. Provider commands that need richer local auth logic can use Babashka. Use a provider-local Node package only when SDKs or package dependencies are required.
 
-Create a temporary command under the current session overlay, or under `.strap-user/commands` when no session is current:
+Create a temporary command under the active session overlay, or under `.strap-user/commands` when `STRAP_SESSION` is unset:
 
 ```bash
 strap commands new my-command
@@ -98,7 +98,7 @@ Private helpers go in `inner/` and must be called through the runner, never by e
 strap inner my-command helper-name arg1 arg2
 ```
 
-Run a command against a specific session without changing the convenience pointer:
+Run a command against a specific session without exporting `STRAP_SESSION` in the parent shell:
 
 ```bash
 strap with-session my-session strap history log
@@ -116,7 +116,7 @@ strap with-session my-session strap history log
 | `context` | Transform extracted context, including quoting and summarization. |
 | `embed` | Embed text through the selected provider. |
 | `edit` | Edit or create command files. |
-| `history` | Manage jj-backed current-session history. |
+| `history` | Manage jj-backed active-session history. |
 | `llm` | Compile, call, or complete model-profile requests from canonical state. |
 | `loop` | Run the Nushell model/tool loop. |
 | `mcp` | Run bundled stdio MCP servers. |
@@ -152,7 +152,7 @@ strap artifact promote tool json_echo --from project --to global
 strap artifact discard tool json_echo
 ```
 
-`workon` creates a session-layer working copy when a current session exists, otherwise a user-layer copy. `promote` moves one step down by default: session to user, user to project, project to global, and global to root. `discard` removes the session-layer copy first, then the user-layer copy.
+`workon` creates a session-layer working copy when `STRAP_SESSION` is set, otherwise a user-layer copy. `promote` moves one step down by default: session to user, user to project, project to global, and global to root. `discard` removes the session-layer copy first, then the user-layer copy.
 
 ## Agent Profiles
 
