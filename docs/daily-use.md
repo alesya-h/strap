@@ -53,7 +53,7 @@ strap history log
 For parallel work, prefer explicit session selection. In bash, use a one-command wrapper:
 
 ```bash
-strap with-session repo-analysis -- history log
+strap with-session repo-analysis strap history log
 ```
 
 In Nushell, select the session into the current shell environment:

@@ -260,7 +260,7 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 
 `strap session copy <name>` copies the active session into a new session. With `--at <bookmark>`, the copied state is truncated after that visible bookmark so the conversation can continue in a different direction from a specific point.
 
-Actual session-aware commands rely on `STRAP_SESSION`. The root `cli` runner reads `$STRAP_WORK/sessions/current` only when `STRAP_SESSION` is absent, then exports `STRAP_SESSION` to the command it launches. Use `strap with-session <session> -- <command>` for one-off selection without changing the pointer. In Nushell, `strap session select <session>` is `def --env` and sets `$env.STRAP_SESSION` in the current shell.
+Actual session-aware commands rely on `STRAP_SESSION`. The root `cli` runner reads `$STRAP_WORK/sessions/current` only when `STRAP_SESSION` is absent, then exports `STRAP_SESSION` to the command it launches. Use `strap with-session <session> <command>` for one-off selection without changing the pointer. In Nushell, `strap session select <session>` is `def --env` and sets `$env.STRAP_SESSION` in the current shell.
 
 Session mutations create jj snapshots in the session directory. `strap history` operates on the current session rather than the project-user work root, and `strap history ui` launches `jjui` there.
 

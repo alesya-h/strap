@@ -27,7 +27,7 @@
 (defn current-dir []
   (let [dir (env "STRAP_SESSION")]
     (when (str/blank? (str dir))
-      (throw (ex-info "No active session. Set STRAP_SESSION, run `strap session new <name>`, or use `strap with-session <session> -- <command>`." {})))
+      (throw (ex-info "No active session. Set STRAP_SESSION, run `strap session new <name>`, or use `strap with-session <session> <command>`." {})))
     (str (fs/absolutize dir))))
 
 (defn set-current [dir]

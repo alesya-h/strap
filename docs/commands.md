@@ -101,7 +101,7 @@ strap inner my-command helper-name arg1 arg2
 Run a command against a specific session without changing the convenience pointer:
 
 ```bash
-strap with-session my-session -- history log
+strap with-session my-session strap history log
 ```
 
 ## Built-in Commands

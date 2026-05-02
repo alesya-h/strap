@@ -1,7 +1,11 @@
 Run a strap command with STRAP_SESSION set.
 
 Usage:
-  strap with-session <session-name-or-path> -- <command> [args...]
+  strap with-session <session-name-or-path> <command> [args...]
+
+Examples:
+  strap with-session dev-agent env
+  strap with-session dev-agent strap session path
 
 The selector may be an absolute session path, an exact session directory name, or a unique substring of a session directory under `$STRAP_WORK/sessions`.
 

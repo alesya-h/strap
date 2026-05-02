@@ -91,7 +91,7 @@ save-call $strap [work init] /tmp/strap-work-init.json
 save-call $strap [session new "smoke session"] /tmp/strap-session-new.json
 let session_dir = (open /tmp/strap-session-new.json | get dir)
 let session_name = ($session_dir | path basename)
-save-call $strap [with-session $session_name -- session path] /tmp/strap-with-session-path.txt
+save-call $strap [with-session $session_name $strap session path] /tmp/strap-with-session-path.txt
 with-env { STRAP_BIN: "./bin/strap" } { nu --commands $"($strap_use); strap session clear; strap session select ($session_name) | save -f /tmp/strap-nu-session-select.txt; $env.STRAP_SESSION | save -f /tmp/strap-nu-session-env.txt" }
 save-call $strap [history init] /tmp/strap-history-init.json
 save-call $strap [session ask "remember this smoke question"] /tmp/strap-session-ask.json
