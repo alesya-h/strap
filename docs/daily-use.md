@@ -113,16 +113,16 @@ If `strap nu lib-dir` is in `NU_LIB_DIRS`, use the shorter import:
 use strap
 ```
 
-Use the lower-level plumbing module for block combinators:
+Use the routed Nu surface for block combinators:
 
 ```nu
-use '/path/to/strap/nu/plumbing.nu' *
+use '/path/to/strap/nu/strap'
 
-open state.json | with-events {|events| $events | where from == user }
-open state.json | map-events {|event| { from: $event.from, text: $event.text } }
+open state.json | strap with-events {|events| $events | where from == user }
+open state.json | strap map-events {|event| $event | upsert reviewed true }
 ```
 
-Find ready imports with `strap nu use-line strap` and `strap nu use-line plumbing`.
+Find ready imports with `strap nu use-line strap`.
 
 Fold stale context by placing bookmarks on unique text and folding the range:
 

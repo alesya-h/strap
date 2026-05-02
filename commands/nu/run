@@ -1,38 +1,10 @@
 #!/usr/bin/env nu
 
-def module-path [name: string] {
-  match $name {
-    "plumbing" => { $env.STRAP_ROOT | path join nu plumbing.nu }
-    "strap" => { $env.STRAP_ROOT | path join nu strap }
-    "wrappers" | "legacy" => { $env.STRAP_ROOT | path join nu strap.nu }
-    _ => {
-      print -e "Usage: strap nu path <plumbing|strap|wrappers>"
-      exit 2
-    }
-  }
+use ./run.nu
+
+def emit [] {
+  let value = $in
+  if (($value | describe) =~ '^string') { print --no-newline $value } else { $value | to json --indent 2 | print }
 }
 
-def main [command?: string, module?: string] {
-  match ($command | default "") {
-    "modules" => {
-      [
-        { name: "strap", kind: "module", path: ($env.STRAP_ROOT | path join nu strap) }
-        { name: "plumbing", kind: "plumbing", path: ($env.STRAP_ROOT | path join nu plumbing.nu) }
-        { name: "wrappers", kind: "adapter", path: ($env.STRAP_ROOT | path join nu strap.nu) }
-      ] | to json --indent 2 | print
-    }
-    "path" => { print (module-path ($module | default "")) }
-    "lib-dir" => { print ($env.STRAP_ROOT | path join nu) }
-    "env-line" => { print $"$env.NU_LIB_DIRS = \($env.NU_LIB_DIRS | prepend '($env.STRAP_ROOT | path join nu)'\)" }
-    "source-line" => { print $"source '(module-path ($module | default 'plumbing'))'" }
-    "use-line" => {
-      let name = ($module | default "strap")
-      let path = (module-path $name)
-      if $name == "strap" { print $"use '($path)'" } else { print $"use '($path)' *" }
-    }
-    _ => {
-      print -e "Usage: strap nu <modules|path|lib-dir|env-line|use-line|source-line> [module]"
-      exit 2
-    }
-  }
-}
+def main [command?: string, module?: string] { run ($command | default "") ($module | default "") | emit }

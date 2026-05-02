@@ -1,15 +1,7 @@
 #!/usr/bin/env nu
 
-def strap-bin [] { $env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap) }
-
-def usage [] {
-  print -e "Usage: strap llm <compile|call|complete> [--model current|name|path.json] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json"
-  exit 2
-}
+use ./run.nu
 
 def main [command?: string, --model: string = "current", --tools: string = "all"] {
-  if not (($command | default "") in [compile call complete]) { usage }
-  let config = (run-external (strap-bin) model show $model | from json)
-  let provider = $config.provider
-  ^cat | run-external (strap-bin) provider $provider $command "--model" $model "--tools" $tools
+  open --raw /dev/stdin | from json | run ($command | default "") --model $model --tools $tools | to json --indent 2 | print
 }

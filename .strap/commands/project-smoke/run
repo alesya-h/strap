@@ -52,13 +52,12 @@ save-filter $strap /tmp/strap-smoke-2.json [agent fork --prompt "inspect docs"] 
 save-filter $strap /tmp/strap-smoke-2.json [agent fold --child /tmp/strap-child.json --summary "child result"] /tmp/strap-folded.json
 run-external $strap ...[state init] | run-external $strap ...[loop --max-turns 0 --finalize false] | save -f /tmp/strap-loop-noop.json
 
-nu --commands 'use nu/plumbing.nu *; open /tmp/strap-smoke-bm-2.json | with-events {|events| $events | where from == user | length } | save -f /tmp/strap-nu-with-events.json'
-nu --commands 'use nu/plumbing.nu *; let state = (open /tmp/strap-smoke-bm-2.json); let ids = ($state | bookmarks | get id); $state | with-extract ($ids | first) ($ids | last) {|ctx| $ctx.events | get text } | save -f /tmp/strap-nu-with-extract.json'
+nu --commands 'use nu/strap; open /tmp/strap-smoke-bm-2.json | strap with-events {|events| $events | where from == user } | strap events | length | save -f /tmp/strap-nu-with-events.json'
+nu --commands 'use nu/strap; let state = (open /tmp/strap-smoke-bm-2.json); let ids = ($state | strap bookmarks | get id); $state | strap with-extract ($ids | first) ($ids | last) {|events| $events | update text { str upcase } } | strap events | get text | save -f /tmp/strap-nu-with-extract.json'
 save-call $strap [nu modules] /tmp/strap-nu-modules.json
-save-call $strap [nu path plumbing] /tmp/strap-nu-path.txt
+save-call $strap [nu path strap] /tmp/strap-nu-path.txt
 save-call $strap [nu lib-dir] /tmp/strap-nu-lib-dir.txt
 save-call $strap [nu env-line] /tmp/strap-nu-env-line.txt
-save-call $strap [nu use-line plumbing] /tmp/strap-nu-use-line.txt
 save-call $strap [nu use-line strap] /tmp/strap-nu-strap-use-line.txt
 
 let strap_use = (run-external $strap ...[nu use-line strap] | str trim)

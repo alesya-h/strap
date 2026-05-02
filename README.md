@@ -126,36 +126,23 @@ For development shells, expose it with:
 NU_LIB_DIRS="$(strap nu lib-dir)" nu
 ```
 
-`nu/plumbing.nu` is the preferred local data plumbing layer. It provides pure state transforms plus closure-based combinators; Node remains only for MCP and real package/runtime pressure.
+The Nu surface routes through command-local `run.nu` modules. Closure-shaped state helpers are available through the grouped `strap` module and behave as lenses over top-level events:
 
 ```nu
-use '/path/to/strap/nu/plumbing.nu' *
+use '/path/to/strap/nu/strap'
 
 open state.json
-| with-events {|events| $events | where from == user }
+| strap with-events {|events| $events | where from == user }
 ```
 
 ```nu
 open state.json
-| with-extract bm_start bm_end {|ctx|
-    $ctx.events | get text
+| strap with-extract bm_start bm_end {|events|
+    $events | update text { str upcase }
   }
 ```
 
-`strap nu modules` prints the installed Nu modules, `strap nu lib-dir` prints the directory to add to `NU_LIB_DIRS`, `strap nu use-line strap` prints the grouped module import, `strap nu path plumbing` prints the plumbing module path, and `strap nu use-line plumbing` prints a plumbing-only import line.
-
-`nu/strap.nu` wraps Strap commands as native structured pipeline commands when an effectful adapter is needed:
-
-```nu
-use nu/strap.nu *
-
-init
-| add-user "List files in the current directory"
-| complete --tools all
-| process-tools --tools all
-| tee { save -f session.json }
-| display-last-message
-```
+`strap nu modules` prints installed Nu modules, and `strap nu lib-dir` prints the directory to add to `NU_LIB_DIRS`.
 
 ## MCP Servers
 

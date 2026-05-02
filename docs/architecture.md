@@ -63,7 +63,7 @@ $STRAP_ROOT/commands
 
 The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/global commands can override built-ins.
 
-Project and user commands are intended to be isolated capsules. They compose with other commands through stdin/stdout and `strap <command>`, not by importing repo-local implementation modules. Some legacy built-ins still wrap shared JS modules, but new or refactored commands should be self-contained Nu, Babashka, shell, or command-local package implementations.
+Project and user commands are isolated capsules. They compose with other commands through the top-level `strap` router, not by importing repo-local implementation modules. Process callers use stdin/stdout and `strap <command>`; Nu callers may route through command-local `run.nu` modules for richer values and closures.
 
 A command directory can contain:
 
@@ -144,27 +144,29 @@ Addressability is optional. `strap state bookmark add` attaches inline bookmarks
 
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 
-## Nu Plumbing
+## Nu Routed Surface
 
 Nu is the preferred implementation surface for local structured data plumbing. The grouped module is `nu/strap/mod.nu`, imported as `use '/path/to/strap/nu/strap'` or `use strap` when `strap nu lib-dir` is in `NU_LIB_DIRS`, and exposes commands such as `strap state init`, `strap session new`, `strap agents list`, and `strap skills list`.
 
-The stable plumbing module is `nu/plumbing.nu`; it owns pure state transforms, event/bookmark/context inspection, and higher-order combinators that accept blocks.
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. `run.nu` is encouraged but optional. When present it is the Nu entrypoint, exports `main`, and may expose richer pipeline and closure behavior. When absent, Nu callers can fall back to process `run`, usually with explicit `to json`/`from json` at the boundary.
+
+The boundary is still routed through the top-level surface: callers do not import another capsule's private files directly. Closure-shaped operations, such as `with-events`, may accept native Nu closures, explicit external process filters after `--`, or plain command words that default to `strap <command> ...`. Process filters receive JSON on stdin and emit JSON on stdout.
 
 Examples:
 
 ```nu
-use '/path/to/strap/nu/plumbing.nu' *
+use '/path/to/strap/nu/strap'
 
-open state.json | with-events {|events| $events | where from == user }
-open state.json | map-events {|event| { from: $event.from, text: $event.text } }
-open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
+open state.json | strap with-events {|events| $events | where from == user }
+open state.json | strap map-events {|event| $event | upsert reviewed true }
+open state.json | strap with-extract bm_start bm_end {|events| $events | update text { str upcase } }
 ```
 
 The intended boundary is: Nu owns local dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Babashka owns richer local algorithms and state/auth logic that are awkward in Nu but do not need a package ecosystem; Node is reserved for MCP and real package/runtime pressure only.
 
 Implementation files are intentionally small. The hard cap is 150 lines per source file, command `run` script, or helper; prefer even smaller files when a command has separable concepts. Command-local modules are the escape hatch for complexity, not shared repo libraries. Existing oversized files must appear in `.strap/config/line-cap-exceptions.txt` until they are split.
 
-`strap nu modules`, `strap nu lib-dir`, `strap nu use-line strap`, `strap nu path plumbing`, and `strap nu use-line plumbing` expose installed module paths/import lines for agents and humans.
+`strap nu modules`, `strap nu lib-dir`, `strap nu use-line strap`, and `strap nu path strap` expose installed module paths/import lines for agents and humans.
 
 ## Execution Loops
 

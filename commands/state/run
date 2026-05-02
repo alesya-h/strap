@@ -1,95 +1,26 @@
 #!/usr/bin/env nu
 
-use lib/bookmark.nu
-use lib/common.nu
-use lib/init.nu
-use lib/range.nu
-use lib/render.nu
-use lib/walk.nu
+use ./run.nu
+
+def read-state [file: string] {
+  if $file == "-" { open --raw /dev/stdin | from json } else { open $file }
+}
+
+def write-json [] { $in | to json --indent 2 | print }
 
 def usage [] {
   print -e "Usage: strap state <init|add-user|add-assistant|push|pop|bookmark|extract|fold|locate|show|tree|display-last-message> [args] < state.json > next.json"
   exit 2
 }
 
-def pop-scope [file: string, words: list<string>] {
-  let state = (common read-state $file)
-  let summary_text = ($words | str join " ")
-  let indexed = ($state.root.children | enumerate)
-  let open = ($indexed | where {|entry| $entry.item.type == "scope" and $entry.item.status == "open" } | last)
-  if ($open | is-empty) { error make { msg: "No open scope found" } }
-  let collapsed = ($open.item | merge { status: "collapsed", summary: $summary_text, hidden: { children: $open.item.children }, children: [] })
-  $state | update root.children { update $open.index $collapsed } | common write-json
-}
-
-def bookmark-command [sub: string, args: list<string>, file: string, text: string, created_by: string, id: string, hidden: bool, label: string] {
-  match $sub {
-    "add" => {
-      let text_value = if $text == "" { $args | str join " " } else { $text }
-      let id_value = if $id == "" { $"bm_((date now | format date '%s'))_((random uuid) | str substring 0..3)" } else { $id }
-      if $text_value == "" { error make { msg: "Usage: strap state bookmark add --text <unique substring> [--label label]" } }
-      let bookmark_value = ({ id: $id_value, created_by: $created_by, created_at: (date now | into string) } | if $label == "folded conversation segment" { $in } else { $in | insert label $label })
-      common read-state $file | bookmark add-root $text_value $bookmark_value | common write-json
-    }
-    "list" => { common read-state $file | bookmark list $hidden | common write-json }
-    "remove" => {
-      let target_id = ($args | first | default "")
-      if $target_id == "" { error make { msg: "Usage: strap state bookmark remove <bookmark>" } }
-      common read-state $file | bookmark remove-root $target_id | common write-json
-    }
-    _ => { error make { msg: "Usage: strap state bookmark <add|list|remove> [args]" } }
-  }
-}
-
-def show-command [file: string, sub: string, text: string, bookmark_id: string] {
-  if $text != "" {
-    common read-state $file | walk locate-text $text true | common write-json
-  } else {
-    let selector = if $bookmark_id == "" { $sub | default "" } else { $bookmark_id }
-    if $selector == "" { error make { msg: "Usage: strap state show <bookmark> | --text <unique substring>" } }
-    let bookmarks = (walk walk-state (common read-state $file) true | where {|match| (walk bookmark-ids $match) | any {|id| $id == $selector } })
-    if (($bookmarks | length) != 1) { error make { msg: $"Bookmark not found or duplicate: ($selector)" } }
-    $bookmarks | first | common write-json
-  }
-}
-
-def main [
+def --wrapped main [
   command?: string, sub?: string, ...args: string, --file: string = "-", --from: string = "", --to: string = "",
   --summary: string = "", --label: string = "folded conversation segment", --text: string = "",
   --created-by: string = "assistant", --id: string = "", --hidden, --bookmark: string = ""
 ] {
   if ($command | is-empty) { usage }
+  if $command == "init" { run init | write-json; return }
   let words = ([($sub | default "")] | append $args | where {|item| $item != "" })
-
-  match $command {
-    "init" => { init state | common write-json }
-    "add-user" => { common read-state $file | common append-event { from: "user", to: ["assistant"], kind: "message", text: ($words | str join " ") } | common write-json }
-    "add-assistant" => { common read-state $file | common append-event { from: "assistant", to: ["user"], kind: "message", text: ($words | str join " ") } | common write-json }
-    "push" => { common read-state $file | update root.children { append { type: "scope", label: (($words | str join " ") | default "scope"), status: "open", participants: ["assistant", "harness"], children: [] } } | common write-json }
-    "pop" => { pop-scope $file $words }
-    "bookmark" => { bookmark-command $sub $args $file $text $created_by $id $hidden $label }
-    "extract" => {
-      let to_value = if $to == "" { $from } else { $to }
-      if $from == "" or $to_value == "" { error make { msg: "Usage: strap state extract --from <bookmark> [--to <bookmark>]" } }
-      common read-state $file | range extract-root $from $to_value | common write-json
-    }
-    "fold" => {
-      let summary_value = if $summary == "" { $words | str join " " } else { $summary }
-      if $from == "" or $to == "" or $summary_value == "" { error make { msg: "Usage: strap state fold --from <bookmark> --to <bookmark> --summary <text>" } }
-      common read-state $file | range fold-root $from $to $summary_value $label | common write-json
-    }
-    "locate" => {
-      let text_value = if $text == "" { $words | str join " " } else { $text }
-      if $text_value == "" { error make { msg: "Usage: strap state locate --text <unique substring>" } }
-      let match = (common read-state $file | walk locate-text $text_value true)
-      { path: $match._path, hidden: $match._hidden, node: (walk describe-node $match), bookmarks: (walk bookmark-ids $match) } | common write-json
-    }
-    "show" => { show-command $file ($sub | default "") $text $bookmark }
-    "tree" => { print (common read-state $file | render tree $hidden) }
-    "display-last-message" => {
-      let events = (common read-state $file | get root.children | where type == "event" and from == "assistant" and text != "")
-      if not ($events | is-empty) { print ($events | last | get text) }
-    }
-    _ => { usage }
-  }
+  let result = (read-state $file | run $command ($words | first | default "") ...($words | skip 1) --from $from --to $to --summary $summary --label $label --text $text --created-by $created_by --id $id --hidden=$hidden --bookmark $bookmark)
+  if $command == "tree" or $command == "display-last-message" { print $result } else { $result | write-json }
 }

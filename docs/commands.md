@@ -121,7 +121,7 @@ strap with-session my-session strap history log
 | `loop` | Run the Nushell model/tool loop. |
 | `mcp` | Run bundled stdio MCP servers. |
 | `model` | List, show, select, and fork model profiles. |
-| `nu` | Inspect Nushell plumbing module paths. |
+| `nu` | Inspect Nushell routed module paths. |
 | `one-shot` | Run an agent once until its first final answer. |
 | `paths` | Print resolved root/config/global/project/session/work/workspace paths. |
 | `provider` | Run provider-specific operations and authentication. |
@@ -193,7 +193,7 @@ strap model fork current next-chatgpt --set-model-id gpt-next
 
 `current.json` is a Linux symlink to the selected profile in the active overlay.
 
-## Nushell Plumbing
+## Nushell Routed Surface
 
 The grouped Nu module lives in `nu/strap/mod.nu` and is normally imported as:
 
@@ -213,14 +213,20 @@ For a development shell:
 NU_LIB_DIRS="$(strap nu lib-dir)" nu
 ```
 
-Nu plumbing lives in `nu/plumbing.nu` and supports block-based composition:
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. `run.nu` is encouraged but optional. When present, it exports `main` and may support richer pipeline values and closures. When absent, Nu callers can fall back to process `run`, usually with explicit `to json`/`from json`.
+
+Closure-shaped operations are lenses over top-level events: they return full state with the selected events replaced. Nu callers can pass closures. Process callers can provide an external JSON filter after `--`, or plain command words that default to `strap <command> ...`.
 
 ```nu
-use '/path/to/strap/nu/plumbing.nu' *
+use '/path/to/strap/nu/strap'
 
-open state.json | with-events {|events| $events | where from == user }
-open state.json | map-events {|event| $event.text }
-open state.json | with-extract bm_start bm_end {|ctx| $ctx.events | get text }
+open state.json | strap with-events {|events| $events | where from == user }
+open state.json | strap map-events {|event| $event | upsert reviewed true }
+open state.json | strap with-extract bm_start bm_end {|events| $events | update text { str upcase } }
+```
+
+```bash
+strap state with-events -- jq 'map(select(.from == "user"))' < state.json > next.json
 ```
 
 Discover installed module paths with:
@@ -229,8 +235,7 @@ Discover installed module paths with:
 strap nu modules
 strap nu lib-dir
 strap nu use-line strap
-strap nu path plumbing
-strap nu use-line plumbing
+strap nu path strap
 ```
 
 ## Bookmark Addressability

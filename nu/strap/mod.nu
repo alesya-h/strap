@@ -1,24 +1,7 @@
-export use ../plumbing.nu [
-  init
-  append-event
-  add-user
-  add-assistant
-  add-tool-request
-  open-scope
-  collapse-last-scope
-  last-assistant-text
-  add-trace
-  walk
-  events
-  with-events
-  map-events
-  where-events
-  bookmarks
-  locate-text
-  locate-bookmark
-  extract-range
-  with-extract
-  update-actor
+export use ./state.nu [
+  init append-event add-user add-assistant add-tool-request open-scope collapse-last-scope
+  last-assistant-text add-trace walk events with-events map-events where-events bookmarks
+  locate-text locate-bookmark extract-range with-extract update-actor
 ]
 
 export use ./state.nu
@@ -37,7 +20,3 @@ export use ./commands.nu
 export use ./paths.nu
 export use ./status.nu
 export use ./provider.nu
-
-export def "model use" [name: string] {
-  run-external ($env.STRAP_BIN? | default "strap") model use $name | from json
-}

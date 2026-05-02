@@ -23,7 +23,7 @@
     (first
      (for [root (command-dirs)
            :let [candidate (fs/path root name)]
-           :when (fs/exists? (fs/path candidate "run"))]
+            :when (fs/exists? (fs/path candidate "run"))]
        (str candidate)))))
 
 (defn commands []

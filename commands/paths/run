@@ -1,26 +1,5 @@
 #!/usr/bin/env nu
 
-def main [target: string = "all"] {
-  match $target {
-    "root" => { print $env.STRAP_ROOT }
-    "config" => { print $env.STRAP_CONFIG }
-    "global" => { print $env.STRAP_GLOBAL }
-    "project" => { print $env.STRAP_PROJECT }
-    "session" => { print ($env.STRAP_SESSION? | default "") }
-    "work" => { print $env.STRAP_WORK }
-    "workspace" => { print $env.STRAP_WORKSPACE }
-    "all" => {
-      print $"STRAP_ROOT=($env.STRAP_ROOT)"
-      print $"STRAP_CONFIG=($env.STRAP_CONFIG)"
-      print $"STRAP_GLOBAL=($env.STRAP_GLOBAL)"
-      print $"STRAP_PROJECT=($env.STRAP_PROJECT)"
-      print $"STRAP_SESSION=($env.STRAP_SESSION? | default '')"
-      print $"STRAP_WORK=($env.STRAP_WORK)"
-      print $"STRAP_WORKSPACE=($env.STRAP_WORKSPACE)"
-    }
-    _ => {
-      print -e "Usage: strap paths [root|config|global|project|session|work|workspace|all]"
-      exit 2
-    }
-  }
-}
+use ./run.nu
+
+def main [target: string = "all"] { print --no-newline (run $target) }

@@ -1,20 +1,22 @@
-use ./common.nu *
+use ../../commands/session/run.nu
+
+def maybe-flag [name: string, value: any] { if ($value == null) or (($value | into string) == "") { [] } else { [$name $value] } }
 
 export def --env new [name: string] {
-  let result = (call-json [session new $name])
+  let result = (run ...[new $name])
   $env.STRAP_SESSION = $result.dir
   $result
 }
 
 export def --env copy [name: string, --at: string = ""] {
-  let result = (call-json ([session copy $name] ++ (maybe-flag "--at" $at)))
+  let result = (run ...([copy $name] ++ (maybe-flag "--at" $at)))
   $env.STRAP_SESSION = $result.dir
   $result
 }
 
 export def --env select [session?: string] {
   let selection = if ($session | is-empty) { choose-session } else { $session }
-  $env.STRAP_SESSION = (call-text [session resolve $selection] | str trim)
+  $env.STRAP_SESSION = (run ...[resolve $selection] --text | str trim)
   $env.STRAP_SESSION
 }
 
@@ -22,7 +24,7 @@ def choose-session [] {
   if (which sk | is-empty) {
     error make { msg: "strap session select requires `sk` when no session argument is provided" }
   }
-  let sessions = (call-json [session list])
+  let sessions = (run ...[list])
   if ($sessions | is-empty) {
     error make { msg: "No strap sessions found" }
   }
@@ -43,11 +45,11 @@ export def --env clear [] {
   if (($env.STRAP_SESSION? | default "") != "") { hide-env STRAP_SESSION }
 }
 
-export def list [] { call-json [session list] }
-export def resolve [session: string] { call-text [session resolve $session] }
-export def path [] { call-text [session path] }
-export def trace [] { call-text [session trace] }
-export def ask [text: string] { call-json [session ask $text] }
-export def show [] { call-json [session show] }
-export def save [] { $in | filter-json [session save] }
-export def state [] { call-text [session state] }
+export def list [] { run ...[list] }
+export def resolve [session: string] { run ...[resolve $session] --text }
+export def path [] { run ...[path] --text }
+export def trace [] { run ...[trace] --text }
+export def ask [text: string] { run ...[ask $text] }
+export def show [] { run ...[show] }
+export def save [] { $in | run ...[save] --stdin }
+export def state [] { run ...[state] --text }
