@@ -1,6 +1,8 @@
 use ../../commands/session/run.nu
 
-def maybe-flag [name: string, value: any] { if ($value == null) or (($value | into string) == "") { [] } else { [$name $value] } }
+def maybe-flag [name: string, value: any] {
+  if ($value == null) or (($value | into string) == "") { [] } else { [$name $value] }
+}
 
 export def --env new [name: string] {
   let result = (run ...[new $name])
@@ -46,10 +48,17 @@ export def --env clear [] {
 }
 
 export def list [] { run ...[list] }
+
 export def resolve [session: string] { run ...[resolve $session] --text }
+
 export def path [] { run ...[path] --text }
+
 export def trace [] { run ...[trace] --text }
+
 export def ask [text: string] { run ...[ask $text] }
+
 export def show [] { run ...[show] }
+
 export def save [] { $in | run ...[save] --stdin }
+
 export def state [] { run ...[state] --text }

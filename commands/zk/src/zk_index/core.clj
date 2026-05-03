@@ -6,12 +6,23 @@
 
 (def flag-options #{})
 
-(defn env [name] (System/getenv name))
-(defn now [] (.toString (java.time.Instant/now)))
-(defn note-id [] (str "zk_" (random-uuid)))
-(defn chunk-id [id] (str id ":0"))
-(defn json-out [value] (println (json/generate-string value)))
-(defn parse-json [text] (json/parse-string text true))
+(defn env [name]
+  (System/getenv name))
+
+(defn now []
+  (.toString (java.time.Instant/now)))
+
+(defn note-id []
+  (str "zk_" (random-uuid)))
+
+(defn chunk-id [id]
+  (str id ":0"))
+
+(defn json-out [value]
+  (println (json/generate-string value)))
+
+(defn parse-json [text]
+  (json/parse-string text true))
 
 (defn usage []
   (binding [*out* *err*]
@@ -46,8 +57,11 @@
       (when-let [work (env "STRAP_WORK")] (str (fs/path work "zettel" "zettel.sqlite")))
       (str (fs/path (System/getProperty "user.home") ".config" "strap" "zettel.sqlite"))))
 
-(defn db-path [db] (or (not-empty db) (default-db)))
-(defn sql-string [value] (str "'" (str/replace (str (or value "")) "'" "''") "'"))
+(defn db-path [db]
+  (or (not-empty db) (default-db)))
+
+(defn sql-string [value]
+  (str "'" (str/replace (str (or value "")) "'" "''") "'"))
 (defn sql-template [template values]
   (reduce-kv (fn [out k v] (str/replace out (str "__" (name k) "__") (str v))) template values))
 

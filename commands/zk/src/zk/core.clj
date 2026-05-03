@@ -14,13 +14,26 @@
 
 (def flag-options #{"--paths"})
 
-(defn env [name] (System/getenv name))
-(defn now [] (.toString (java.time.Instant/now)))
-(defn note-id [] (str "zk_" (random-uuid)))
-(defn basename [file] (.getName (io/file file)))
-(defn basename-no-ext [file] (str/replace (basename file) #"\.md$" ""))
-(defn json-out [value] (println (json/generate-string value {:pretty true})))
-(defn parse-json [text] (json/parse-string text true))
+(defn env [name]
+  (System/getenv name))
+
+(defn now []
+  (.toString (java.time.Instant/now)))
+
+(defn note-id []
+  (str "zk_" (random-uuid)))
+
+(defn basename [file]
+  (.getName (io/file file)))
+
+(defn basename-no-ext [file]
+  (str/replace (basename file) #"\.md$" ""))
+
+(defn json-out [value]
+  (println (json/generate-string value {:pretty true})))
+
+(defn parse-json [text]
+  (json/parse-string text true))
 
 (defn usage []
   (binding [*out* *err*]

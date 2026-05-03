@@ -3,9 +3,30 @@
 const base_url = "https://kagi.com/api/v0"
 
 def opt [row key] { $row | get -o $key }
-def add-param [params key value] { if $value == null { $params } else { $params | append {key: $key, value: ($value | into string)} } }
-def code-lens [x] { match $x { academic => 0, forums => 1, pdfs => 2, programming => 3, news_360 => 4, small_web => 5, cyber_security => 6, fediverse_forums => 7, jobs => 8, usenet_archive => 9, kagi_documentation => 10, recipes => 11 } }
+
+def add-param [params key value] {
+  if $value == null { $params } else { $params | append { key: $key, value: ($value | into string) } }
+}
+
+def code-lens [x] {
+  match $x {
+    academic => 0
+    forums => 1
+    pdfs => 2
+    programming => 3
+    news_360 => 4
+    small_web => 5
+    cyber_security => 6
+    fediverse_forums => 7
+    jobs => 8
+    usenet_archive => 9
+    kagi_documentation => 10
+    recipes => 11
+  }
+}
+
 def code-order-by [x] { match $x { relevance => 1, recency => 2, website => 3, ad_trackers => 4 } }
+
 def code-date-range [x] { match $x { "24h" => 1, week => 2, month => 3, year => 4 } }
 
 def api-key [] {
@@ -40,23 +61,47 @@ def search-params [query] {
 
 def search-one [query start] {
   let response = (fetch-json "/search" (search-params $query) 10)
-  if ($response.error? | default null) != null { return {query: (opt $query q), error: $response.error, results: [], next: $start} }
+  if ($response.error? | default null) != null {
+    return { query: (opt $query q), error: $response.error, results: [], next: $start }
+  }
   let results = (($response.data? | default []) | where t == 0 | enumerate | each {|row|
     let item = $row.item
-    {number: ($start + $row.index), title: ($item.title? | default "Not Available"), url: ($item.url? | default "Not Available"), published: ($item.published? | default "Not Available"), snippet: ($item.snippet? | default "Not Available")}
+    {
+      number: ($start + $row.index)
+      title: ($item.title? | default "Not Available")
+      url: ($item.url? | default "Not Available")
+      published: ($item.published? | default "Not Available")
+      snippet: ($item.snippet? | default "Not Available")
+    }
   })
-  {query: (opt $query q), results: $results, next: ($start + ($results | length))}
+  { query: (opt $query q), results: $results, next: ($start + ($results | length)) }
 }
 
-def render-result [item] { $"($item.number): ($item.title)\n($item.url)\nPublished Date: ($item.published)\n($item.snippet)" }
-def render-query [block] { $"-----\nResults for search query \"($block.query)\":\n-----\n(if ($block.error? | default null) != null { 'ERROR: ' + ($block.error | to json --raw) } else if ($block.results | is-empty) { 'No results found.' } else { $block.results | each {|r| render-result $r } | str join "\n\n" })" }
+def render-result [item] {
+  $"($item.number): ($item.title)\n($item.url)\nPublished Date: ($item.published)\n($item.snippet)"
+}
+
+def render-query [block] {
+  let body = if ($block.error? | default null) != null {
+    'ERROR: ' + ($block.error | to json --raw)
+  } else if ($block.results | is-empty) {
+    'No results found.'
+  } else {
+    $block.results | each {|r| render-result $r } | str join "\n\n"
+  }
+  $"-----\nResults for search query \"($block.query)\":\n-----\n($body)"
+}
 
 def web-search [args] {
   let queries = ($args.queries? | default [])
   if ($queries | is-empty) { error make {msg: "Search called with no queries."} }
   mut next = 1
   mut blocks = []
-  for query in $queries { let block = (search-one $query $next); $next = $block.next; $blocks = ($blocks | append ($block | reject next)) }
+  for query in $queries {
+    let block = (search-one $query $next)
+    $next = $block.next
+    $blocks = ($blocks | append ($block | reject next))
+  }
   let text = ($blocks | each {|b| render-query $b } | str join "\n\n")
   {result: {content: [{type: "text", text: $text}], structuredContent: {queries: $blocks}}}
 }
@@ -65,17 +110,36 @@ def summarizer [args] {
   if (($args.url? | default "") | is-empty) { error make {msg: "Summarizer called with no URL."} }
   let engine = ($args.engine? | default "muriel")
   let summary_type = ($args.summary_type? | default "summary")
-  mut params = [{key: url, value: $args.url} {key: engine, value: $engine} {key: summary_type, value: $summary_type}]
+  mut params = [
+    { key: url, value: $args.url }
+    { key: engine, value: $engine }
+    { key: summary_type, value: $summary_type }
+  ]
   if ($args.target_language? | default null) != null { $params = (add-param $params target_language $args.target_language) }
   let response = (fetch-json "/summarize" $params 60)
   if ($response.error? | default null) != null { error make {msg: ($response.error | to json --raw)} }
   let result = ($response.data.output? | default "")
   let text = $"Summary for ($args.url)\nEngine: ($engine)\nType: ($summary_type)\nTarget language: ($args.target_language? | default 'default')\n\n($result)"
-  {result: {content: [{type: "text", text: $text}], structuredContent: {url: $args.url, engine: $engine, summary_type: $summary_type, target_language: ($args.target_language? | default null), result: $result}}}
+  {
+    result: {
+      content: [{ type: "text", text: $text }]
+      structuredContent: {
+        url: $args.url
+        engine: $engine
+        summary_type: $summary_type
+        target_language: ($args.target_language? | default null)
+        result: $result
+      }
+    }
+  }
 }
 
 def main [action?: string] {
   if ($action | is-empty) { print ([web_search summarizer] | to json); return }
   let args = ((^cat | from json).arguments? | default {})
-  match $action { web_search => (web-search $args), summarizer => (summarizer $args), _ => (error make {msg: $"Unknown kagi action: ($action)"}) } | to json | print
+  match $action {
+    web_search => (web-search $args)
+    summarizer => (summarizer $args)
+    _ => (error make { msg: $"Unknown kagi action: ($action)" })
+  } | to json | print
 }

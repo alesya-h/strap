@@ -1,3 +1,1 @@
 # Existing oversized source files. These are refactor debt, not precedent.
-commands/state/run.nu
-/home/alesya/p/ai/strap/commands/state/run.nu

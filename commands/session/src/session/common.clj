@@ -4,11 +4,20 @@
             [cheshire.core :as json]
             [clojure.string :as str]))
 
-(defn env [name] (System/getenv name))
-(defn json-out [value] (println (json/generate-string value {:pretty true})))
-(defn parse-json [text] (json/parse-string text true))
-(defn now [] (.toString (java.time.Instant/now)))
-(defn stamp [] (str/replace (now) #"[:.]" "-"))
+(defn env [name]
+  (System/getenv name))
+
+(defn json-out [value]
+  (println (json/generate-string value {:pretty true})))
+
+(defn parse-json [text]
+  (json/parse-string text true))
+
+(defn now []
+  (.toString (java.time.Instant/now)))
+
+(defn stamp []
+  (str/replace (now) #"[:.]" "-"))
 
 (defn slug [text]
   (let [cleaned (-> (str (or text "session")) str/lower-case (str/replace #"[^a-z0-9]+" "-") (str/replace #"^-|-$" ""))]
@@ -20,8 +29,13 @@
     (str root)))
 
 (declare current-dir)
-(defn state-path ([dir] (str (fs/path dir "state.json"))) ([] (state-path (current-dir))))
-(defn trace-path ([dir] (str (fs/path dir "trace.jsonl"))) ([] (trace-path (current-dir))))
+(defn state-path
+  ([dir] (str (fs/path dir "state.json")))
+  ([] (state-path (current-dir))))
+
+(defn trace-path
+  ([dir] (str (fs/path dir "trace.jsonl")))
+  ([] (trace-path (current-dir))))
 
 (defn current-dir []
   (let [dir (env "STRAP_SESSION")]

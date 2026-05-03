@@ -25,8 +25,11 @@
   {:version "strap.state.v0.2" :actors {}
    :root {:type "scope" :label "root" :status "open" :participants [] :children []}})
 
-(defn read-state [file] (normalize (c/parse-json (slurp file))))
-(defn write-state [file state] (spit file (str (c/json-str (normalize state)) "\n")))
+(defn read-state [file]
+  (normalize (c/parse-json (slurp file))))
+
+(defn write-state [file state]
+  (spit file (str (c/json-str (normalize state)) "\n")))
 
 (defn collapse-last-open-scope [state summary]
   (let [children (get-in state [:root :children])

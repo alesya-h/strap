@@ -39,7 +39,11 @@ export function startMcpServer({ name = "strap", group = "all" } = {}) {
   async function dispatch(message) {
     switch (message.method) {
       case "initialize":
-        return { protocolVersion: message.params?.protocolVersion || "2024-11-05", capabilities: { tools: { listChanged: false } }, serverInfo: { name, version: "0.1.0" } };
+        return {
+          protocolVersion: message.params?.protocolVersion || "2024-11-05",
+          capabilities: { tools: { listChanged: false } },
+          serverInfo: { name, version: "0.1.0" },
+        };
       case "tools/list":
         return { tools: await listTools(group) };
       case "tools/call":
@@ -79,16 +83,38 @@ async function callTool(group, name, input) {
 
 async function toolsWithGroups(group) {
   const groups = expandGroups(group);
-  const nested = await Promise.all(groups.map(async (item) => (await runStrapJson(["tools", "list", "--group", item, "--json"])).map((tool) => ({ group: item, tool }))));
+  const nested = await Promise.all(groups.map(async (item) => {
+    const tools = await runStrapJson(["tools", "list", "--group", item, "--json"]);
+    return tools.map((tool) => ({ group: item, tool }));
+  }));
   return nested.flat();
 }
 
 function expandGroups(group) {
-  return String(group || "all").split(",").flatMap((item) => item.trim() === "all" ? LOCAL_GROUPS : [item.trim()]).filter(Boolean);
+  return String(group || "all")
+    .split(",")
+    .flatMap((item) => item.trim() === "all" ? LOCAL_GROUPS : [item.trim()])
+    .filter(Boolean);
 }
 
 function oneCallState(tool, input) {
-  return { version: "strap.state.v0.2", actors: {}, root: { type: "scope", label: "root", status: "open", participants: ["assistant", "harness"], children: [{ type: "event", from: "assistant", to: ["harness"], kind: "tool_request", calls: [{ id: "mcp-call", tool, input }] }] } };
+  return {
+    version: "strap.state.v0.2",
+    actors: {},
+    root: {
+      type: "scope",
+      label: "root",
+      status: "open",
+      participants: ["assistant", "harness"],
+      children: [{
+        type: "event",
+        from: "assistant",
+        to: ["harness"],
+        kind: "tool_request",
+        calls: [{ id: "mcp-call", tool, input }],
+      }],
+    },
+  };
 }
 
 function strapBin() {
