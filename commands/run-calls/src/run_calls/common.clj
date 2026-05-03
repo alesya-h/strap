@@ -12,8 +12,8 @@
 (defn write-json [value]
   (println (json-str value)))
 
-(defn read-input [file]
-  (parse-json (if (= file "-") (slurp *in*) (slurp file))))
+(defn read-input []
+  (parse-json (slurp *in*)))
 
 (defn tool-result
   ([output]

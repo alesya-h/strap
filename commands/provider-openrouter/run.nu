@@ -9,10 +9,8 @@ def usage [] {
   error make { msg: "Usage: strap provider openrouter <compile|call|complete> [args]" }
 }
 
-def read-state [file: string] { if $file == "-" { $in } else { open $file } }
-
-def prepare [model_name: string, tools_name: string, file: string] {
-  let input_state = ($in | read-state $file)
+def prepare [model_name: string, tools_name: string] {
+  let input_state = $in
   let config = (model load $model_name)
   if $config.provider != "openrouter" {
     error make { msg: $"Model profile provider mismatch: expected openrouter, got ($config.provider)" }
@@ -25,19 +23,19 @@ def prepare [model_name: string, tools_name: string, file: string] {
   }
 }
 
-export def main [command?: string, --model: string = "current", --tools: string = "all", --file: string = "-"] {
+export def main [command?: string, --model: string = "current", --tools: string = "all"] {
   let input = $in
   match ($command | default "") {
     "compile" => {
-      let prepared = ($input | prepare $model $tools $file)
+      let prepared = ($input | prepare $model $tools)
       $prepared.body
     }
     "call" => {
-      let prepared = ($input | prepare $model $tools $file)
+      let prepared = ($input | prepare $model $tools)
       common post-json $prepared.config.base_url [$"Authorization: Bearer (common secret $prepared.config.auth)"] $prepared.body
     }
     "complete" => {
-      let prepared = ($input | prepare $model $tools $file)
+      let prepared = ($input | prepare $model $tools)
       let response = (common post-json $prepared.config.base_url [$"Authorization: Bearer (common secret $prepared.config.auth)"] $prepared.body)
       $prepared.state | update root.children { append (compile response-event $response) }
     }

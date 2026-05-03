@@ -134,8 +134,7 @@
 
 (defn -main [& argv]
   (let [[group argv] (take-opt (vec argv) "--tools" (or (first argv) "all"))
-        [file _] (take-opt argv "--file" "-")
-        original (state/normalize (c/read-input file))
+        original (state/normalize (c/read-input))
         state-atom (atom original)
         full-replaced (atom false)
         tools (into {} (map (juxt :name identity) (tool-specs group)))]

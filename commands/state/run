@@ -2,10 +2,6 @@
 
 use ./run.nu
 
-def read-state [file: string] {
-  if $file == "-" { open --raw /dev/stdin | from json } else { open $file }
-}
-
 def write-json [] { $in | to json --indent 2 | print }
 
 def usage [] {
@@ -14,13 +10,13 @@ def usage [] {
 }
 
 def --wrapped main [
-  command?: string, sub?: string, ...args: string, --file: string = "-", --from: string = "", --to: string = "",
+  command?: string, sub?: string, ...args: string, --from: string = "", --to: string = "",
   --summary: string = "", --label: string = "folded conversation segment", --text: string = "",
   --created-by: string = "assistant", --id: string = "", --hidden, --bookmark: string = ""
 ] {
   if ($command | is-empty) { usage }
   if $command == "init" { run init | write-json; return }
   let words = ([($sub | default "")] | append $args | where {|item| $item != "" })
-  let result = (read-state $file | run $command ($words | first | default "") ...($words | skip 1) --from $from --to $to --summary $summary --label $label --text $text --created-by $created_by --id $id --hidden=$hidden --bookmark $bookmark)
+  let result = (open --raw /dev/stdin | from json | run $command ($words | first | default "") ...($words | skip 1) --from $from --to $to --summary $summary --label $label --text $text --created-by $created_by --id $id --hidden=$hidden --bookmark $bookmark)
   if $command == "tree" or $command == "display-last-message" { print $result } else { $result | write-json }
 }

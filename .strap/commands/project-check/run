@@ -74,6 +74,7 @@ def check-content-guards [] {
   rg-forbid "Non-MCP Node surfaces are retired; use Nu/Babashka command boundaries instead." '#strap/(core|providers|jsmcp|loop)|\^node' ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "*.nu" "--glob" "*.clj" "--glob" "*.sh" "--glob" "!.git/**" "--glob" "!subprojects/mcp/**"]
   rg-forbid "Nu command run scripts must delegate to run.nu, not main.nu." 'main[.]nu' [commands --glob run]
   rg-forbid "run.nu must not read/write process stdin or stdout." 'open --raw /dev/stdin|\^cat|\bprint\b' [commands --glob run.nu]
+  rg-forbid "Command input must be data-in/data-out; do not add stdin/file input flags." '[-][-]stdin|[-][-]file\b' [commands .strap/commands nu README.md docs --glob "*.nu" --glob "*.clj" --glob "*.md" --glob run]
 }
 
 def check-command-syntax [] {

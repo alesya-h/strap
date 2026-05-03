@@ -2,14 +2,6 @@
 
 use ./run.nu
 
-def read-optional-state [file: string] {
-  if $file == "-" { open --raw /dev/stdin | from json } else { null }
-}
-
-def main [command?: string, ...args: string, --prompt: string = "", --child: string = "", --summary: string = "", --file: string = "-"] {
-  if $file == "-" {
-    read-optional-state $file | run ($command | default "") ...$args --prompt $prompt --child $child --summary $summary --file $file | to json --indent 2 | print
-  } else {
-    run ($command | default "") ...$args --prompt $prompt --child $child --summary $summary --file $file | to json --indent 2 | print
-  }
+def main [command?: string, ...args: string, --prompt: string = "", --child: string = "", --summary: string = ""] {
+  open --raw /dev/stdin | from json | run ($command | default "") ...$args --prompt $prompt --child $child --summary $summary | to json --indent 2 | print
 }

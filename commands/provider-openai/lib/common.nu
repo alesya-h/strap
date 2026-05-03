@@ -1,7 +1,3 @@
-export def write-json [] {
-  $in | to json --indent 2 | print
-}
-
 export def get-env [name: string] {
   $env | get -o $name | default ""
 }
@@ -20,10 +16,6 @@ export def secret [auth: record] {
   }
 
   open --raw ($auth.file | path expand) | str trim
-}
-
-export def read-input [file: string] {
-  if $file == "-" { ^cat | from json } else { open $file }
 }
 
 export def post-json [url: string, headers: list<string>, body: record] {

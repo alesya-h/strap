@@ -71,7 +71,18 @@ strap session show \
 
 Each active session has a session-local overlay under `overlay/` that shadows user, project, global, and root artifacts. `strap artifact workon <type> <name>` writes there while `STRAP_SESSION` is set, and `strap artifact promote <type> <name>` promotes one step at a time: session to user, user to project, project to global, and global to the Strap repo layer. Session state and session overlay changes are jj-backed in the session directory; use `strap history log`, `strap history diff`, or `strap history ui`.
 
-Session-aware commands use `STRAP_SESSION` and fail when it is absent. Use `strap with-session <session> <command>` for one-off commands, or in Nushell run `strap session select <session>` to set `$env.STRAP_SESSION` in the current shell.
+Session-aware commands use `STRAP_SESSION` and fail when it is absent. Use `strap with-session <session> <command>` for one-off process commands. In Nushell, use the native scoped helper to run a block without leaking the environment change:
+
+```nu
+use strap
+
+strap with-session repo-analysis {
+  strap session path
+  strap history log
+}
+```
+
+Use `strap session select <session>` when you do want to set `$env.STRAP_SESSION` in the current shell.
 
 See `docs/daily-use.md`, `docs/commands.md`, and `docs/architecture.md`.
 

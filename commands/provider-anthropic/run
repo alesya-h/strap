@@ -2,13 +2,9 @@
 
 use ./run.nu
 
-def read-json-input [file: string] {
-  if $file == "-" { open --raw /dev/stdin | from json } else { null }
-}
-
-def main [command?: string, --model: string = "current", --tools: string = "all", --file: string = "-"] {
-  read-json-input $file
-  | run ($command | default "") --model $model --tools $tools --file $file
+def main [command?: string, --model: string = "current", --tools: string = "all"] {
+  open --raw /dev/stdin | from json
+  | run ($command | default "") --model $model --tools $tools
   | to json --indent 2
   | print
 }

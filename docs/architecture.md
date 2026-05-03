@@ -150,7 +150,9 @@ Nu is the preferred implementation surface for local structured data plumbing. T
 
 Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. For Nu-native capsules, `run.nu` is the only Nu entrypoint, exports `main`, and may expose richer pipeline and closure behavior. Additional `.nu` files are command-local modules for `run.nu`, not alternate entrypoints.
 
-`run.nu` stays native: it accepts and returns Nushell values, and does not read stdin, write stdout, or encode/decode command-boundary text JSON. The executable `run` owns stdin/stdout, `--file`, text JSON parsing/printing, and process compatibility shims before delegating to `run.nu`.
+`run.nu` stays native: it accepts and returns Nushell values, and does not read stdin, write stdout, or expose command-boundary text JSON flags. The executable `run` owns stdin/stdout text JSON handling before delegating to `run.nu`: it parses stdin when the command logically takes input, ignores stdin when it does not, and prints text JSON or plain text as the process result.
+
+Command input does not use compatibility switches. The process surface is data-in/data-out over stdin/stdout; the Nu surface is data-in/data-out over native pipeline values.
 
 The boundary is still routed through the top-level surface: callers do not import another capsule's private files directly. Closure-shaped operations, such as `with-events`, may accept native Nu closures, explicit external process filters after `--`, or plain command words that default to `strap <command> ...`. Process filters receive JSON on stdin and emit JSON on stdout.
 
@@ -264,7 +266,7 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 
 `strap session copy <name>` copies the active session into a new session. With `--at <bookmark>`, the copied state is truncated after that visible bookmark so the conversation can continue in a different direction from a specific point.
 
-Actual session-aware commands rely on `STRAP_SESSION`. There is no current-session pointer fallback; commands that need a session fail when the env var is absent. Use `strap with-session <session> <command>` for one-off selection. In Nushell, `strap session select <session>` is `def --env` and sets `$env.STRAP_SESSION` in the current shell.
+Actual session-aware commands rely on `STRAP_SESSION`. There is no current-session pointer fallback; commands that need a session fail when the env var is absent. Use `strap with-session <session> <command>` for one-off process selection. In Nushell, `strap with-session <session> { ... }` runs a block with `STRAP_SESSION` scoped to that block, while `strap session select <session>` is `def --env` and sets `$env.STRAP_SESSION` in the current shell.
 
 Session mutations create jj snapshots in the session directory selected by `STRAP_SESSION`. `strap history` operates on that session directory rather than the project-user work root, and `strap history ui` launches `jjui` there.
 

@@ -20,3 +20,4 @@ export use ./commands.nu
 export use ./paths.nu
 export use ./status.nu
 export use ./provider.nu
+export use ./with-session.nu

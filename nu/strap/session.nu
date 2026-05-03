@@ -18,7 +18,7 @@ export def --env copy [name: string, --at: string = ""] {
 
 export def --env select [session?: string] {
   let selection = if ($session | is-empty) { choose-session } else { $session }
-  $env.STRAP_SESSION = (run ...[resolve $selection] --text | str trim)
+  $env.STRAP_SESSION = (run ...[resolve $selection] | str trim)
   $env.STRAP_SESSION
 }
 
@@ -49,16 +49,16 @@ export def --env clear [] {
 
 export def list [] { run ...[list] }
 
-export def resolve [session: string] { run ...[resolve $session] --text }
+export def resolve [session: string] { run ...[resolve $session] }
 
-export def path [] { run ...[path] --text }
+export def path [] { run ...[path] }
 
-export def trace [] { run ...[trace] --text }
+export def trace [] { run ...[trace] }
 
 export def ask [text: string] { run ...[ask $text] }
 
 export def show [] { run ...[show] }
 
-export def save [] { $in | run ...[save] --stdin }
+export def save [] { $in | run ...[save] }
 
-export def state [] { run ...[state] --text }
+export def state [] { run ...[state] }

@@ -108,6 +108,15 @@ Run a command against a specific session without exporting `STRAP_SESSION` in th
 strap with-session my-session strap history log
 ```
 
+In the grouped Nu module, use a scoped block when you want native commands to see `STRAP_SESSION` without leaking it to the caller:
+
+```nu
+strap with-session my-session {
+  strap session path
+  strap history log
+}
+```
+
 ## Built-in Commands
 
 | Command | Purpose |
@@ -219,7 +228,9 @@ NU_LIB_DIRS="$(strap nu lib-dir)" nu
 
 Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. For Nu-native commands, `run.nu` is the only Nu entrypoint and exports `main`. Additional `.nu` files may exist only as modules used by `run.nu`.
 
-The boundary split is strict: `run.nu` accepts and returns native Nushell data. It must not read stdin, write stdout, or perform command-boundary text JSON encoding/decoding. The executable `run` owns process concerns such as reading stdin or `--file`, parsing text JSON, printing text JSON, and adapting compatibility flags before delegating to `run.nu` for the actual work.
+The boundary split is strict: `run.nu` accepts and returns native Nushell data. It must not read stdin, write stdout, or expose command-boundary text JSON flags. The executable `run` owns process concerns: parsing stdin text JSON when the command logically takes input, ignoring stdin when it does not, printing text JSON or plain text, and delegating to `run.nu` for the actual work.
+
+Do not add stdin/file-switch compatibility flags for command input. Data comes in through stdin for the process surface and through the pipeline for the Nu surface; data comes out through stdout for the process surface and as native values for the Nu surface.
 
 When a command is not Nu-native, omit `run.nu` unless there is a real native Nu surface. Do not add `main.nu`; that entrypoint shape is retired.
 

@@ -14,15 +14,7 @@ def env-map [] {
   }
 }
 
-export def --wrapped main [...args: string, --stdin, --text] {
+export def --wrapped main [...args: string] {
   let argv = ($args | each {|arg| $arg | into string })
-  let input = $in
-  let out = with-env (env-map) {
-    if $stdin {
-      $input | to json | run-external (run-path) ...$argv
-    } else {
-      run-external (run-path) ...$argv
-    }
-  }
-  if $text { $out } else { $out | from json }
+  with-env (env-map) { run-external (run-path) ...$argv } | from json
 }

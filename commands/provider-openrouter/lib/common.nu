@@ -1,11 +1,3 @@
-export def read-input [file: string] {
-  if $file == "-" { ^cat | from json } else { open $file }
-}
-
-export def write-json [] {
-  $in | to json --indent 2 | print
-}
-
 export def getenv [name: string] {
   $env | get -o $name | default ""
 }

@@ -14,15 +14,20 @@ def env-map [] {
   }
 }
 
-export def --wrapped main [...args: string, --stdin, --text] {
+def text-command [command: string] {
+  $command in [resolve path state trace]
+}
+
+export def --wrapped main [...args: string] {
   let argv = ($args | each {|arg| $arg | into string })
+  let command = ($argv | first | default "")
   let input = $in
   let out = with-env (env-map) {
-    if $stdin {
+    if $command == "save" {
       $input | to json | run-external (run-path) ...$argv
     } else {
       run-external (run-path) ...$argv
     }
   }
-  if $text { $out } else { $out | from json }
+  if (text-command $command) { $out } else { $out | from json }
 }

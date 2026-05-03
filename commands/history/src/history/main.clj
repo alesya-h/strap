@@ -1,16 +1,12 @@
 (ns history.main
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
-            [cheshire.core :as json]
             [clojure.string :as str]))
 
 (defn usage []
   (binding [*out* *err*]
     (println "Usage: strap history <init|root|status|log|diff|snapshot|new|restore|ui|jjui> [args]"))
   (System/exit 2))
-
-(defn json-out [value]
-  (println (json/generate-string value {:pretty true})))
 
 (defn session []
   (let [root (System/getenv "STRAP_SESSION")]
@@ -51,7 +47,7 @@
         message (or (:value m1) (:value m2) (str/join " " values) "strap state snapshot")]
     (run-jj root ["describe" "-m" message] true)
     (run-jj root ["new"] true)
-    (json-out {:ok true :work root :message message})))
+    (println (str "history snapshot: " message))))
 
 (defn init []
   (let [root (session)
@@ -62,7 +58,7 @@
     (when (or changed initialized)
       (run-jj root ["describe" "-m" "history init"] true)
       (run-jj root ["new"] true))
-    (json-out {:ok true :work root :jj (str (fs/path root ".jj"))})))
+    (println (str "history initialized: " root))))
 
 (defn run-ui [root args]
   (let [result (apply process/shell {:out :inherit :err :inherit :continue true :dir root} "jjui" args)]

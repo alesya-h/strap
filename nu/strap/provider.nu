@@ -9,7 +9,7 @@ def maybe-flag [name: string, value: any] {
 }
 
 def provider-filter [provider: string, command: string, model: string, tools: string] {
-  $in | run ...[$provider $command "--model" $model "--tools" $tools] --stdin
+  $in | run ...[$provider $command "--model" $model "--tools" $tools]
 }
 
 export def list [] { run ...[list] }
