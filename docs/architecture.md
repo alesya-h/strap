@@ -148,7 +148,9 @@ Provider request payloads are compiled projections. Provider continuation IDs or
 
 Nu is the preferred implementation surface for local structured data plumbing. The grouped module is `nu/strap/mod.nu`, imported as `use '/path/to/strap/nu/strap'` or `use strap` when `strap nu lib-dir` is in `NU_LIB_DIRS`, and exposes commands such as `strap state init`, `strap session new`, `strap agents list`, and `strap skills list`.
 
-Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. `run.nu` is encouraged but optional. When present it is the Nu entrypoint, exports `main`, and may expose richer pipeline and closure behavior. When absent, Nu callers can fall back to process `run`, usually with explicit `to json`/`from json` at the boundary.
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. For Nu-native capsules, `run.nu` is the only Nu entrypoint, exports `main`, and may expose richer pipeline and closure behavior. Additional `.nu` files are command-local modules for `run.nu`, not alternate entrypoints.
+
+`run.nu` stays native: it accepts and returns Nushell values, and does not read stdin, write stdout, or encode/decode command-boundary text JSON. The executable `run` owns stdin/stdout, `--file`, text JSON parsing/printing, and process compatibility shims before delegating to `run.nu`.
 
 The boundary is still routed through the top-level surface: callers do not import another capsule's private files directly. Closure-shaped operations, such as `with-events`, may accept native Nu closures, explicit external process filters after `--`, or plain command words that default to `strap <command> ...`. Process filters receive JSON on stdin and emit JSON on stdout.
 

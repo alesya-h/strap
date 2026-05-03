@@ -83,5 +83,5 @@ def public-spec [tool: record] {
 export def main [command?: string = "list", --group: string = "all", --json, --internal] {
   if $command != "list" { usage }
   let tools = (load-tools $group)
-  if $internal { $tools | to json } else { $tools | each {|tool| public-spec $tool } | to json }
+  if $internal { $tools } else { $tools | each {|tool| public-spec $tool } }
 }

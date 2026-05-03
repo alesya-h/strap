@@ -1,14 +1,14 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env nu
 
-args=()
-while [ "$#" -gt 0 ]; do
-  case "$1" in
-    --finalize)
-      if [ "${2:-true}" = "false" ]; then args+=(--no-finalize); fi
-      shift 2 ;;
-    *) args+=("$1"); shift ;;
-  esac
-done
+use ./run.nu
 
-exec nu "$STRAP_CMD_DIR/main.nu" "${args[@]}"
+def read-state [file: string] {
+  if $file == "-" { open --raw /dev/stdin | from json } else { open $file }
+}
+
+def main [--model: string = "current", --tools: string = "all", --max-turns: int = 8, --no-finalize, --finalize: any = "true", --max-tool-calls: int = 64, --file: string = "-"] {
+  read-state $file
+  | run --model $model --tools $tools --max-turns $max_turns --no-finalize=$no_finalize --finalize $finalize --max-tool-calls $max_tool_calls
+  | to json --indent 2
+  | print
+}

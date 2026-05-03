@@ -1,7 +1,6 @@
 #!/usr/bin/env nu
 
 def strap-bin [] { $env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap) }
-def read-input [file: string] { if $file == "-" { $in } else { open $file } }
 
 def complete-once [model: string, tools: string] {
   $in | to json | run-external (strap-bin) llm complete "--model" $model "--tools" $tools | from json
@@ -70,6 +69,6 @@ def run-loop [model: string, tools: string, max_turns: int, finalize: bool, max_
   $state
 }
 
-export def main [--model: string = "current", --tools: string = "all", --max-turns: int = 8, --no-finalize, --finalize: string = "true", --max-tool-calls: int = 64, --file: string = "-"] {
-  $in | read-input $file | run-loop $model $tools $max_turns ((not $no_finalize) and ($finalize != "false")) $max_tool_calls
+export def main [--model: string = "current", --tools: string = "all", --max-turns: int = 8, --no-finalize, --finalize: any = "true", --max-tool-calls: int = 64] {
+  $in | run-loop $model $tools $max_turns ((not $no_finalize) and (($finalize | into string) != "false")) $max_tool_calls
 }

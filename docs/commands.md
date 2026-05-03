@@ -217,7 +217,11 @@ For a development shell:
 NU_LIB_DIRS="$(strap nu lib-dir)" nu
 ```
 
-Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. `run.nu` is encouraged but optional. When present, it exports `main` and may support richer pipeline values and closures. When absent, Nu callers can fall back to process `run`, usually with explicit `to json`/`from json`.
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. For Nu-native commands, `run.nu` is the only Nu entrypoint and exports `main`. Additional `.nu` files may exist only as modules used by `run.nu`.
+
+The boundary split is strict: `run.nu` accepts and returns native Nushell data. It must not read stdin, write stdout, or perform command-boundary text JSON encoding/decoding. The executable `run` owns process concerns such as reading stdin or `--file`, parsing text JSON, printing text JSON, and adapting compatibility flags before delegating to `run.nu` for the actual work.
+
+When a command is not Nu-native, omit `run.nu` unless there is a real native Nu surface. Do not add `main.nu`; that entrypoint shape is retired.
 
 Closure-shaped operations are lenses over top-level events: they return full state with the selected events replaced. Nu callers can pass closures. Process callers can provide an external JSON filter after `--`, or plain command words that default to `strap <command> ...`.
 

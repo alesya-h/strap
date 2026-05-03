@@ -126,7 +126,7 @@ For development shells, expose it with:
 NU_LIB_DIRS="$(strap nu lib-dir)" nu
 ```
 
-The Nu surface routes through command-local `run.nu` modules. Closure-shaped state helpers are available through the grouped `strap` module and behave as lenses over top-level events:
+The Nu surface routes through command-local `run.nu` modules. For Nu-native commands, `run.nu` is the only Nu entrypoint and stays native: process text JSON and stdin/stdout handling belong in executable `run`. Closure-shaped state helpers are available through the grouped `strap` module and behave as lenses over top-level events:
 
 ```nu
 use '/path/to/strap/nu/strap'

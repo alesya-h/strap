@@ -59,6 +59,7 @@ def check-no-retired-surfaces [] {
     nu/strap.nu
   ]
   if not (glob --no-dir "commands/run-calls/src/**/*.js" | is-empty) { fail "run-calls is a Babashka capsule; JS files must not exist there." }
+  if not (glob --no-dir "commands/*/main.nu" | is-empty) { fail "Nu command capsules must use run.nu as the only Nu entrypoint; main.nu is retired." }
   require-missing (files-for ["commands/run-calls/src/run_calls/*_tools.clj" "commands/run-calls/src/run_calls/jsmcp.clj" "commands/run-calls/src/run_calls/registry.clj" "commands/run-calls/src/run_calls/scripts.clj"])
   if not (glob --no-dir "tools/*/src/run_calls/*" | is-empty) { fail "Tool-local code should use tool.* namespaces, not run_calls paths." }
   for file in (glob "tools/*") { if (($file | path type) == "file") { fail $"Tool artifacts must be grouped directories, not flat files: ($file)" } }
@@ -71,6 +72,8 @@ def check-content-guards [] {
   rg-forbid "Shared #strap/tools imports are retired; use strap tools/run-calls boundaries." "#strap/tools" ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "!.git/**"]
   rg-forbid "Root npm/package entrypoints are retired; use strap project-* commands." "npm test|npm run|package[.]json" ["README.md" "docs" "--glob" "*.md"]
   rg-forbid "Non-MCP Node surfaces are retired; use Nu/Babashka command boundaries instead." '#strap/(core|providers|jsmcp|loop)|\^node' ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "*.nu" "--glob" "*.clj" "--glob" "*.sh" "--glob" "!.git/**" "--glob" "!subprojects/mcp/**"]
+  rg-forbid "Nu command run scripts must delegate to run.nu, not main.nu." 'main[.]nu' [commands --glob run]
+  rg-forbid "run.nu must not read/write process stdin or stdout." 'open --raw /dev/stdin|\^cat|\bprint\b' [commands --glob run.nu]
 }
 
 def check-command-syntax [] {

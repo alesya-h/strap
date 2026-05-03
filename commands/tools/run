@@ -1,2 +1,7 @@
-#!/usr/bin/env bash
-exec nu "$STRAP_CMD_DIR/main.nu" "$@"
+#!/usr/bin/env nu
+
+use ./run.nu
+
+def main [command?: string = "list", --group: string = "all", --json, --internal] {
+  run ($command | default "list") --group $group --json=$json --internal=$internal | to json --indent 2 | print
+}
