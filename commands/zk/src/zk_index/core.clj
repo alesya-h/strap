@@ -1,4 +1,4 @@
-(ns zk.index
+(ns zk-index.core
   (:require [babashka.fs :as fs]
             [cheshire.core :as json]
             [clojure.java.shell :as sh]

@@ -1,11 +1,13 @@
-(in-ns 'zk.index)
+(ns zk-index.schema
+  (:require [babashka.fs :as fs]
+            [cheshire.core :as json]
+            [clojure.string :as str]
+            [zk-index.core :as core]))
 
-(defn init-db [args]
-  (let [{:keys [opts]} (parse-args args)
-        db (db-path (:db opts))
-        dimensions (parse-long (str (or (:dimensions opts) "384")))]
+(defn init-db* [db dimensions]
+  (let [db (core/db-path db)]
     (fs/create-dirs (fs/parent db))
-    (sqlite-exec db (sql-template "
+    (core/sqlite-exec db (core/sql-template "
 PRAGMA journal_mode = WAL;
 CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT NOT NULL);
 INSERT INTO meta(key, value) VALUES ('schema_version', '1') ON CONFLICT(key) DO NOTHING;
@@ -19,15 +21,20 @@ CREATE TABLE IF NOT EXISTS aliases(note_id TEXT NOT NULL, alias TEXT NOT NULL, P
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(id UNINDEXED, title, body, tokenize = 'porter unicode61');
 CREATE VIRTUAL TABLE IF NOT EXISTS vec_chunks USING vec0(embedding float[__DIMENSIONS__]);
 " {:DIMENSIONS dimensions}))
-    (json-out {:ok true
-               :db db
-               :dimensions dimensions
-               :sqlite_vec_load (or (env "STRAP_ZK_SQLITE_VEC_LOAD") "vec0")})))
+    {:ok true
+     :db db
+     :dimensions dimensions
+     :sqlite_vec_load (or (core/env "STRAP_ZK_SQLITE_VEC_LOAD") "vec0")}))
+
+(defn init-db [args]
+  (let [{:keys [opts]} (core/parse-args args)
+        dimensions (parse-long (str (or (:dimensions opts) "384")))]
+    (core/json-out (init-db* (:db opts) dimensions))))
 
 (defn ensure-db [db dimensions]
   (if-not (fs/exists? db)
-    (binding [*out* (java.io.StringWriter.)] (init-db ["--db" db "--dimensions" (str dimensions)]))
-    (let [rows (sqlite-json db "SELECT value FROM meta WHERE key = 'dimensions';")]
+    (init-db* db dimensions)
+    (let [rows (core/sqlite-json db "SELECT value FROM meta WHERE key = 'dimensions';")]
       (when (empty? rows) (throw (ex-info (str "Zettelkasten DB missing dimensions metadata: " db) {})))
       (let [existing (parse-long (str (:value (first rows))))]
         (when-not (= existing dimensions)
@@ -36,19 +43,19 @@ CREATE VIRTUAL TABLE IF NOT EXISTS vec_chunks USING vec0(embedding float[__DIMEN
 (defn tag-sql [id tags]
   (str/join "\n"
             (for [tag tags]
-              (sql-template "INSERT INTO tags(note_id, tag) VALUES (__ID__, __TAG__);"
-                            {:ID (sql-string id) :TAG (sql-string tag)}))))
+              (core/sql-template "INSERT INTO tags(note_id, tag) VALUES (__ID__, __TAG__);"
+                                 {:ID (core/sql-string id) :TAG (core/sql-string tag)}))))
 
 (defn alias-sql [id aliases]
   (str/join "\n"
             (for [alias aliases]
-              (sql-template "INSERT INTO aliases(note_id, alias) VALUES (__ID__, __ALIAS__);"
-                            {:ID (sql-string id) :ALIAS (sql-string alias)}))))
+              (core/sql-template "INSERT INTO aliases(note_id, alias) VALUES (__ID__, __ALIAS__);"
+                                 {:ID (core/sql-string id) :ALIAS (core/sql-string alias)}))))
 
 (defn upsert-note [db id title body author tags aliases embedding]
-  (let [created (now)
+  (let [created (core/now)
         text (str title "\n\n" body)
-        script (sql-template "
+        script (core/sql-template "
 BEGIN IMMEDIATE;
 INSERT INTO notes(id, title, body, created_at, updated_at, author_actor, visibility, deleted_at)
 VALUES (__ID__, __TITLE__, __BODY__, __CREATED__, __CREATED__, __AUTHOR__, 'shared', NULL)
@@ -67,23 +74,23 @@ INSERT INTO vec_chunks(rowid, embedding) VALUES (last_insert_rowid(), __VECTOR__
 __TAGS__
 __ALIASES__
 COMMIT;
-" {:ID (sql-string id)
-   :TITLE (sql-string title)
-   :BODY (sql-string body)
-   :CREATED (sql-string created)
-   :AUTHOR (sql-string author)
-   :CHUNK (sql-string (chunk-id id))
-   :TEXT (sql-string text)
-   :MODEL (sql-string (:model embedding))
+" {:ID (core/sql-string id)
+   :TITLE (core/sql-string title)
+   :BODY (core/sql-string body)
+   :CREATED (core/sql-string created)
+   :AUTHOR (core/sql-string author)
+   :CHUNK (core/sql-string (core/chunk-id id))
+   :TEXT (core/sql-string text)
+   :MODEL (core/sql-string (:model embedding))
    :DIMENSIONS (:dimensions embedding)
-   :VECTOR (sql-string (json/generate-string (:vector embedding)))
+   :VECTOR (core/sql-string (json/generate-string (:vector embedding)))
    :TAGS (tag-sql id tags)
    :ALIASES (alias-sql id aliases)})]
-    (sqlite-exec db script)))
+    (core/sqlite-exec db script)))
 
 (defn note-row [db id]
-  (first (sqlite-json db (sql-template "
+  (first (core/sqlite-json db (core/sql-template "
 SELECT id, title, body, created_at, updated_at, author_actor, visibility
 FROM notes
 WHERE id = __ID__ AND deleted_at IS NULL;
-" {:ID (sql-string id)}))))
+" {:ID (core/sql-string id)}))))

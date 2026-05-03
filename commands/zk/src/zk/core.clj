@@ -1,4 +1,4 @@
-(ns zk.main
+(ns zk.core
   (:require [babashka.fs :as fs]
             [cheshire.core :as json]
             [clojure.java.io :as io]

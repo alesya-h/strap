@@ -79,8 +79,9 @@
           "description": "tmux subcommand, for example list-sessions"
         },
         "arguments": {
-          "type": "string",
-          "description": "Space-separated arguments"
+          "type": "array",
+          "description": "Additional tmux argv entries, without shell splitting.",
+          "items": {"type": "string"}
         },
         "timeout_ms": {
           "type": "integer",

@@ -1,11 +1,12 @@
 #!/usr/bin/env bb
 (require '[babashka.fs :as fs])
+(require '[babashka.classpath :as cp])
 
 (def cmd-dir
   (or (System/getenv "STRAP_CMD_DIR")
       (str (fs/parent (fs/parent *file*)))))
 
-(doseq [file ["core.clj" "schema.clj" "crud.clj" "search.clj" "main.clj"]]
-  (load-file (str (fs/path cmd-dir "src" "zk_index" file))))
+(cp/add-classpath (str (fs/path cmd-dir "src")))
+(require 'zk-index.main)
 
-(apply (resolve 'zk.index/-main) *command-line-args*)
+(apply (resolve 'zk-index.main/-main) *command-line-args*)

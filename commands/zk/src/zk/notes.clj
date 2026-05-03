@@ -1,4 +1,9 @@
-(in-ns 'zk.main)
+(ns zk.notes
+  (:require [babashka.fs :as fs]
+            [cheshire.core :as json]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
+            [zk.core :as core]))
 
 (defn markdown-files [dir]
   (let [root (io/file dir)]
@@ -36,7 +41,7 @@
   (spit file (str "---\n" (format-frontmatter meta) "---\n\n" (str/trim (or body "")) "\n")))
 
 (defn read-layer [layer]
-  (for [file (markdown-files (zettel-dir layer))
+  (for [file (markdown-files (core/zettel-dir layer))
         :let [parsed (parse-note (slurp file)) id (get-in parsed [:meta :id])]
         :when id]
     (assoc parsed :file file :layer layer)))
@@ -70,23 +75,23 @@
      (->> (vals @by-id) (filter #(or (= scope "all") (= (:layer %) scope))) (map #(enrich-note project-by-id %))))))
 
 (defn note-ref [note]
-  {:id (get-in note [:meta :id]) :title (get-in note [:meta :title]) :file (basename (:file note)) :layer (:layer note) :status (:status note)})
+  {:id (get-in note [:meta :id]) :title (get-in note [:meta :title]) :file (core/basename (:file note)) :layer (:layer note) :status (:status note)})
 
 (defn path-info [note]
   {:path (:file note) :project_path (:project-file note)})
 
 (defn match-notes [id notes]
-  (let [needle (str/trim (str id)) lower (str/lower-case needle) slugged (slug needle)]
+  (let [needle (str/trim (str id)) lower (str/lower-case needle) slugged (core/slug needle)]
     (filter
       (fn [note]
         (let [title (str (get-in note [:meta :title]))]
           (or (= (get-in note [:meta :id]) needle) (= title needle) (= (str/lower-case title) lower)
-              (= (slug title) slugged) (= (basename (:file note)) needle) (= (basename-no-ext (:file note)) needle)
-              (some #(or (= % needle) (= (str/lower-case (str %)) lower) (= (slug %) slugged)) (parse-list (get-in note [:meta :aliases]))))))
+              (= (core/slug title) slugged) (= (core/basename (:file note)) needle) (= (core/basename-no-ext (:file note)) needle)
+              (some #(or (= % needle) (= (str/lower-case (str %)) lower) (= (core/slug %) slugged)) (core/parse-list (get-in note [:meta :aliases]))))))
       notes)))
 
 (defn find-one [id notes label]
-  (when (or (nil? id) (empty? (str id))) (usage))
+  (when (or (nil? id) (empty? (str id))) (core/usage))
   (let [matches (vec (match-notes id notes))]
     (case (count matches) 0 (throw (ex-info (str label " not found: " id) {})) 1 (first matches)
           (throw (ex-info (str "Ambiguous " label ": " id) {:matches (map note-ref matches)})))))
@@ -96,8 +101,8 @@
   (let [matches (vec (match-notes id (filter #(= layer (:layer %)) notes)))]
     (case (count matches) 0 nil 1 (first matches) (throw (ex-info (str "Ambiguous " layer " note: " id) {})))))
 
-(defn user-file-for [note] (str (fs/path (zettel-dir "user") (basename (:file note)))))
-(defn project-file-for [note] (str (fs/path (zettel-dir "project") (basename (:file note)))))
+(defn user-file-for [note] (str (fs/path (core/zettel-dir "user") (core/basename (:file note)))))
+(defn project-file-for [note] (str (fs/path (core/zettel-dir "project") (core/basename (:file note)))))
 (defn ensure-user-overlay [note]
   (if (= "user" (:layer note)) note
       (let [target (user-file-for note)]

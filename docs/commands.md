@@ -52,8 +52,12 @@ A capsule command must not use:
 - Repo-local implementation imports from another command's private source tree.
 - Direct execution of repo-local JS implementation entrypoints outside the owning command capsule.
 - Another command's private files except through `strap <command>` or `strap inner <command> <helper>`.
+- Ordered `load-file` plus `in-ns` to spread one namespace across files. Babashka/Clojure commands with multiple files should add the command-local `src` directory to the classpath and use normal `ns`/`require` forms.
+- Captured stdout as an internal function call. Split pure command-local functions from CLI printers, and call the pure function internally.
 
 `strap project-check` enforces the import/direct-JS parts of this rule for project and user command overlays, excluding the `project-*` validation commands themselves.
+
+If two commands need the same behavior, prefer a small JSON-in/JSON-out command API over a shared library or copy-pasted implementation. Root discovery, model resolution, tool discovery, and similar project primitives should have one command contract that other commands call through `strap <command>`, not private source imports and not parallel reimplementations.
 
 File size is part of the capsule contract. A source file, `run` script, or helper file has a hard cap of 150 lines; prefer smaller files, usually 50-100 lines. If a file approaches the cap, split it into command-local modules under that command directory instead of adding more branches to one large script. JSON data files are exempt from this line cap because readability matters more than vertical compactness there. `strap project-check` enforces the cap for command capsules; the temporary exceptions in `.strap/config/line-cap-exceptions.txt` are existing refactor debt and should shrink over time, not grow.
 

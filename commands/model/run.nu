@@ -53,6 +53,7 @@ def normalize-model [config: record, file: string, fallback_name: string] {
   | upsert base_url ($config.base_url? | default (default-base-url $provider $api))
   | upsert headers ($config.headers? | default {})
   | upsert auth ($config.auth? | default (default-auth $provider))
+  | upsert parameters ($config.parameters? | default {})
 }
 
 def public-model [config: record, include_paths: bool] {

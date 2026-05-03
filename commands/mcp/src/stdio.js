@@ -1,8 +1,6 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 
-const LOCAL_GROUPS = ["fs", "process", "web", "kagi", "agent", "json_echo", "zk"];
-
 function encodeMessage(message) {
   const json = JSON.stringify(message);
   return `Content-Length: ${Buffer.byteLength(json, "utf8")}\r\n\r\n${json}`;
@@ -76,25 +74,34 @@ async function callTool(group, name, input) {
   if (!item) throw new Error(`Unknown tool: ${name}`);
   const state = oneCallState(name, input);
   const next = await runStrapJson(["run-calls", "--tools", item.group], state);
-  const call = next.root.children[0].calls[0];
+  const call = findCallResult(next, name);
   if (!call.ok) throw new Error(call.error || `Tool failed: ${name}`);
   return call.output;
 }
 
 async function toolsWithGroups(group) {
-  const groups = expandGroups(group);
-  const nested = await Promise.all(groups.map(async (item) => {
-    const tools = await runStrapJson(["tools", "list", "--group", item, "--json"]);
-    return tools.map((tool) => ({ group: item, tool }));
-  }));
-  return nested.flat();
+  const tools = await runStrapJson(["tools", "list", "--group", String(group || "all"), "--json", "--internal"]);
+  return tools.map((tool) => ({ group: tool.group, tool: publicTool(tool) }));
 }
 
-function expandGroups(group) {
-  return String(group || "all")
-    .split(",")
-    .flatMap((item) => item.trim() === "all" ? LOCAL_GROUPS : [item.trim()])
-    .filter(Boolean);
+function publicTool(tool) {
+  return {
+    name: tool.name,
+    description: tool.description || "",
+    inputSchema: tool.inputSchema || { type: "object", properties: {}, additionalProperties: true },
+  };
+}
+
+function findCallResult(state, toolName) {
+  const stack = [state?.root].filter(Boolean);
+  while (stack.length > 0) {
+    const node = stack.pop();
+    for (const call of node.calls || []) {
+      if (call.tool === toolName) return call;
+    }
+    for (const child of node.children || []) stack.push(child);
+  }
+  throw new Error(`No tool result found for: ${toolName}`);
 }
 
 function oneCallState(tool, input) {

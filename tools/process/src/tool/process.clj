@@ -51,7 +51,7 @@
 
 (defn tmux-args [args]
   (into [(str (or (:subcommand args) ""))]
-        (remove str/blank? (str/split (str (or (:arguments args) "")) #" "))))
+        (map str (or (:arguments args) []))))
 
 (defn tmux [args _]
   (let [result (proc "tmux" (tmux-args args) {})]

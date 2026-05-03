@@ -1,32 +1,40 @@
-(in-ns 'zk.main)
+(ns zk.main
+  (:require [babashka.fs :as fs]
+            [cheshire.core :as json]
+            [clojure.string :as str]
+            [zk.core :as core]
+            [zk.crud :as crud]
+            [zk.links :as links]
+            [zk.notes :as notes]
+            [zk.overlay :as overlay]))
 
 (defn reindex-notes [& [{:keys [scope db]}]]
-  (let [db-path (or (not-empty db) (default-db-path))]
+  (let [db-path (or (not-empty db) (core/default-db-path))]
     (fs/create-dirs (fs/parent db-path))
     (doseq [suffix ["" "-shm" "-wal"]] (fs/delete-if-exists (str db-path suffix)))
-    (let [notes (visible-notes (or scope "all"))]
+    (let [notes (notes/visible-notes (or scope "all"))]
       (doseq [note notes]
-        (call-index ["create"
+        (core/call-index ["create"
                      "--id" (get-in note [:meta :id])
                      "--title" (get-in note [:meta :title])
                      "--body" (:body note)
-                     "--tags" (json/generate-string (parse-list (get-in note [:meta :tags])))
-                     "--aliases" (json/generate-string (parse-list (get-in note [:meta :aliases])))
+                     "--tags" (json/generate-string (core/parse-list (get-in note [:meta :tags])))
+                     "--aliases" (json/generate-string (core/parse-list (get-in note [:meta :aliases])))
                      "--author" (or (get-in note [:meta :author]) "agent")
                      "--db" db-path]))
       {:ok true :reindexed (count notes) :db db-path})))
 
 (defn reindex-command [args]
-  (let [{:keys [opts]} (parse-args args)]
-    (json-out (reindex-notes {:scope (or (:scope opts) "all") :db (:db opts)}))))
+  (let [{:keys [opts]} (core/parse-args args)]
+    (core/json-out (reindex-notes {:scope (or (:scope opts) "all") :db (:db opts)}))))
 
 (defn index-search [command args]
-  (let [{:keys [opts pos]} (parse-args args)
+  (let [{:keys [opts pos]} (core/parse-args args)
         query (or (:query opts) (str/join " " pos))
         limit (or (:limit opts) "10")]
-    (when (empty? query) (usage))
+    (when (empty? query) (core/usage))
     (let [{:keys [db]} (reindex-notes {:scope (or (:scope opts) "all") :db (:db opts)})]
-      (print (call-index [command query "--limit" limit "--db" db])))))
+      (print (core/call-index [command query "--limit" limit "--db" db])))))
 
 (defn last-text-event [state]
   (let [children (get-in state [:root :children] [])
@@ -34,35 +42,35 @@
     (or (last assistant) (last (filter #(and (= "event" (:type %)) (not-empty (:text %))) children)))))
 
 (defn remember-state [args]
-  (let [{:keys [opts]} (parse-args args)
-        raw (if-let [file (:file opts)] (slurp file) (read-stdin-if-any))
-        state (parse-json raw)
+  (let [{:keys [opts]} (core/parse-args args)
+        raw (if-let [file (:file opts)] (slurp file) (core/read-stdin-if-any))
+        state (core/parse-json raw)
         event (last-text-event state)]
     (when-not event (throw (ex-info "No text event found in state" {})))
     (let [first-line (first (str/split-lines (:text event)))
           title (or (not-empty (:title opts)) (subs first-line 0 (min 80 (count first-line))))
-          id (note-id)
-          file (str (fs/path (zettel-dir "user") (str (slug title) "-" (subs id 3 11) ".md")))
-          timestamp (now)
+          id (core/note-id)
+          file (str (fs/path (core/zettel-dir "user") (str (core/slug title) "-" (subs id 3 11) ".md")))
+          timestamp (core/now)
           meta {:id id
                 :title title
-                :tags (parse-list (or (:tags opts) "session,summary"))
+                :tags (core/parse-list (or (:tags opts) "session,summary"))
                 :aliases []
                 :author (or (:author opts) "agent")
                 :scope "user"
                 :created_at timestamp
                 :updated_at timestamp}]
-      (write-note file meta (:text event))
-      (let [visible (visible-notes)] (json-out {:ok true :note (decorate-note (find-visible id visible) visible)})))))
+      (notes/write-note file meta (:text event))
+      (let [visible (notes/visible-notes)] (core/json-out {:ok true :note (links/decorate-note (notes/find-visible id visible) visible)})))))
 
 (defn invoke-self [args]
-  (run-strap-out (concat ["zk"] args)))
+  (core/run-strap-out (concat ["zk"] args)))
 
 (defn maybe [condition values]
   (if condition values []))
 
 (defn tool [_args]
-  (let [req (parse-json (read-stdin-if-any))
+  (let [req (core/parse-json (core/read-stdin-if-any))
         action (or (:action req) "search_hybrid")]
     (print
       (case action
@@ -103,16 +111,16 @@
 (defn -main [& args]
   (try
     (let [command (first args) rest-args (vec (rest args))]
-      (cond (nil? command) (usage) (= command "--help") (usage)
-            (contains? index-commands command) (print (call-index (cons (get index-commands command) rest-args)))
+      (cond (nil? command) (core/usage) (= command "--help") (core/usage)
+            (contains? core/index-commands command) (print (core/call-index (cons (get core/index-commands command) rest-args)))
             :else (case command
-                    "create" (create-note rest-args) "list" (list-notes rest-args) "get" (get-note rest-args)
-                    "update" (update-note rest-args) "delete" (delete-note rest-args) "tags" (list-tags rest-args)
-                    "search" (search-notes rest-args) "search-text" (index-search "search-text" rest-args)
+                    "create" (crud/create-note rest-args) "list" (crud/list-notes rest-args) "get" (crud/get-note rest-args)
+                    "update" (crud/update-note rest-args) "delete" (crud/delete-note rest-args) "tags" (crud/list-tags rest-args)
+                    "search" (crud/search-notes rest-args) "search-text" (index-search "search-text" rest-args)
                     "search-vector" (index-search "search-vector" rest-args) "search-hybrid" (index-search "search-hybrid" rest-args)
-                    "links" (show-links rest-args) "backlinks" (show-backlinks rest-args) "status" (show-status rest-args)
-                    "workon" (workon-note rest-args) "promote" (promote-note rest-args) "discard" (discard-note rest-args)
-                    "reindex" (reindex-command rest-args) "remember-state" (remember-state rest-args) "tool" (tool rest-args) (usage))))
+                    "links" (crud/show-links rest-args) "backlinks" (crud/show-backlinks rest-args) "status" (crud/show-status rest-args)
+                    "workon" (overlay/workon-note rest-args) "promote" (overlay/promote-note rest-args) "discard" (overlay/discard-note rest-args)
+                    "reindex" (reindex-command rest-args) "remember-state" (remember-state rest-args) "tool" (tool rest-args) (core/usage))))
     (catch Throwable error
       (binding [*out* *err*] (println (or (ex-message error) (.getMessage error))))
       (System/exit 1))))

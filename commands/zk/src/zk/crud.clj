@@ -1,75 +1,80 @@
-(in-ns 'zk.main)
+(ns zk.crud
+  (:require [babashka.fs :as fs]
+            [clojure.string :as str]
+            [zk.core :as core]
+            [zk.links :as links]
+            [zk.notes :as notes]))
 
 (defn create-note [args]
-  (let [{:keys [opts]} (parse-args args) scope (or (:scope opts) "user") title (:title opts)
-        body (or (:body opts) (read-stdin-if-any)) id (or (:id opts) (note-id))]
+  (let [{:keys [opts]} (core/parse-args args) scope (or (:scope opts) "user") title (:title opts)
+        body (or (:body opts) (core/read-stdin-if-any)) id (or (:id opts) (core/note-id))]
     (when (empty? (str title)) (throw (ex-info "Usage: strap zk create --title <title> [--body body] [--scope user|project]" {})))
-    (let [file (str (fs/path (zettel-dir scope) (str (slug title) "-" (subs id 3 11) ".md")))
-          timestamp (now)
-          meta {:id id :title title :tags (parse-list (:tags opts)) :aliases (parse-list (:aliases opts))
+    (let [file (str (fs/path (core/zettel-dir scope) (str (core/slug title) "-" (subs id 3 11) ".md")))
+          timestamp (core/now)
+          meta {:id id :title title :tags (core/parse-list (:tags opts)) :aliases (core/parse-list (:aliases opts))
                 :author (or (:author opts) "agent") :scope scope :created_at timestamp :updated_at timestamp}]
-      (write-note file meta body)
-      (let [visible (visible-notes) note (find-visible id visible)]
-        (json-out {:ok true :note (decorate-note note visible {:include-paths (:paths opts)})})))))
+      (notes/write-note file meta body)
+      (let [visible (notes/visible-notes) note (notes/find-visible id visible)]
+        (core/json-out {:ok true :note (links/decorate-note note visible {:include-paths (:paths opts)})})))))
 
 (defn list-notes [args]
-  (let [{:keys [opts]} (parse-args args) scope (or (:scope opts) "all") tag (:tag opts)
-        limit (parse-long (or (:limit opts) "50")) visible (visible-notes scope)
-        notes (->> visible (map #(decorate-note % visible {:include-paths (:paths opts)}))
+  (let [{:keys [opts]} (core/parse-args args) scope (or (:scope opts) "all") tag (:tag opts)
+        limit (parse-long (or (:limit opts) "50")) visible (notes/visible-notes scope)
+        notes (->> visible (map #(links/decorate-note % visible {:include-paths (:paths opts)}))
                    (filter #(or (empty? (str tag)) (some #{tag} (:tags %))))
                    (sort-by #(or (:updated_at %) "") compare) reverse (take limit))]
-    (json-out notes)))
+    (core/json-out notes)))
 
 (defn get-note [args]
-  (let [{:keys [opts pos]} (parse-args args) visible (visible-notes) note (find-visible (or (first pos) (:id opts)) visible)]
-    (json-out (decorate-note note visible {:include-body true :include-paths (:paths opts)}))))
+  (let [{:keys [opts pos]} (core/parse-args args) visible (notes/visible-notes) note (notes/find-visible (or (first pos) (:id opts)) visible)]
+    (core/json-out (links/decorate-note note visible {:include-body true :include-paths (:paths opts)}))))
 
 (defn update-note [args]
-  (let [{:keys [opts pos]} (parse-args args) visible (visible-notes)
-        current (find-visible (or (first pos) (:id opts)) visible) editable (ensure-user-overlay current)
+  (let [{:keys [opts pos]} (core/parse-args args) visible (notes/visible-notes)
+        current (notes/find-visible (or (first pos) (:id opts)) visible) editable (notes/ensure-user-overlay current)
         meta (merge (:meta editable) {:title (or (:title opts) (get-in editable [:meta :title]) "")
-                                      :author (or (:author opts) (get-in editable [:meta :author]) "agent")
-                                      :scope "user" :updated_at (now)})
-        meta (if (contains? opts :tags) (assoc meta :tags (parse-list (:tags opts))) meta)
-        meta (if (contains? opts :aliases) (assoc meta :aliases (parse-list (:aliases opts))) meta)
+                                       :author (or (:author opts) (get-in editable [:meta :author]) "agent")
+                                       :scope "user" :updated_at (core/now)})
+        meta (if (contains? opts :tags) (assoc meta :tags (core/parse-list (:tags opts))) meta)
+        meta (if (contains? opts :aliases) (assoc meta :aliases (core/parse-list (:aliases opts))) meta)
         meta (dissoc meta :deleted) body (or (:body opts) (:body editable) "")]
-    (write-note (:file editable) meta body)
-    (let [next-visible (visible-notes) updated (find-visible (:id meta) next-visible)]
-      (json-out {:ok true :note (decorate-note updated next-visible {:include-paths (:paths opts)})}))))
+    (notes/write-note (:file editable) meta body)
+    (let [next-visible (notes/visible-notes) updated (notes/find-visible (:id meta) next-visible)]
+      (core/json-out {:ok true :note (links/decorate-note updated next-visible {:include-paths (:paths opts)})}))))
 
 (defn delete-note [args]
-  (let [{:keys [opts pos]} (parse-args args) visible (visible-notes) current (find-visible (or (first pos) (:id opts)) visible)]
+  (let [{:keys [opts pos]} (core/parse-args args) visible (notes/visible-notes) current (notes/find-visible (or (first pos) (:id opts)) visible)]
     (if (and (= "user" (:layer current)) (nil? (:project-file current)))
-      (do (fs/delete-if-exists (:file current)) (json-out {:ok true :id (get-in current [:meta :id]) :deleted true}))
-      (let [tombstone (if (= "user" (:layer current)) (:file current) (user-file-for current))
-            meta (assoc (:meta current) :scope "user" :deleted true :updated_at (now))]
-        (write-note tombstone meta "")
-        (json-out {:ok true :note (decorate-note (assoc current :file tombstone :layer "user" :status "deleted" :meta meta) visible {:include-paths (:paths opts)}) :deleted true})))))
+      (do (fs/delete-if-exists (:file current)) (core/json-out {:ok true :id (get-in current [:meta :id]) :deleted true}))
+      (let [tombstone (if (= "user" (:layer current)) (:file current) (notes/user-file-for current))
+            meta (assoc (:meta current) :scope "user" :deleted true :updated_at (core/now))]
+        (notes/write-note tombstone meta "")
+        (core/json-out {:ok true :note (links/decorate-note (assoc current :file tombstone :layer "user" :status "deleted" :meta meta) visible {:include-paths (:paths opts)}) :deleted true})))))
 
 (defn list-tags [_args]
-  (let [counts (frequencies (mapcat #(parse-list (get-in % [:meta :tags])) (visible-notes)))]
-    (json-out (->> counts (map (fn [[tag notes]] {:tag tag :notes notes})) (sort-by (juxt (comp - :notes) :tag))))))
+  (let [counts (frequencies (mapcat #(core/parse-list (get-in % [:meta :tags])) (notes/visible-notes)))]
+    (core/json-out (->> counts (map (fn [[tag notes]] {:tag tag :notes notes})) (sort-by (juxt (comp - :notes) :tag))))))
 
 (defn search-notes [args]
-  (let [{:keys [opts pos]} (parse-args args) scope (or (:scope opts) "all") limit (parse-long (or (:limit opts) "10")) query (or (:query opts) (str/join " " pos))]
-    (when (empty? query) (usage))
-    (let [needle (str/lower-case query) visible (visible-notes scope)]
-      (json-out
+  (let [{:keys [opts pos]} (core/parse-args args) scope (or (:scope opts) "all") limit (parse-long (or (:limit opts) "10")) query (or (:query opts) (str/join " " pos))]
+    (when (empty? query) (core/usage))
+    (let [needle (str/lower-case query) visible (notes/visible-notes scope)]
+      (core/json-out
         (->> visible
              (map (fn [note] (let [text (str (get-in note [:meta :title]) "\n" (:body note))]
-                               (assoc (decorate-note note visible {:include-paths (:paths opts)}) :score (count-matches (str/lower-case text) needle) :excerpt (excerpt text needle)))))
+                               (assoc (links/decorate-note note visible {:include-paths (:paths opts)}) :score (core/count-matches (str/lower-case text) needle) :excerpt (core/excerpt text needle)))))
              (filter #(pos? (:score %))) (sort-by :score >) (take limit))))))
 
 (defn show-links [args]
-  (let [{:keys [opts pos]} (parse-args args) visible (visible-notes) note (find-visible (or (first pos) (:id opts)) visible)]
-    (json-out {:note (note-ref note) :links (resolve-outgoing-links note visible)})))
+  (let [{:keys [opts pos]} (core/parse-args args) visible (notes/visible-notes) note (notes/find-visible (or (first pos) (:id opts)) visible)]
+    (core/json-out {:note (notes/note-ref note) :links (links/resolve-outgoing-links note visible)})))
 
 (defn show-backlinks [args]
-  (let [{:keys [opts pos]} (parse-args args) visible (visible-notes) note (find-visible (or (first pos) (:id opts)) visible)]
-    (json-out (merge {:note (note-ref note)} (backlink-report note visible)))))
+  (let [{:keys [opts pos]} (core/parse-args args) visible (notes/visible-notes) note (notes/find-visible (or (first pos) (:id opts)) visible)]
+    (core/json-out (merge {:note (notes/note-ref note)} (links/backlink-report note visible)))))
 
 (defn show-status [args]
-  (let [{:keys [opts]} (parse-args args) visible (visible-notes)
-        tombstones (->> (all-notes) (filter #(and (= "user" (:layer %)) (deleted? %)))
-                        (map #(merge (note-ref (assoc % :status "deleted")) {:tags (parse-list (get-in % [:meta :tags])) :aliases (parse-list (get-in % [:meta :aliases]))} (when (:paths opts) (path-info %)))))]
-    (json-out (sort-by :title (concat (map #(decorate-note % visible {:include-paths (:paths opts)}) visible) tombstones)))))
+  (let [{:keys [opts]} (core/parse-args args) visible (notes/visible-notes)
+        tombstones (->> (notes/all-notes) (filter #(and (= "user" (:layer %)) (notes/deleted? %)))
+                        (map #(merge (notes/note-ref (assoc % :status "deleted")) {:tags (core/parse-list (get-in % [:meta :tags])) :aliases (core/parse-list (get-in % [:meta :aliases]))} (when (:paths opts) (notes/path-info %)))))]
+    (core/json-out (sort-by :title (concat (map #(links/decorate-note % visible {:include-paths (:paths opts)}) visible) tombstones)))))
