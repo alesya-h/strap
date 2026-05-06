@@ -94,47 +94,41 @@ Apply an agent profile to a state:
 ```nu
 strap agents list
 strap skills list
-open state.json | strap agents apply chat-concise | strap skills apply concise | save -f concise-state.json
+open state.json | to json | ^strap agents apply chat-concise | ^strap skills apply concise | save -f concise-state.json
 ```
 
-Use Nu plumbing for local structured state work:
+Use Nu with the process command surface for local structured state work:
 
 ```nu
-use '/path/to/strap/nu/strap'
-
 strap state init
-| strap agents apply chat-concise
-| strap skills apply concise
+| to json
+| ^strap agents apply chat-concise
+| from json
+| to json
+| ^strap skills apply concise
+| from json
 ```
 
-If `strap nu lib-dir` is in `NU_LIB_DIRS`, use the shorter import:
+Command-local `run.nu` files are implementation details, not a public import surface.
+
+Use process filters for state combinators:
 
 ```nu
-use strap
+open --raw state.json | ^strap state with-events -- jq 'map(select(.from == "user"))' | from json
+open --raw state.json | ^strap state map-events -- jq '. + {"reviewed": true}' | from json
 ```
-
-Use the routed Nu surface for block combinators:
-
-```nu
-use '/path/to/strap/nu/strap'
-
-open state.json | strap with-events {|events| $events | where from == user }
-open state.json | strap map-events {|event| $event | upsert reviewed true }
-```
-
-Find ready imports with `strap nu use-line strap`.
 
 Fold stale context by placing bookmarks on unique text and folding the range:
 
 ```nu
 strap session show | save -f state.json
-open state.json | strap state bookmark add --text "first unique phrase" --label fold-start | save -f marked-1.json
-open marked-1.json | strap state bookmark add --text "last unique phrase" --label fold-end | save -f marked-2.json
-open marked-2.json | strap state bookmark list
-open marked-2.json | strap state extract --from bm_start --to bm_end | strap context quote | save -f quote.json
-open quote.json | strap context summarize "only architectural decisions and unresolved risks" --tools none | save -f summary.json
-open marked-2.json | strap state fold --from bm_start --to bm_end --summary "What this range established." | save -f folded.json
-open folded.json | strap session save
+open state.json | to json | ^strap state bookmark add --text "first unique phrase" --label fold-start | save -f marked-1.json
+open marked-1.json | to json | ^strap state bookmark add --text "last unique phrase" --label fold-end | save -f marked-2.json
+open marked-2.json | to json | ^strap state bookmark list | from json
+open marked-2.json | to json | ^strap state extract --from bm_start --to bm_end | ^strap context quote | save -f quote.json
+open quote.json | to json | ^strap context summarize "only architectural decisions and unresolved risks" --tools none | save -f summary.json
+open marked-2.json | to json | ^strap state fold --from bm_start --to bm_end --summary "What this range established." | save -f folded.json
+open folded.json | to json | ^strap session save
 ```
 
 Use the actual bookmark IDs from `bookmark list` in the `fold` command.

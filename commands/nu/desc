@@ -1,4 +1,0 @@
-Inspect Nushell plumbing modules.
-
-Usage:
-  strap nu <modules|path|lib-dir|env-line|use-line|source-line> [module]

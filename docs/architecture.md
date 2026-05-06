@@ -63,7 +63,7 @@ $STRAP_ROOT/commands
 
 The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/global commands can override built-ins.
 
-Project and user commands are isolated capsules. They compose with other commands through the top-level `strap` router, not by importing repo-local implementation modules. Process callers use stdin/stdout and `strap <command>`; Nu callers may route through command-local `run.nu` modules for richer values and closures.
+Project and user commands are isolated capsules. They compose with other commands through the top-level `strap` router, not by importing repo-local implementation modules. All callers use stdin/stdout and `strap <command>` at command boundaries.
 
 A command directory can contain:
 
@@ -144,33 +144,29 @@ Addressability is optional. `strap state bookmark add` attaches inline bookmarks
 
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 
-## Nu Routed Surface
+## Nu Implementation Surface
 
-Nu is the preferred implementation surface for local structured data plumbing. The grouped module is `nu/strap/mod.nu`, imported as `use '/path/to/strap/nu/strap'` or `use strap` when `strap nu lib-dir` is in `NU_LIB_DIRS`, and exposes commands such as `strap state init`, `strap session new`, `strap agents list`, and `strap skills list`.
+Nu is the preferred implementation surface for local structured data plumbing inside command capsules. There is intentionally no grouped native `use strap` module and no cross-command Nu import layer.
 
-Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. For Nu-native capsules, `run.nu` is the only Nu entrypoint, exports `main`, and may expose richer pipeline and closure behavior. Additional `.nu` files are command-local modules for `run.nu`, not alternate entrypoints.
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. For Nu-native capsules, `run.nu` is command-local implementation code. Additional `.nu` files are command-local modules for `run.nu`, not alternate entrypoints or public imports.
 
-`run.nu` stays native: it accepts and returns Nushell values, and does not read stdin, write stdout, or expose command-boundary text JSON flags. The executable `run` owns stdin/stdout text JSON handling before delegating to `run.nu`: it parses stdin when the command logically takes input, ignores stdin when it does not, and prints text JSON or plain text as the process result.
+`run.nu` stays native inside its command capsule: it accepts and returns Nushell values, and does not read stdin, write stdout, or expose command-boundary text JSON flags. The executable `run` owns stdin/stdout text JSON handling before delegating to `run.nu`: it parses stdin when the command logically takes input, ignores stdin when it does not, and prints text JSON or plain text as the process result.
 
-Command input does not use compatibility switches. The process surface is data-in/data-out over stdin/stdout; the Nu surface is data-in/data-out over native pipeline values.
+Command input does not use compatibility switches. The public surface is data-in/data-out over stdin/stdout.
 
-The boundary is still routed through the top-level surface: callers do not import another capsule's private files directly. Closure-shaped operations, such as `with-events`, may accept native Nu closures, explicit external process filters after `--`, or plain command words that default to `strap <command> ...`. Process filters receive JSON on stdin and emit JSON on stdout.
+Callers do not import another capsule's private files directly. State lens operations such as `with-events`, `map-events`, and `with-extract` accept explicit external process filters after `--`, or plain command words that default to `strap <command> ...`. Process filters receive JSON on stdin and emit JSON on stdout.
 
 Examples:
 
-```nu
-use '/path/to/strap/nu/strap'
-
-open state.json | strap with-events {|events| $events | where from == user }
-open state.json | strap map-events {|event| $event | upsert reviewed true }
-open state.json | strap with-extract bm_start bm_end {|events| $events | update text { str upcase } }
+```bash
+strap state with-events -- jq 'map(select(.from == "user"))' < state.json > next.json
+strap state map-events -- jq '. + {"reviewed": true}' < state.json > next.json
+strap state with-extract bm_start bm_end -- jq 'map(.text |= ascii_upcase)' < state.json > next.json
 ```
 
 The intended boundary is: Nu owns local dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Babashka owns richer local algorithms and state/auth logic that are awkward in Nu but do not need a package ecosystem; Node is reserved for MCP and real package/runtime pressure only.
 
 Implementation files are intentionally small. The hard cap is 150 lines per source file, command `run` script, or helper; prefer even smaller files when a command has separable concepts. Command-local modules are the escape hatch for complexity, not shared repo libraries. Existing oversized files must appear in `.strap/config/line-cap-exceptions.txt` until they are split.
-
-`strap nu modules`, `strap nu lib-dir`, `strap nu use-line strap`, and `strap nu path strap` expose installed module paths/import lines for agents and humans.
 
 ## Execution Loops
 

@@ -14,14 +14,10 @@ def read-desc [dir: string] {
 def manifest [name: string, dir: string] {
   let inner_dir = ($dir | path join inner)
   let run = ($dir | path join run)
-  let run_nu = ($dir | path join run.nu)
   {
     name: $name
     description: (read-desc $dir)
     hasRun: ($run | path exists)
-    hasRunNu: ($run_nu | path exists)
-    nuEntrypoint: (if ($run_nu | path exists) { $run_nu } else { $run })
-    nuEntrypointKind: (if ($run_nu | path exists) { "native" } else { "process-fallback" })
     hasSpec: (($dir | path join spec.yaml) | path exists)
     hasDynamicCompletion: ((($dir | path join carapace-complete) | path exists) or (($dir | path join compgen) | path exists))
     inner: (if ($inner_dir | path exists) { ls $inner_dir | sort-by name | get name | each {|item| $item | path basename } } else { [] })
@@ -60,7 +56,6 @@ def validate-item [item: record] {
   mut errors = []
   mut warnings = []
   let run = ($item.dir | path join run)
-  let run_nu = ($item.dir | path join run.nu)
   let desc = ($item.dir | path join desc)
 
   if not (valid-name $item.name) { $errors = ($errors | append "name must match [a-z][a-z0-9-]*") }
@@ -70,7 +65,6 @@ def validate-item [item: record] {
     if not (is-executable $run) { $errors = ($errors | append "run is not executable") }
     if not (has-shebang $run) { $errors = ($errors | append "run missing shebang") }
   }
-  if not ($run_nu | path exists) { $warnings = ($warnings | append "missing optional run.nu") }
   if not ($desc | path exists) { $errors = ($errors | append "missing desc") } else if ((read-desc $item.dir) == "") { $errors = ($errors | append "desc first line is empty") }
 
   let inner_dir = ($item.dir | path join inner)

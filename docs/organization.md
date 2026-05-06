@@ -139,7 +139,7 @@ Create and update sessions with:
 strap session new "task name"
 strap session ask "user request"
 strap session show
-open state.json | strap session save
+open state.json | to json | ^strap session save
 ```
 
 ## Command Examples

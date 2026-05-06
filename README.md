@@ -71,18 +71,7 @@ strap session show \
 
 Each active session has a session-local overlay under `overlay/` that shadows user, project, global, and root artifacts. `strap artifact workon <type> <name>` writes there while `STRAP_SESSION` is set, and `strap artifact promote <type> <name>` promotes one step at a time: session to user, user to project, project to global, and global to the Strap repo layer. Session state and session overlay changes are jj-backed in the session directory; use `strap history log`, `strap history diff`, or `strap history ui`.
 
-Session-aware commands use `STRAP_SESSION` and fail when it is absent. Use `strap with-session <session> <command>` for one-off process commands. In Nushell, use the native scoped helper to run a block without leaking the environment change:
-
-```nu
-use strap
-
-strap with-session repo-analysis {
-  strap session path
-  strap history log
-}
-```
-
-Use `strap session select <session>` when you do want to set `$env.STRAP_SESSION` in the current shell.
+Session-aware commands use `STRAP_SESSION` and fail when it is absent. Use `strap with-session <session> <command>` for one-off process commands.
 
 See `docs/daily-use.md`, `docs/commands.md`, and `docs/architecture.md`.
 
@@ -90,9 +79,11 @@ Run a one-shot agent over quoted context without mutating a session:
 
 ```nu
 open state.json
-| strap state extract --from bm_a --to bm_b
-| strap context quote
-| strap context summarize "Summarize only architectural decisions and unresolved risks" --agent chat-concise --skill concise --tools none
+| to json
+| ^strap state extract --from bm_a --to bm_b
+| ^strap context quote
+| ^strap context summarize "Summarize only architectural decisions and unresolved risks" --agent chat-concise --skill concise --tools none
+| from json
 ```
 
 Agent profiles are layered artifacts:
@@ -100,7 +91,7 @@ Agent profiles are layered artifacts:
 ```nu
 strap agents list
 strap agents show chat-concise
-open state.json | strap agents apply chat-concise | save -f concise-state.json
+open state.json | to json | ^strap agents apply chat-concise | save -f concise-state.json
 strap agents import-opencode ~/.config/opencode/agents
 ```
 
@@ -109,51 +100,25 @@ Skill bundles layer the same way:
 ```nu
 strap skills list
 strap skills show concise
-open state.json | strap skills apply concise | save -f concise-state.json
+open state.json | to json | ^strap skills apply concise | save -f concise-state.json
 strap skills import-opencode ~/.config/opencode/skills
 ```
 
 ## Nushell
 
-Use the grouped Nu module for the normal Nu-facing surface:
+Nushell remains an implementation language for many commands, but there is no grouped native `use strap` module. The supported integration boundary is the normal process surface: `strap <command>` reads JSON from stdin and writes JSON to stdout.
 
 ```nu
-use '/path/to/strap/nu/strap'
-
 strap state init
-| strap agents apply chat-concise
-| strap skills apply concise
+| to json
+| ^strap agents apply chat-concise
+| from json
+| to json
+| ^strap skills apply concise
+| from json
 ```
 
-If the module is installed on `NU_LIB_DIRS`, the import can be shortened:
-
-```nu
-use strap
-```
-
-For development shells, expose it with:
-
-```bash
-NU_LIB_DIRS="$(strap nu lib-dir)" nu
-```
-
-The Nu surface routes through command-local `run.nu` modules. For Nu-native commands, `run.nu` is the only Nu entrypoint and stays native: process text JSON and stdin/stdout handling belong in executable `run`. Closure-shaped state helpers are available through the grouped `strap` module and behave as lenses over top-level events:
-
-```nu
-use '/path/to/strap/nu/strap'
-
-open state.json
-| strap with-events {|events| $events | where from == user }
-```
-
-```nu
-open state.json
-| strap with-extract bm_start bm_end {|events|
-    $events | update text { str upcase }
-  }
-```
-
-`strap nu modules` prints installed Nu modules, and `strap nu lib-dir` prints the directory to add to `NU_LIB_DIRS`.
+Command-local `run.nu` files are implementation modules used by their owning executable `run` scripts. They are not a public import surface.
 
 ## MCP Servers
 

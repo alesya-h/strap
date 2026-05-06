@@ -8,7 +8,7 @@ This document records what `strap` currently implements.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
 - Root/config/project/work/workspace path model via `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
 - Immutable JSON filter CLIs for state transforms and harness operations.
-- Grouped `use strap`-style Nu module plus Nu-first local plumbing with closure-based event and context combinators.
+- Nu-first local plumbing inside command capsules, exposed through the process `strap <command>` boundary.
 - Basic scope operations for opening/collapsing context regions.
 - Bookmark-based state extraction into `strap.context.v0.1`.
 - Quoted context rendering with `strap context quote`.
@@ -34,7 +34,6 @@ This document records what `strap` currently implements.
 - `strap skills`: list, show, apply, and import skill instruction bundles.
 - `strap model`: list, show, select, and fork model profiles.
 - `strap mcp`: run bundled stdio MCP servers.
-- `strap nu`: inspect installed Nushell module paths and generated `use` lines.
 - `strap artifact`: inspect and manage layered command/tool/model/agent/skill artifacts.
 - `strap status`: inspect active roots, layers, and overlay status.
 - `strap zk`: shared zettelkasten CLI backed by SQLite, FTS5, and sqlite-vec.

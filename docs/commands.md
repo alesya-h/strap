@@ -108,15 +108,6 @@ Run a command against a specific session without exporting `STRAP_SESSION` in th
 strap with-session my-session strap history log
 ```
 
-In the grouped Nu module, use a scoped block when you want native commands to see `STRAP_SESSION` without leaking it to the caller:
-
-```nu
-strap with-session my-session {
-  strap session path
-  strap history log
-}
-```
-
 ## Built-in Commands
 
 | Command | Purpose |
@@ -134,7 +125,6 @@ strap with-session my-session {
 | `loop` | Run the Nushell model/tool loop. |
 | `mcp` | Run bundled stdio MCP servers. |
 | `model` | List, show, select, and fork model profiles. |
-| `nu` | Inspect Nushell routed module paths. |
 | `one-shot` | Run an agent once until its first final answer. |
 | `paths` | Print resolved root/config/global/project/session/work/workspace paths. |
 | `provider` | Run provider-specific operations and authentication. |
@@ -174,7 +164,7 @@ Agent profiles are markdown files with optional frontmatter:
 ```nu
 strap agents list
 strap agents show chat-concise
-open state.json | strap agents apply chat-concise | save -f next.json
+open state.json | to json | ^strap agents apply chat-concise | save -f next.json
 strap agents import-opencode ~/.config/opencode/agents
 ```
 
@@ -187,7 +177,7 @@ Skills are `skills/name/SKILL.md` instruction bundles:
 ```nu
 strap skills list
 strap skills show concise
-open state.json | strap skills apply concise | save -f next.json
+open state.json | to json | ^strap skills apply concise | save -f next.json
 strap skills import-opencode ~/.config/opencode/skills
 ```
 
@@ -206,55 +196,34 @@ strap model fork current next-chatgpt --set-model-id gpt-next
 
 `current.json` is a Linux symlink to the selected profile in the active overlay.
 
-## Nushell Routed Surface
+## Nushell Implementation Surface
 
-The grouped Nu module lives in `nu/strap/mod.nu` and is normally imported as:
+Nu is an implementation language for command capsules, not a separate public command layer. There is no grouped native `use strap` module. Use the process boundary from Nu the same way shell callers do:
 
 ```nu
-use '/path/to/strap/nu/strap'
-
 strap state init
-| strap agents apply chat-concise
-| strap skills apply concise
+| to json
+| ^strap agents apply chat-concise
+| from json
+| to json
+| ^strap skills apply concise
+| from json
 ```
 
-If installed on `NU_LIB_DIRS`, use `use strap`.
-
-For a development shell:
-
-```bash
-NU_LIB_DIRS="$(strap nu lib-dir)" nu
-```
-
-Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. For Nu-native commands, `run.nu` is the only Nu entrypoint and exports `main`. Additional `.nu` files may exist only as modules used by `run.nu`.
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. For Nu-native commands, `run.nu` is command-local implementation code. Additional `.nu` files may exist only as modules used by `run.nu`.
 
 The boundary split is strict: `run.nu` accepts and returns native Nushell data. It must not read stdin, write stdout, or expose command-boundary text JSON flags. The executable `run` owns process concerns: parsing stdin text JSON when the command logically takes input, ignoring stdin when it does not, printing text JSON or plain text, and delegating to `run.nu` for the actual work.
 
-Do not add stdin/file-switch compatibility flags for command input. Data comes in through stdin for the process surface and through the pipeline for the Nu surface; data comes out through stdout for the process surface and as native values for the Nu surface.
+Do not add stdin/file-switch compatibility flags for command input. Data comes in through stdin and goes out through stdout at command boundaries.
 
-When a command is not Nu-native, omit `run.nu` unless there is a real native Nu surface. Do not add `main.nu`; that entrypoint shape is retired.
+When a command is not Nu-native, omit `run.nu`. Do not add `main.nu`; that entrypoint shape is retired.
 
-Closure-shaped operations are lenses over top-level events: they return full state with the selected events replaced. Nu callers can pass closures. Process callers can provide an external JSON filter after `--`, or plain command words that default to `strap <command> ...`.
-
-```nu
-use '/path/to/strap/nu/strap'
-
-open state.json | strap with-events {|events| $events | where from == user }
-open state.json | strap map-events {|event| $event | upsert reviewed true }
-open state.json | strap with-extract bm_start bm_end {|events| $events | update text { str upcase } }
-```
+State lens operations are over top-level events: they return full state with the selected events replaced. Provide an external JSON filter after `--`, or plain command words that default to `strap <command> ...`.
 
 ```bash
 strap state with-events -- jq 'map(select(.from == "user"))' < state.json > next.json
-```
-
-Discover installed module paths with:
-
-```bash
-strap nu modules
-strap nu lib-dir
-strap nu use-line strap
-strap nu path strap
+strap state map-events -- jq '. + {"reviewed": true}' < state.json > next.json
+strap state with-extract bm_start bm_end -- jq 'map(.text |= ascii_upcase)' < state.json > next.json
 ```
 
 ## Bookmark Addressability
