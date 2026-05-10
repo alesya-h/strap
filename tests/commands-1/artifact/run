@@ -1,0 +1,11 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let types = (call-json [artifact types])
+ok ("tool" in $types) "artifact types includes tool"
+let status = (call-json [artifact status tool])
+ok (($status | any {|item| $item.name == "json_echo" })) "artifact status includes json_echo tool"
+let worked = (call-json [artifact workon tool json_echo])
+ok ($worked.ok == true) "artifact workon creates editable tool overlay"
+let discarded = (call-json [artifact discard tool json_echo])
+ok ($discarded.ok == true) "artifact discard removes editable overlay"

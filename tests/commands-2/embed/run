@@ -1,0 +1,8 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let chatgpt = ({ texts: ["embedding command test"] } | pipe-json [embed --provider chatgpt])
+ok (($chatgpt.embeddings | length) > 0) "embed chatgpt returns at least one vector"
+ok (($chatgpt.embeddings.0 | length) > 0) "embed chatgpt vector is non-empty"
+let hash = ({ texts: ["embedding command test"] } | pipe-json [embed --provider hash])
+ok (($hash.embeddings.0 | length) > 0) "embed hash provider remains available for deterministic local embeddings"

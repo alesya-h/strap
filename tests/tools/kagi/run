@@ -1,0 +1,7 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let search = (tool-output kagi kagi.web_search { queries: [{ q: "Strap agent harness" }] })
+non-empty $search.content.0.text "kagi.web_search returns readable results"
+let summary = (tool-output kagi kagi.summarizer { url: "https://help.kagi.com/kagi/api/overview.html", summary_type: "summary" })
+non-empty $summary.content.0.text "kagi.summarizer returns readable summary"

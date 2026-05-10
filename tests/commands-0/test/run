@@ -1,0 +1,6 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let listed = (call [test --list])
+has $listed "commands-0/state" "test runner lists command layer tests"
+has $listed "tools/fs" "test runner lists tool tests"

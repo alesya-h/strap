@@ -1,0 +1,14 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+with-env { STRAP_ZK_EMBED_PROVIDER: "chatgpt" } {
+  let created = (call-json [zk create --scope user --title "ZK command test" --body "ZK command body links to [[ZK target test]]." --tags test])
+  ok ($created.ok == true) "zk create succeeds"
+  call-json [zk create --scope user --title "ZK target test" --body "Target body." --tags test] | ignore
+  let links = (call-json [zk links "ZK command test"])
+  ok (($links.links | length) >= 1) "zk links derives wikilinks"
+  let search = (call-json [zk search "command body"])
+  ok (($search | length) >= 1) "zk text search finds created note"
+  let hybrid = (call-json [zk search-hybrid "command body"])
+  ok (($hybrid | length) >= 1) "zk hybrid search uses real embedding provider"
+}

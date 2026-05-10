@@ -1,0 +1,16 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let base = (call-json [state init])
+ok ($base.version == "strap.state.v0.2") "state init emits canonical version"
+let state = ($base | pipe-json [state add-user hello] | pipe-json [state add-assistant world])
+ok (($state.root.children | length) == 2) "user and assistant messages append"
+has ($state | pipe-call [state display-last-message]) "world" "display-last-message returns latest assistant text"
+let bm1 = ($state | pipe-json [state bookmark add --text hello --label start])
+let bm2 = ($bm1 | pipe-json [state bookmark add --text world --label end])
+let first_id = $bm2.root.children.0.bookmarks.0.id
+let last_id = $bm2.root.children.1.bookmarks.0.id
+let context = ($bm2 | pipe-json [state extract --from $first_id --to $last_id])
+ok (($context.nodes | length) == 2) "state extract returns bookmarked range"
+let filtered = ($bm2 | pipe-json [state with-events -- jq "map(select(.from == \"user\"))"])
+ok (($filtered.root.children | length) == 1) "with-events accepts process JSON filter"

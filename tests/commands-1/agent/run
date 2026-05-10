@@ -1,0 +1,11 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let parent = (state-with-user "parent request")
+let child = ($parent | pipe-json [agent fork --prompt "child investigation"])
+ok ($child.parent.fork_prompt == "child investigation") "agent fork records prompt"
+let child_file = (case-tmp | path join child.json)
+$child | to json | save -f $child_file
+let folded = ($parent | pipe-json [agent fold --child $child_file --summary "child summary"])
+let last = ($folded.root.children | last)
+ok ($last.kind == "agent_fold") "agent fold appends fold event"

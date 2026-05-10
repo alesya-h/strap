@@ -1,0 +1,14 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let state = (state-with-user "Summarize this quoted context." | pipe-json [state add-assistant "Context says strap context works."])
+let marked1 = ($state | pipe-json [state bookmark add --text "Summarize this quoted context." --label start])
+let marked2 = ($marked1 | pipe-json [state bookmark add --text "Context says strap context works." --label end])
+let start = $marked2.root.children.0.bookmarks.0.id
+let end = $marked2.root.children.1.bookmarks.0.id
+let context = ($marked2 | pipe-json [state extract --from $start --to $end])
+let quote = ($context | pipe-json [context quote --title "context test"])
+has $quote.text "strap context works" "context quote includes source text"
+has ($quote | pipe-call [context render --title "rendered context"]) "rendered context" "context render returns text"
+let summary = ($quote | pipe-json [context summarize "Summarize in one short sentence." --tools none --max-turns 1])
+non-empty $summary.summary "context summarize returns a real model-backed summary"

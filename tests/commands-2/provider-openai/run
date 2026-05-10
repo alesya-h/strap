@@ -1,0 +1,9 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+paid-only "OpenAI provider calls require --with-paid-providers"
+let state = (state-with-user "Reply with exactly STRAP_OPENAI_OK and no extra words.")
+let compiled = ($state | pipe-json [provider-openai compile --model gpt-5.1-openai --tools none])
+ok ($compiled.model | str contains "gpt") "openai compile selects GPT model"
+let completed = ($state | pipe-json [provider-openai complete --model gpt-5.1-openai --tools none])
+non-empty (($completed.root.children | last).text) "openai complete returns text"

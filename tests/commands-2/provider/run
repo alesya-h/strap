@@ -1,0 +1,10 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let providers = (call-json [provider list])
+ok ("chatgpt" in $providers) "provider list includes chatgpt"
+let state = (state-with-user "Reply with exactly STRAP_PROVIDER_OK and no extra words.")
+let completed = ($state | pipe-json [provider chatgpt complete --tools none])
+let last = ($completed.root.children | last)
+ok ($last.from == "assistant") "provider facade appends assistant response"
+non-empty $last.text "provider facade returns ChatGPT text"

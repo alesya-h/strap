@@ -1,0 +1,4 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+call [project-check] | ignore

@@ -1,0 +1,8 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let all = (call [paths])
+has $all "STRAP_ROOT=" "paths prints STRAP_ROOT"
+has $all "STRAP_WORKSPACE=" "paths prints STRAP_WORKSPACE"
+let root = (call [paths root] | str trim)
+ok ($root == $env.STRAP_ROOT) "paths root matches STRAP_ROOT"

@@ -1,0 +1,8 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let status = (call-json [status])
+ok ($status.roots.root == $env.STRAP_ROOT) "status reports root"
+ok (($status.artifacts.command | any {|item| $item.name == "state" })) "status reports command artifacts"
+let with_paths = (call-json [status --paths])
+ok (($with_paths.roots.project | into string | str length) > 0) "status --paths returns roots"

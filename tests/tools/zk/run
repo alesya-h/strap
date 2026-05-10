@@ -1,0 +1,15 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+with-env { STRAP_ZK_EMBED_PROVIDER: "chatgpt" } {
+  call-json [zk create --scope user --title "Tool ZK source" --body "Tool zettel body links to [[Tool ZK target]]." --tags tool] | ignore
+  call-json [zk create --scope user --title "Tool ZK target" --body "Tool target body." --tags tool] | ignore
+  let status = (tool-output zk zk.status {})
+  non-empty $status.content.0.text "zk.status returns readable zettelkasten status"
+  let search = (tool-output zk zk.search { query: "zettel body", limit: 5 })
+  has $search.content.0.text "Tool ZK source" "zk.search finds created note"
+  let backlinks = (tool-output zk zk.backlinks { id: "Tool ZK target" })
+  has $backlinks.content.0.text "Tool ZK source" "zk.backlinks finds linked source"
+  let hybrid = (tool-output zk zk.search_hybrid { query: "zettel body", limit: 5 })
+  has $hybrid.content.0.text "Tool ZK source" "zk.search_hybrid uses real embedding provider"
+}

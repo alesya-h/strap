@@ -1,0 +1,8 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let init = (call-json [work init])
+ok ($init.ok == true) "work init succeeds"
+ok (($env.STRAP_WORK | path join sessions) | path exists) "work init creates sessions directory"
+let paths = (call-json [work path])
+ok ($paths.work == $env.STRAP_WORK) "work path reports STRAP_WORK"

@@ -1,0 +1,12 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let created = (call-json [session new "history command test"])
+let dir = $created.dir
+with-env { STRAP_SESSION: $dir } {
+  call [history init] | ignore
+  let status = (call [history status])
+  has $status "Working copy" "history status reports jj working copy"
+  let snap = (call [history snapshot --message "history test snapshot"])
+  has $snap "history snapshot" "history snapshot succeeds"
+}

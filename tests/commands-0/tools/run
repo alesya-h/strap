@@ -1,0 +1,9 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let fs_tools = (call-json [tools list --group fs --json])
+ok (($fs_tools | any {|item| $item.name == "fs.read_file" })) "fs.read_file public schema is listed"
+let internal = (call-json [tools list --group json_echo --json --internal])
+let echo = ($internal | first)
+ok ($echo.group == "json_echo") "internal tool listing includes group"
+ok ($echo.runner | str ends-with "/tools/json_echo/run") "internal tool listing includes runner"

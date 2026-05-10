@@ -22,7 +22,7 @@ def exception-lines [] {
 def check-line-cap [] {
   let exceptions = (exception-lines)
   mut failed = false
-  let files = (files-for [bin/strap "cli/**/*" "commands/**/*" "tools/**/*" "nu/**/*" ".strap/commands/**/*" ".strap-user/commands/**/*"])
+  let files = (files-for [bin/strap "cli/**/*" "commands/**/*" "tools/**/*" "tests/**/*" "nu/**/*" ".strap/commands/**/*" ".strap-user/commands/**/*"])
   for file in $files {
     if ($file | str ends-with ".json") { continue }
     let n = (open --raw $file | lines | length)
@@ -78,13 +78,13 @@ def check-content-guards [] {
 }
 
 def check-command-syntax [] {
-  for file in (files-for ["commands/*/run" "commands/*/inner/*" ".strap/commands/*/run" ".strap-user/commands/*/run"]) {
+  for file in (files-for ["commands/*/run" "commands/*/inner/*" "tests/commands-*/*/run" "tests/tools/*/run" ".strap/commands/*/run" ".strap-user/commands/*/run"]) {
     let shebang = (open --raw $file | lines | first | default "")
     if ($shebang | str contains "bash") { run-external bash ...[-n $file] }
     if ($shebang | str contains "node") { run-external node ...[--check $file] }
     if ($shebang | str contains "nu") { run-external nu ...[--ide-check 20 $file] | ignore }
   }
-  for file in (files-for ["commands/*/run.nu"]) { run-external nu ...[--ide-check 20 $file] | ignore }
+  for file in (files-for ["commands/*/run.nu" "tests/lib/*.nu"]) { run-external nu ...[--ide-check 20 $file] | ignore }
   for file in (glob --no-dir "commands/provider-*/main.nu") { run-external nu ...[--ide-check 20 $file] | ignore }
 }
 

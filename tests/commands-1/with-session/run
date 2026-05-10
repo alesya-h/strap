@@ -1,0 +1,7 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let created = (call-json [session new "with-session command test"])
+let name = ($created.dir | path basename)
+let selected = (call [with-session $name (strap-bin) session path] | str trim)
+ok ($selected == $created.dir) "with-session resolves name and runs command with STRAP_SESSION"

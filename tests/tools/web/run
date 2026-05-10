@@ -1,0 +1,7 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let fetched = (tool-output web web.web_fetch { url: "https://example.com", format: "text", max_output_bytes: 4000 })
+has $fetched.content.0.text "Example Domain" "web.web_fetch returns page content"
+let searched = (tool-output web web.web_search { query: "Example Domain", limit: 3 })
+non-empty $searched.content.0.text "web.web_search returns readable results"

@@ -1,0 +1,14 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+tool-output fs fs.write_file { path: "sample.txt", content: "alpha\nbeta\ngamma\n", overwrite: true } | ignore
+let read = (tool-output fs fs.read_file { path: "sample.txt", offset: 1, limit: 2 })
+has $read.structuredContent.value "alpha" "fs.read_file includes file contents"
+let listed = (tool-output fs fs.list_dir { path: "." })
+ok (($listed.structuredContent.value | any {|item| $item.name == "sample.txt" })) "fs.list_dir lists written file"
+tool-output fs fs.edit_file { path: "sample.txt", old_text: "beta", new_text: "BETA" } | ignore
+tool-output fs fs.multi_edit_file { path: "sample.txt", edits: [{ old_text: "alpha", new_text: "ALPHA" }, { old_text: "gamma", new_text: "GAMMA" }] } | ignore
+let grep = (tool-output fs fs.grep_files { pattern: "BETA", path: "." })
+has $grep.structuredContent.value "sample.txt" "fs.grep_files finds edited file"
+let globbed = (tool-output fs fs.glob_files { pattern: "*.txt", path: "." })
+ok ("sample.txt" in $globbed.structuredContent.value) "fs.glob_files finds sample.txt"

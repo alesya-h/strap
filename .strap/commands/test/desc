@@ -1,0 +1,7 @@
+Run layered Strap command and tool tests.
+
+Usage:
+  strap test [--list] [--only text] [--layer commands-0|commands-1|commands-2|tools] [--with-paid-providers]
+
+Tests live under tests/commands-0, tests/commands-1, tests/commands-2, and tests/tools.
+ChatGPT-backed tests run by default. Non-ChatGPT paid provider tests must explicitly opt in with --with-paid-providers.

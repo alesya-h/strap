@@ -1,0 +1,45 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let client = (case-tmp | path join mcp-client.mjs)
+'
+import { spawn } from "node:child_process";
+const strap = process.argv[2];
+const child = spawn(strap, ["mcp", "json_echo"], { stdio: ["pipe", "pipe", "pipe"] });
+let buffer = Buffer.alloc(0);
+let nextId = 1;
+const pending = new Map();
+function send(method, params = {}) {
+  const id = nextId++;
+  const body = JSON.stringify({ jsonrpc: "2.0", id, method, params });
+  child.stdin.write(`Content-Length: ${Buffer.byteLength(body)}\r\n\r\n${body}`);
+  return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+}
+child.stdout.on("data", chunk => {
+  buffer = Buffer.concat([buffer, chunk]);
+  while (true) {
+    const headerEnd = buffer.indexOf("\r\n\r\n");
+    if (headerEnd < 0) return;
+    const header = buffer.slice(0, headerEnd).toString("utf8");
+    const len = Number(header.match(/Content-Length:\s*(\d+)/i)?.[1] || 0);
+    const start = headerEnd + 4;
+    if (buffer.length < start + len) return;
+    const message = JSON.parse(buffer.slice(start, start + len).toString("utf8"));
+    buffer = buffer.slice(start + len);
+    const waiter = pending.get(message.id);
+    if (waiter) {
+      pending.delete(message.id);
+      message.error ? waiter.reject(new Error(message.error.message)) : waiter.resolve(message.result);
+    }
+  }
+});
+child.stderr.on("data", chunk => process.stderr.write(chunk));
+await send("initialize", { protocolVersion: "2024-11-05" });
+const listed = await send("tools/list");
+if (!listed.tools.some(tool => tool.name === "json_echo.echo")) throw new Error("missing json_echo.echo");
+const result = await send("tools/call", { name: "json_echo.echo", arguments: { value: "mcp-ok" } });
+if (result.structuredContent.value !== "mcp-ok") throw new Error("bad mcp tool result");
+child.kill();
+' | save -f $client
+let result = (run-external node $client (strap-bin) | complete)
+ok ($result.exit_code == 0) $"mcp json_echo initialize/list/call failed\n($result.stderr)\n($result.stdout)"

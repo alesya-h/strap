@@ -1,0 +1,18 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let created = (call-json [session new "session command test"])
+let dir = $created.dir
+ok ($dir | path exists) "session new creates a session directory"
+with-env { STRAP_SESSION: $dir } {
+  let asked = (call-json [session ask "remember session test"])
+  ok (($asked.root.children | length) == 1) "session ask appends user event"
+  let shown = (call-json [session show])
+  ok (($shown.root.children | length) == 1) "session show returns saved state"
+  let saved = ($shown | pipe-json [session save])
+  ok ($saved.ok == true) "session save accepts stdin state"
+  let copy = (call-json [session copy "session command copy"])
+  ok ($copy.ok == true) "session copy succeeds"
+}
+let listed = (call-json [session list])
+ok (($listed | any {|item| $item.dir == $dir })) "session list includes created session"

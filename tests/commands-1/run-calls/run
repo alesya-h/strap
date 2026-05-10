@@ -1,0 +1,8 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let call = (tool-call json_echo json_echo.echo { value: "run-calls-ok" })
+ok ($call.ok == true) "run-calls executes json_echo"
+ok ($call.output.structuredContent.value == "run-calls-ok") "run-calls stores structured tool output"
+let missing = (tool-call json_echo missing.tool {})
+ok ($missing.ok == false) "run-calls marks unknown tool call as failed"

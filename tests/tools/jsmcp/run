@@ -1,0 +1,9 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let listed = (tool-call jsmcp jsmcp.list_servers {})
+ok ($listed.ok == true) "jsmcp.list_servers succeeds"
+let text = $listed.output.content.0.text
+has $text "ok" "jsmcp server list includes status text"
+let tools = (tool-call jsmcp jsmcp.list_tools { server: "kagi" })
+ok ($tools.ok == true) "jsmcp.list_tools succeeds for kagi server"

@@ -1,0 +1,12 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let state = (state-with-user "Reply with exactly STRAP_CHATGPT_OK and no extra words.")
+let compiled = ($state | pipe-json [provider-chatgpt compile --tools none])
+ok ($compiled.model == "gpt-5.5") "provider-chatgpt compile uses current model"
+let completed = ($state | pipe-json [provider-chatgpt complete --tools none])
+let last = ($completed.root.children | last)
+ok ($last.provider.name == "chatgpt.responses") "provider-chatgpt records provider metadata"
+non-empty $last.text "provider-chatgpt complete returns text"
+let embedded = ({ texts: ["chatgpt provider embedding"] } | pipe-json [provider-chatgpt embed])
+ok (($embedded.embeddings.0 | length) > 0) "provider-chatgpt embed returns vector"

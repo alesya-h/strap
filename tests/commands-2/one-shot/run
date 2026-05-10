@@ -1,0 +1,6 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let result = (call-json [one-shot run "Reply with exactly STRAP_ONE_SHOT_OK and no extra words." --tools none --max-turns 1])
+ok ($result.final == true) "one-shot reaches a final answer"
+non-empty $result.answer "one-shot answer is populated by a real model call"

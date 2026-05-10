@@ -1,0 +1,5 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let out = (call [sandbox run -- bash -lc "printf sandbox-ok"])
+ok (($out | str trim) == "sandbox-ok") "sandbox readonly profile can run a simple command"

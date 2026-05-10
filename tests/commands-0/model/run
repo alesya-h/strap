@@ -1,0 +1,11 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let models = (call-json [model list])
+ok (($models | any {|item| $item.source == "current.json" })) "current model symlink is listed"
+let current = (call-json [model show current])
+ok ($current.provider == "chatgpt") "current model uses ChatGPT provider"
+let forked = (call-json [model fork current layer0-model --set-model-id strap-test-model])
+ok ($forked.ok == true) "model fork succeeds"
+let used = (call-json [model use layer0-model])
+ok ($used.ok == true) "model use updates current symlink in test work root"

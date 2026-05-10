@@ -1,0 +1,15 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let shell = (tool-output process process.shell { command: "printf process-shell-ok", max_output_bytes: 2000 })
+has $shell.content.0.text "process-shell-ok" "process.shell captures stdout"
+let nu_eval = (tool-output process process.nu_eval { command: "'process-nu-ok'", max_output_bytes: 2000 })
+has $nu_eval.content.0.text "process-nu-ok" "process.nu_eval captures stdout"
+let session = $"strap-process-((random uuid) | str substring 0..7)"
+tool-output process process.shell { command: $"tmux new-session -d -s ($session) 'sleep 30'", max_output_bytes: 2000 } | ignore
+let listed = (tool-output process process.tmux { subcommand: "list-sessions", arguments: [] })
+has $listed.content.0.text $session "process.tmux lists created session"
+tool-output process process.tmux_send { target: $session, text: "echo tmux-send-ok", enter: true } | ignore
+let captured = (tool-output process process.tmux_capture { target: $session, lines: 20 })
+has $captured.content.0.text "tmux-send-ok" "process.tmux_capture captures sent text"
+tool-output process process.shell { command: $"tmux kill-session -t ($session)", max_output_bytes: 2000 } | ignore

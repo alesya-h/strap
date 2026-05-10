@@ -1,0 +1,10 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let editor = (case-tmp | path join editor.sh)
+"#!/usr/bin/env bash\nset -euo pipefail\nprintf '%s\n' 'edited command docs' > \"$1\"\n" | save -f $editor
+chmod +x $editor
+with-env { EDITOR: $editor } { call [edit -d edited-command] | ignore }
+let desc = ($env.STRAP_WORK | path join commands edited-command desc)
+ok ($desc | path exists) "edit creates missing command doc file through EDITOR"
+has (open --raw $desc) "edited command docs" "editor wrote requested file"

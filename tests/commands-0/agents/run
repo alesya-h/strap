@@ -1,0 +1,9 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let profiles = (call-json [agents list])
+ok (($profiles | any {|item| $item.name == "chat-concise" })) "chat-concise profile is listed"
+let profile = (call-json [agents show chat-concise])
+has $profile.instructions "concise" "agent instructions are returned"
+let state = (call-json [state init] | pipe-json [agents apply chat-concise])
+ok ($state.actors.assistant.agent == "chat-concise") "agent profile applies to assistant actor"

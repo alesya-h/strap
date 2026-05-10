@@ -1,0 +1,10 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let all = (call-json [commands list --json --all])
+ok (($all | any {|item| $item.name == "state" })) "commands list includes state"
+ok (($all | any {|item| $item.name == "test" })) "commands list includes project test runner"
+let manifest = (call-json [commands manifest state])
+ok ($manifest.hasRun == true) "state manifest reports run file"
+let validation = (call-json [commands validate state --json])
+ok (($validation | first).ok == true) "state command validates"

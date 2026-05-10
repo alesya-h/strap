@@ -1,0 +1,93 @@
+#!/usr/bin/env nu
+
+cd $env.STRAP_ROOT
+
+def usage [] {
+  print -e "Usage: strap test [--list] [--only text] [--layer name] [--with-paid-providers]"
+  exit 2
+}
+
+def test-roots [] {
+  [
+    { order: 0, layer: "commands-0", dir: "tests/commands-0" }
+    { order: 1, layer: "commands-1", dir: "tests/commands-1" }
+    { order: 2, layer: "commands-2", dir: "tests/commands-2" }
+    { order: 3, layer: "tools", dir: "tests/tools" }
+  ]
+}
+
+def discover-tests [] {
+  mut out = []
+  for root in (test-roots) {
+    if not ($root.dir | path exists) { continue }
+    for entry in (ls $root.dir | where type == dir) {
+      let file = ($entry.name | path join run)
+      if ($file | path exists) {
+        let name = ($entry.name | path basename)
+        $out = ($out | append ($root | merge { name: $name, id: $"($root.layer)/($name)", path: $file }))
+      }
+    }
+  }
+  $out | sort-by order name
+}
+
+def selected [only: string, layer: string] {
+  let tests = $in
+  $tests | where {|test|
+    (($layer == "") or ($test.layer == $layer)) and (($only == "") or ($test.id | str contains $only))
+  }
+}
+
+def command-path [root: string] {
+  let project_commands = ($root | path join .strap commands)
+  let old = ($env.STRAP_COMMAND_PATH? | default "")
+  if $old == "" { $project_commands } else { $"($project_commands):($old)" }
+}
+
+def run-one [test: record, run_id: string, with_paid: bool] {
+  let root = $env.STRAP_ROOT
+  let strap = ($env.STRAP_BIN? | default ($root | path join bin strap))
+  let case_tmp = ("/tmp/strap-tests" | path join $run_id $test.layer $test.name)
+  rm -rf $case_tmp
+  mkdir ($case_tmp | path join workspace)
+  mkdir ($case_tmp | path join work)
+  mkdir ($case_tmp | path join project)
+  mkdir ($case_tmp | path join global)
+  mut envs = {
+    STRAP_BIN: $strap
+    STRAP_ROOT: $root
+    STRAP_TEST_ROOT: $root
+    STRAP_TEST_TMP: ("/tmp/strap-tests" | path join $run_id)
+    STRAP_TEST_CASE_TMP: $case_tmp
+    STRAP_WORKSPACE: ($case_tmp | path join workspace)
+    STRAP_WORK: ($case_tmp | path join work)
+    STRAP_PROJECT: ($case_tmp | path join project)
+    STRAP_GLOBAL: ($case_tmp | path join global)
+    STRAP_COMMAND_PATH: (command-path $root)
+  }
+  if $with_paid { $envs = ($envs | insert STRAP_WITH_PAID_PROVIDERS "1") }
+  print $"test ($test.id)"
+  let result = with-env $envs {
+    if (($env.STRAP_SESSION? | default "") != "") { hide-env STRAP_SESSION }
+    run-external ($test.path | path expand) | complete
+  }
+  if $result.stdout != "" { print $result.stdout }
+  if $result.stderr != "" { print -e $result.stderr }
+  if $result.exit_code == 0 { return { id: $test.id, status: "ok" } }
+  if $result.exit_code == 77 { return { id: $test.id, status: "skip" } }
+  { id: $test.id, status: "fail", code: $result.exit_code }
+}
+
+def main [--list, --only: string = "", --layer: string = "", --with-paid-providers] {
+  let tests = (discover-tests | selected $only $layer)
+  if $list { return ($tests | select id path) }
+  if ($tests | is-empty) { usage }
+  let run_id = (random uuid)
+  mut results = []
+  for test in $tests { $results = ($results | append (run-one $test $run_id $with_paid_providers)) }
+  let failed = ($results | where status == fail)
+  let skipped = ($results | where status == skip)
+  let passed = ($results | where status == ok)
+  print $"passed=($passed | length) skipped=($skipped | length) failed=($failed | length)"
+  if not ($failed | is-empty) { exit 1 }
+}

@@ -1,0 +1,7 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let listed = (call [carapace list-commands])
+has $listed "state" "carapace command list includes root commands"
+let completed = (call [carapace complete state])
+ok (($completed | into string | str length) >= 0) "carapace completion command exits successfully"
