@@ -120,7 +120,7 @@
      :kind (if (seq calls) "tool_request" "message")
      :text text
      :calls (when (seq calls) calls)
-     :provider {:name "openai.responses"
+      :provider {:name "chatgpt.responses"
                 :id (:id response)
                 :model (:model response)
                 :usage (:usage response)}}))

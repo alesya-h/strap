@@ -5,6 +5,7 @@
             [provider.auth :as auth]
             [provider.auth-actions :as auth-actions]
             [provider.model :as model]
+            [provider.sse :as sse]
             [provider.state :as state]))
 
 (defn usage []
@@ -41,7 +42,7 @@
         result (apply process/shell {:out :string :err :string :continue true} args)]
     (when-not (zero? (:exit result))
       (throw (ex-info (:err result) {})))
-    (json/parse-string (:out result) true)))
+    (sse/decode (:out result))))
 
 (defn assert-chatgpt [config]
   (when-not (= (:provider config) "chatgpt")
