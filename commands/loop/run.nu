@@ -23,8 +23,9 @@ def last-calls [] {
 def has-tool-calls [] { (($in | last-calls | length) > 0) }
 
 def add-trace [kind: string, data: any] {
+  let state = $in
   let trace = { at: (date now | into string), kind: $kind, data: $data }
-  if ("trace" in ($in | columns)) { $in | update trace { append $trace } } else { $in | insert trace [$trace] }
+  if ("trace" in ($state | columns)) { $state | update trace { append $trace } } else { $state | insert trace [$trace] }
 }
 
 def add-budget-exhausted [turns: int] {
