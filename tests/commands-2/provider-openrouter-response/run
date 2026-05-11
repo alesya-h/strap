@@ -5,11 +5,11 @@ use ../../../commands/provider-openrouter/lib/compile.nu *
 let event = (response-event {
   id: "or_fixture"
   model: "openrouter-fixture-model"
-  choices: [{ message: { content: "", tool_calls: [{ id: "call_or_1", type: "function", function: { name: "json_echo.echo", arguments: '{"value":"openrouter-fixture"}' } }] } }]
+  choices: [{ message: { content: "", tool_calls: [{ id: "call_or_1", type: "function", function: { name: "json_echo__echo", arguments: '{"value":"openrouter-fixture"}' } }] } }]
   usage: {}
 })
 
 ok ($event.kind == "tool_request") "openrouter response parser converts tool_calls into tool_request"
 ok ($event.to.0 == "harness") "openrouter tool request targets harness"
-ok ($event.calls.0.tool == "json_echo.echo") "openrouter parser preserves tool name"
+ok ($event.calls.0.tool == "json_echo.echo") "openrouter parser decodes provider-safe tool name"
 ok ($event.calls.0.input.value == "openrouter-fixture") "openrouter parser decodes tool arguments"

@@ -1,7 +1,10 @@
 use state.nu
 
+def provider-tool-name [name: string] { $name | str replace --all "." "__" }
+def canonical-tool-name [name: string] { $name | str replace --all "__" "." }
+
 def tool-spec [tool: record] {
-  { type: "function", function: { name: $tool.name, description: $tool.description, parameters: $tool.inputSchema } }
+  { type: "function", function: { name: (provider-tool-name $tool.name), description: $tool.description, parameters: $tool.inputSchema } }
 }
 
 def parse-arguments [value: any] {
@@ -12,7 +15,7 @@ def parse-arguments [value: any] {
 def response-call [call: record] {
   {
     id: ($call.id? | default "")
-    tool: ($call.function.name? | default "")
+    tool: (canonical-tool-name ($call.function.name? | default ""))
     input: (parse-arguments ($call.function.arguments? | default "{}"))
     provider: { type: ($call.type? | default "function"), id: ($call.id? | default "") }
   }

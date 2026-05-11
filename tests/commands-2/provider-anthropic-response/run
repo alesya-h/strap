@@ -5,12 +5,12 @@ use ../../../commands/provider-anthropic/lib/compile.nu *
 let event = (response-event {
   id: "msg_fixture"
   model: "claude-fixture-model"
-  content: [{ type: "text", text: "Need the echo tool." }, { type: "tool_use", id: "toolu_1", name: "json_echo.echo", input: { value: "anthropic-fixture" } }]
+  content: [{ type: "text", text: "Need the echo tool." }, { type: "tool_use", id: "toolu_1", name: "json_echo__echo", input: { value: "anthropic-fixture" } }]
   usage: {}
 })
 
 ok ($event.kind == "tool_request") "anthropic response parser converts tool_use into tool_request"
 ok ($event.to.0 == "harness") "anthropic tool request targets harness"
-ok ($event.calls.0.tool == "json_echo.echo") "anthropic parser preserves tool name"
+ok ($event.calls.0.tool == "json_echo.echo") "anthropic parser decodes provider-safe tool name"
 ok ($event.calls.0.input.value == "anthropic-fixture") "anthropic parser preserves tool input"
 has $event.text "Need the echo tool." "anthropic parser preserves assistant text"

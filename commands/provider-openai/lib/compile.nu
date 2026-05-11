@@ -1,5 +1,8 @@
 use state.nu
 
+def provider-tool-name [name: string] { $name | str replace --all "." "__" }
+def canonical-tool-name [name: string] { $name | str replace --all "__" "." }
+
 def parse-arguments [value: any] {
   let raw = ($value | default "{}")
   try { $raw | from json } catch { { raw: $raw } }
@@ -8,7 +11,7 @@ def parse-arguments [value: any] {
 def chat-call [call: record] {
   {
     id: ($call.id? | default "")
-    tool: ($call.function.name? | default "")
+    tool: (canonical-tool-name ($call.function.name? | default ""))
     input: (parse-arguments ($call.function.arguments? | default "{}"))
     provider: { type: ($call.type? | default "function"), id: ($call.id? | default "") }
   }
@@ -17,7 +20,7 @@ def chat-call [call: record] {
 def responses-call [item: record] {
   {
     id: ($item.call_id? | default ($item.id? | default ""))
-    tool: ($item.name? | default "")
+    tool: (canonical-tool-name ($item.name? | default ""))
     input: (parse-arguments ($item.arguments? | default "{}"))
     provider: { type: ($item.type? | default "function_call"), id: ($item.id? | default ""), call_id: ($item.call_id? | default "") }
   }
@@ -46,11 +49,11 @@ export def response-event [response: record, api: string] {
 }
 
 def chat-tool [tool: record] {
-  { type: "function", function: { name: $tool.name, description: $tool.description, parameters: $tool.inputSchema } }
+  { type: "function", function: { name: (provider-tool-name $tool.name), description: $tool.description, parameters: $tool.inputSchema } }
 }
 
 def responses-tool [tool: record] {
-  { type: "function", name: $tool.name, description: $tool.description, parameters: $tool.inputSchema }
+  { type: "function", name: (provider-tool-name $tool.name), description: $tool.description, parameters: $tool.inputSchema }
 }
 
 def compile-chat [statev: record, config: record, toolv: list] {

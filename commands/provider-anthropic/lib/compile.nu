@@ -1,13 +1,16 @@
 use state.nu
 
+def provider-tool-name [name: string] { $name | str replace --all "." "__" }
+def canonical-tool-name [name: string] { $name | str replace --all "__" "." }
+
 def tool-spec [tool: record] {
-  { name: $tool.name, description: $tool.description, input_schema: $tool.inputSchema }
+  { name: (provider-tool-name $tool.name), description: $tool.description, input_schema: $tool.inputSchema }
 }
 
 def response-call [item: record] {
   {
     id: ($item.id? | default "")
-    tool: ($item.name? | default "")
+    tool: (canonical-tool-name ($item.name? | default ""))
     input: ($item.input? | default {})
     provider: { type: "tool_use", id: ($item.id? | default "") }
   }

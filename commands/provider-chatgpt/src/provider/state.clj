@@ -50,12 +50,18 @@
         (seq text-parts) (str/join "\n" text-parts)
         :else (json/generate-string output)))))
 
+(defn provider-tool-name [name]
+  (str/replace (str name) "." "__"))
+
+(defn canonical-tool-name [name]
+  (str/replace (str name) "__" "."))
+
 (defn function-call-inputs [call]
   (concat
     [{:type "function_call"
       :id (or (get-in call [:provider :id]) (:id call))
       :call_id (or (get-in call [:provider :call_id]) (:id call))
-      :name (:tool call)
+      :name (provider-tool-name (:tool call))
       :arguments (json/generate-string (or (:input call) {}))}]
     (when (contains? call :ok)
       [{:type "function_call_output"
@@ -75,7 +81,7 @@
 
 (defn tool-spec [tool]
   {:type "function"
-   :name (:name tool)
+   :name (provider-tool-name (:name tool))
    :description (:description tool)
    :parameters (:inputSchema tool)})
 
@@ -105,7 +111,7 @@
 
 (defn response-call [item]
   {:id (or (:call_id item) (:id item))
-   :tool (:name item)
+   :tool (canonical-tool-name (:name item))
    :input (parse-json-object (:arguments item))
    :provider {:type (:type item)
               :id (:id item)
