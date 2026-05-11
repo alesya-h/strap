@@ -16,7 +16,7 @@
 
 (defn usage []
   (binding [*out* *err*]
-    (println "Usage: strap embed [--provider hash|chatgpt|openai|...] < {\"texts\":[...] }"))
+    (println "Usage: strap embed [--provider hash|openrouter|openai|...] [--model model] < {\"texts\":[...] }"))
   (System/exit 2))
 
 (defn read-json []
@@ -50,8 +50,13 @@
     (str (fs/path root "bin" "strap"))
     "strap"))
 
-(defn delegate-provider [provider input]
-  (let [res (sh/sh (strap-bin) "provider" provider "embed" :in input)]
+(defn provider-args [provider opts]
+  (cond-> [(strap-bin) "provider" provider "embed"]
+    (:model opts) (conj "--model" (:model opts))
+    (:dimensions opts) (conj "--dimensions" (:dimensions opts))))
+
+(defn delegate-provider [provider opts input]
+  (let [res (apply sh/sh (concat (provider-args provider opts) [:in input]))]
     (when-not (zero? (:exit res))
       (throw (ex-info (or (not-empty (:err res)) (not-empty (:out res)) (str "provider " provider " embed failed")) {})))
     (print (:out res))))
@@ -60,7 +65,7 @@
   (try
     (when (some #{"--help" "-h"} args) (usage))
     (let [{:keys [opts]} (parse-args args)
-          provider (or (:provider opts) (System/getenv "STRAP_EMBED_PROVIDER") (System/getenv "STRAP_ZK_EMBED_PROVIDER") "chatgpt")
+           provider (or (:provider opts) (System/getenv "STRAP_EMBED_PROVIDER") (System/getenv "STRAP_ZK_EMBED_PROVIDER") "openrouter")
           input-raw (slurp *in*)
           input (if (empty? (str/trim input-raw)) {} (json/parse-string input-raw true))
           texts (cond
@@ -72,7 +77,7 @@
           (println (json/generate-string {:model (str "strap-hash-embedding-v1/" dimensions)
                                           :dimensions dimensions
                                           :embeddings (mapv #(hash-embedding % dimensions) texts)})))
-        (delegate-provider provider input-raw)))
+        (delegate-provider provider opts input-raw)))
     (catch Throwable error
       (binding [*out* *err*]
         (println (or (ex-message error) (.getMessage error))))

@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 use ../../lib/test.nu *
 
-with-env { STRAP_ZK_EMBED_PROVIDER: "chatgpt" } {
+with-env { STRAP_ZK_EMBED_PROVIDER: "openrouter" } {
   let created = (call-json [zk create --scope user --title "ZK command test" --body "ZK command body links to [[ZK target test]]." --tags test])
   ok ($created.ok == true) "zk create succeeds"
   call-json [zk create --scope user --title "ZK target test" --body "Target body." --tags test] | ignore

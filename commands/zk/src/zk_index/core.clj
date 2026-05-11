@@ -96,6 +96,6 @@
   (let [input (json/generate-string {:texts [text]})
         out (if-let [cmd (not-empty (env "STRAP_ZK_EMBED_CMD"))]
               (run-command ["sh" "-c" cmd] input)
-              (run-strap ["embed" "--provider" (or (env "STRAP_ZK_EMBED_PROVIDER") "chatgpt")] input))
+              (run-strap ["embed" "--provider" (or (env "STRAP_ZK_EMBED_PROVIDER") "openrouter")] input))
         parsed (parse-json out)]
     {:model (:model parsed) :dimensions (:dimensions parsed) :vector (first (:embeddings parsed))}))

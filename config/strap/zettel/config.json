@@ -1,6 +1,6 @@
 {
   "database": "$STRAP_WORK/zettel/zettel.sqlite",
   "sqlite_vec_load": "vec0",
-  "embedding_provider": "chatgpt",
-  "embedding_model": "text-embedding-3-small"
+  "embedding_provider": "openrouter",
+  "embedding_model": "nvidia/llama-nemotron-embed-vl-1b-v2:free"
 }

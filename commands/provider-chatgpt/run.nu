@@ -15,7 +15,7 @@ def env-map [] {
 }
 
 def takes-input [command: string] {
-  $command in [compile call complete embed]
+  $command in [compile call complete]
 }
 
 export def --wrapped main [command?: string, ...args: string] {

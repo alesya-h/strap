@@ -27,7 +27,7 @@ def default-api [provider: string] {
 def default-base-url [provider: string, api: string] {
   match $provider {
     "anthropic" => "https://api.anthropic.com/v1/messages"
-    "openrouter" => "https://openrouter.ai/api/v1/chat/completions"
+    "openrouter" => { if $api == "embeddings" { "https://openrouter.ai/api/v1/embeddings" } else { "https://openrouter.ai/api/v1/chat/completions" } }
     "chatgpt" => "https://chatgpt.com/backend-api/codex/responses"
     _ => { if $api == "chat" { "https://api.openai.com/v1/chat/completions" } else { "https://api.openai.com/v1/responses" } }
   }

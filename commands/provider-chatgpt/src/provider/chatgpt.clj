@@ -10,7 +10,7 @@
 
 (defn usage []
   (binding [*out* *err*]
-    (println "Usage: strap provider chatgpt <compile|call|complete|embed|auth> [args]"))
+    (println "Usage: strap provider chatgpt <compile|call|complete|auth> [args]"))
   (System/exit 2))
 
 (defn take-opt [xs flag default]
@@ -76,20 +76,7 @@
     (write-json (update-in input-state [:root :children] conj (assoc (state/response-event response) :type "event")))))
 
 (defn command-embed [argv]
-  (let [[embedding-model _] (take-opt argv "--model" (or (System/getenv "STRAP_EMBED_MODEL")
-                                                          (System/getenv "STRAP_ZK_EMBED_MODEL")
-                                                          "text-embedding-3-small"))
-        auth-profile (or (System/getenv "STRAP_ZK_CHATGPT_MODEL") (System/getenv "STRAP_CHATGPT_MODEL") "current")
-        config (model/load-model auth-profile)
-        input (read-json)
-        texts (or (:texts input) [(:text input "")])
-        response (curl-json "https://api.openai.com/v1/embeddings"
-                            (auth/auth-headers config)
-                            {:model embedding-model :input texts})]
-    (assert-chatgpt config)
-    (write-json {:model embedding-model
-                 :dimensions (count (get-in response [:data 0 :embedding]))
-                 :embeddings (mapv :embedding (:data response))})))
+  (throw (ex-info "ChatGPT does not support embeddings; use `strap embed --provider openrouter` instead." {})))
 
 (defn command-auth-login [xs token-file]
   (let [[timeout xs] (take-opt xs "--timeout-seconds" "300")

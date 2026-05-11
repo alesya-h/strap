@@ -1,0 +1,7 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let embedded = ({ texts: ["openrouter provider embedding"] } | pipe-json [provider-openrouter embed --model nvidia-llama-nemotron-embed-vl-1b-v2-openrouter])
+ok ($embedded.model == "nvidia/llama-nemotron-embed-vl-1b-v2:free") "provider-openrouter embed uses NVIDIA free model"
+ok (($embedded.embeddings | length) > 0) "provider-openrouter embed returns at least one vector"
+ok (($embedded.embeddings.0 | length) == $embedded.dimensions) "provider-openrouter embed reports vector dimensions"

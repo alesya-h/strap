@@ -12,5 +12,15 @@ export def secret [auth: record] {
 }
 
 export def post-json [url: string, headers: list<string>, body: record] {
-  ^curl -sS -X POST $url -H "content-type: application/json" ...$headers -d ($body | to json --raw) | from json
+  let curl_headers = ($headers | each {|header| ["-H", $header] } | flatten)
+  let result = (^curl -sS -X POST $url -H "content-type: application/json" ...$curl_headers -d ($body | to json --raw) | complete)
+  if $result.exit_code != 0 {
+    error make { msg: ($result.stderr | default $result.stdout) }
+  }
+  let response = ($result.stdout | from json)
+  if "error" in ($response | columns) {
+    let err = $response.error
+    error make { msg: ($err.message? | default ($err | to json --raw)) }
+  }
+  $response
 }

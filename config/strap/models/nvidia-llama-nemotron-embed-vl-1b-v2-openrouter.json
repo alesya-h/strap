@@ -1,0 +1,11 @@
+{
+  "name": "nvidia-llama-nemotron-embed-vl-1b-v2-openrouter",
+  "provider": "openrouter",
+  "api": "embeddings",
+  "model_id": "nvidia/llama-nemotron-embed-vl-1b-v2:free",
+  "auth": {
+    "type": "api_key",
+    "env": "OPENROUTER_API_KEY"
+  },
+  "parameters": {}
+}
