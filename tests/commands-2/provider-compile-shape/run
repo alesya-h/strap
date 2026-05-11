@@ -1,0 +1,26 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let state = (state-with-user "PROVIDER_SHAPE_USER" | upsert actors.assistant.self.private "PROVIDER_SHAPE_SYSTEM")
+
+let chatgpt = ($state | pipe-json [provider-chatgpt compile --tools json_echo])
+has $chatgpt.instructions "PROVIDER_SHAPE_SYSTEM" "chatgpt compile includes system instructions"
+ok (($chatgpt.input | any {|item| (($item.role? | default "") == "user") and (($item.content? | default "") | str contains "PROVIDER_SHAPE_USER") })) "chatgpt compile includes user chat input"
+ok ($chatgpt.tools.0.name == "json_echo.echo") "chatgpt compile emits tool schema"
+ok ($chatgpt.tools.0.parameters.properties.value.type == "string") "chatgpt tool schema preserves input properties"
+
+let openrouter = ($state | pipe-json [provider-openrouter compile --model nvidia-nemotron-3-super-120b-a12b-openrouter --tools json_echo])
+ok ($openrouter.messages.0.role == "system") "openrouter compile emits system message"
+has $openrouter.messages.0.content "PROVIDER_SHAPE_SYSTEM" "openrouter system message includes actor frame"
+ok (($openrouter.messages | any {|item| (($item.content? | default "") | str contains "PROVIDER_SHAPE_USER") })) "openrouter compile includes user chat message"
+ok ($openrouter.tools.0.function.name == "json_echo.echo") "openrouter compile emits OpenAI-style tool schema"
+
+let anthropic = ($state | pipe-json [provider-anthropic compile --model claude-haiku-4.5-anthropic --tools json_echo])
+has $anthropic.system "PROVIDER_SHAPE_SYSTEM" "anthropic compile includes system prompt"
+ok (($anthropic.messages | any {|item| (($item.content? | default "") | str contains "PROVIDER_SHAPE_USER") })) "anthropic compile includes user message"
+ok ($anthropic.tools.0.name == "json_echo.echo") "anthropic compile emits tool schema"
+
+let openai = ($state | pipe-json [provider-openai compile --model gpt-5.1-openai --tools json_echo])
+has $openai.instructions "PROVIDER_SHAPE_SYSTEM" "openai responses compile includes system instructions"
+has $openai.input "PROVIDER_SHAPE_USER" "openai responses compile includes user input"
+ok ($openai.tools.0.name == "json_echo.echo") "openai responses compile emits tool schema"

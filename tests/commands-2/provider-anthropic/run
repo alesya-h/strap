@@ -7,3 +7,4 @@ let compiled = ($state | pipe-json [provider-anthropic compile --model claude-ha
 ok ($compiled.model == "claude-haiku-4-5-20251001") "anthropic compile selects Claude Haiku 4.5"
 let completed = ($state | pipe-json [provider-anthropic complete --model claude-haiku-4.5-anthropic --tools none])
 non-empty (($completed.root.children | last).text) "anthropic complete returns text"
+has (($completed.root.children | last).text) "STRAP_ANTHROPIC_OK" "anthropic complete returns requested sentinel"

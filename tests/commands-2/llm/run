@@ -8,3 +8,4 @@ let completed = ($state | pipe-json [llm complete --tools none])
 let last = ($completed.root.children | last)
 ok ($last.from == "assistant") "llm complete appends assistant event"
 non-empty $last.text "llm complete returns model text"
+has $last.text "STRAP_LLM_OK" "llm complete returns requested sentinel"

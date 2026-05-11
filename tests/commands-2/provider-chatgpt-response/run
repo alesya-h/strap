@@ -1,0 +1,13 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+let src = (($env.STRAP_ROOT? | default (pwd)) | path join commands provider-chatgpt src)
+let code = '(require (quote [provider.state :as state]) (quote [cheshire.core :as json])) (println (json/generate-string (state/response-event {:id "resp_fixture" :model "gpt-5.5" :output_text "" :output [{:type "function_call" :id "fc_1" :call_id "call_cgpt" :name "json_echo.echo" :arguments "{\"value\":\"chatgpt-fixture\"}"}]}) {:pretty false}))'
+let result = (^bb -cp $src -e $code | complete)
+ok ($result.exit_code == 0) $"chatgpt response fixture failed: ($result.stderr)"
+let event = ($result.stdout | from json)
+
+ok ($event.kind == "tool_request") "chatgpt response parser converts function_call into tool_request"
+ok ($event.to.0 == "harness") "chatgpt tool request targets harness"
+ok ($event.calls.0.tool == "json_echo.echo") "chatgpt parser preserves tool name"
+ok ($event.calls.0.input.value == "chatgpt-fixture") "chatgpt parser decodes tool arguments"

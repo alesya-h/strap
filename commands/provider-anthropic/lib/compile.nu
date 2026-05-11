@@ -4,6 +4,15 @@ def tool-spec [tool: record] {
   { name: $tool.name, description: $tool.description, input_schema: $tool.inputSchema }
 }
 
+def response-call [item: record] {
+  {
+    id: ($item.id? | default "")
+    tool: ($item.name? | default "")
+    input: ($item.input? | default {})
+    provider: { type: "tool_use", id: ($item.id? | default "") }
+  }
+}
+
 export def request [statev: record, config: record, toolv: list] {
   {
     model: $config.model
@@ -18,12 +27,14 @@ export def request [statev: record, config: record, toolv: list] {
 
 export def response-event [response: record] {
   let text = (($response.content? | default []) | where type == "text" | get text? | str join "\n") | default ""
-  {
+  let calls = (($response.content? | default []) | where type == "tool_use" | each {|item| response-call $item })
+  let base = {
     type: "event"
     from: "assistant"
-    to: ["user"]
-    kind: "message"
+    to: (if ($calls | is-empty) { ["user"] } else { ["harness"] })
+    kind: (if ($calls | is-empty) { "message" } else { "tool_request" })
     text: $text
     provider: { name: "anthropic.messages", id: $response.id, model: $response.model, usage: ($response.usage? | default null) }
   }
+  if ($calls | is-empty) { $base } else { $base | insert calls $calls }
 }

@@ -8,3 +8,4 @@ let completed = ($state | pipe-json [provider chatgpt complete --tools none])
 let last = ($completed.root.children | last)
 ok ($last.from == "assistant") "provider facade appends assistant response"
 non-empty $last.text "provider facade returns ChatGPT text"
+has $last.text "STRAP_PROVIDER_OK" "provider facade returns requested sentinel"

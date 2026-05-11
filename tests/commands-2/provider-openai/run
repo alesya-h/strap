@@ -7,3 +7,4 @@ let compiled = ($state | pipe-json [provider-openai compile --model gpt-5.1-open
 ok ($compiled.model | str contains "gpt") "openai compile selects GPT model"
 let completed = ($state | pipe-json [provider-openai complete --model gpt-5.1-openai --tools none])
 non-empty (($completed.root.children | last).text) "openai complete returns text"
+has (($completed.root.children | last).text) "STRAP_OPENAI_OK" "openai complete returns requested sentinel"

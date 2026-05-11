@@ -1,24 +1,48 @@
 use state.nu
 
+def parse-arguments [value: any] {
+  let raw = ($value | default "{}")
+  try { $raw | from json } catch { { raw: $raw } }
+}
+
+def chat-call [call: record] {
+  {
+    id: ($call.id? | default "")
+    tool: ($call.function.name? | default "")
+    input: (parse-arguments ($call.function.arguments? | default "{}"))
+    provider: { type: ($call.type? | default "function"), id: ($call.id? | default "") }
+  }
+}
+
+def responses-call [item: record] {
+  {
+    id: ($item.call_id? | default ($item.id? | default ""))
+    tool: ($item.name? | default "")
+    input: (parse-arguments ($item.arguments? | default "{}"))
+    provider: { type: ($item.type? | default "function_call"), id: ($item.id? | default ""), call_id: ($item.call_id? | default "") }
+  }
+}
+
+def event-base [response: record, provider_name: string, text: string, calls: list] {
+  let base = {
+    from: "assistant"
+    to: (if ($calls | is-empty) { ["user"] } else { ["harness"] })
+    kind: (if ($calls | is-empty) { "message" } else { "tool_request" })
+    text: $text
+    provider: { name: $provider_name, id: $response.id, model: $response.model, usage: ($response.usage? | default null) }
+  }
+  if ($calls | is-empty) { $base } else { $base | insert calls $calls }
+}
+
 export def response-event [response: record, api: string] {
   if $api == "chat" {
     let message = ($response.choices.0.message? | default {})
-    return {
-      from: "assistant"
-      to: ["user"]
-      kind: "message"
-      text: ($message.content? | default "")
-      provider: { name: "openai.chat", id: $response.id, model: $response.model, usage: ($response.usage? | default null) }
-    }
+    let calls = (($message.tool_calls? | default []) | each {|call| chat-call $call })
+    return (event-base $response "openai.chat" ($message.content? | default "") $calls)
   }
 
-  {
-    from: "assistant"
-    to: ["user"]
-    kind: "message"
-    text: ($response.output_text? | default "")
-    provider: { name: "openai.responses", id: $response.id, model: $response.model, usage: ($response.usage? | default null) }
-  }
+  let calls = (($response.output? | default []) | where type == "function_call" | each {|item| responses-call $item })
+  event-base $response "openai.responses" ($response.output_text? | default "") $calls
 }
 
 def chat-tool [tool: record] {
