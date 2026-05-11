@@ -1,0 +1,14 @@
+{
+  "name": "nvidia-nemotron-3-super-120b-a12b-openrouter",
+  "provider": "openrouter",
+  "api": "chat",
+  "model_id": "nvidia/nemotron-3-super-120b-a12b:free",
+  "auth": {
+    "type": "api_key",
+    "env": "OPENROUTER_API_KEY"
+  },
+  "parameters": {
+    "temperature": 0,
+    "max_tokens": 32
+  }
+}

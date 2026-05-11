@@ -1,9 +1,8 @@
 #!/usr/bin/env nu
 use ../../lib/test.nu *
 
-paid-only "OpenRouter completion calls require --with-paid-providers"
 let state = (state-with-user "Reply with exactly STRAP_OPENROUTER_OK and no extra words.")
-let compiled = ($state | pipe-json [provider-openrouter compile --model openai-gpt-5.1-openrouter --tools none])
-ok ($compiled.model | str contains "gpt") "openrouter compile selects GPT model"
-let completed = ($state | pipe-json [provider-openrouter complete --model openai-gpt-5.1-openrouter --tools none])
+let compiled = ($state | pipe-json [provider-openrouter compile --model nvidia-nemotron-3-super-120b-a12b-openrouter --tools none])
+ok ($compiled.model == "nvidia/nemotron-3-super-120b-a12b:free") "openrouter compile selects free NVIDIA completion model"
+let completed = ($state | pipe-json [provider-openrouter complete --model nvidia-nemotron-3-super-120b-a12b-openrouter --tools none])
 non-empty (($completed.root.children | last).text) "openrouter complete returns text"
