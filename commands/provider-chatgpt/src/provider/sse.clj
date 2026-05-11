@@ -1,6 +1,7 @@
 (ns provider.sse
   (:require [cheshire.core :as json]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import [java.io BufferedReader InputStreamReader]))
 
 (defn stream? [text]
   (or (str/starts-with? text "event:")
@@ -30,6 +31,26 @@
   (->> (str/split text #"\r?\n\r?\n")
        (keep parse-block)
        vec))
+
+(defn read-stream [input-stream emit]
+  (let [out (StringBuilder.)
+        block (StringBuilder.)]
+    (with-open [reader (BufferedReader. (InputStreamReader. input-stream))]
+      (loop []
+        (when-let [line (.readLine reader)]
+          (.append out line)
+          (.append out "\n")
+          (if (empty? line)
+            (do
+              (when-let [payload (parse-block (str block))] (emit payload))
+              (.setLength block 0))
+            (do
+              (.append block line)
+              (.append block "\n")))
+          (recur))))
+    (when (pos? (.length block))
+      (when-let [payload (parse-block (str block))] (emit payload)))
+    (str out)))
 
 (defn response-payload? [payload]
   (and (:id payload) (or (:output payload) (:output_text payload))))

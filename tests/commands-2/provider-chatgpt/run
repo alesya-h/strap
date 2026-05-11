@@ -4,7 +4,11 @@ use ../../lib/test.nu *
 let state = (state-with-user "Reply with exactly STRAP_CHATGPT_OK and no extra words.")
 let compiled = ($state | pipe-json [provider-chatgpt compile --tools none])
 ok ($compiled.model == "gpt-5.5") "provider-chatgpt compile uses current model"
-let completed = ($state | pipe-json [provider-chatgpt complete --tools none])
+let result = ($state | to json | run-external (strap-bin) ...(argv [provider-chatgpt complete --tools none]) | complete)
+ok ($result.exit_code == 0) $"strap provider-chatgpt complete failed\nstdout:\n($result.stdout)\nstderr:\n($result.stderr)"
+let chunks = ($result.stderr | lines | where {|line| ($line | str trim) != "" } | each {|line| $line | from json })
+ok (($chunks | any {|item| $item.kind == "provider_chunk" })) "provider-chatgpt streams provider chunks to stderr as jsonl"
+let completed = ($result.stdout | from json)
 let last = ($completed.root.children | last)
 ok ($last.provider.name == "chatgpt.responses") "provider-chatgpt records provider metadata"
 non-empty $last.text "provider-chatgpt complete returns text"

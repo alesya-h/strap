@@ -25,6 +25,10 @@
 (defn write-json [value]
   (println (json/generate-string value {:pretty true})))
 
+(defn write-jsonl-err [value]
+  (binding [*out* *err*]
+    (println (json/generate-string value))))
+
 (defn load-tools [group]
   (if (= group "none")
     []
@@ -35,14 +39,22 @@
         (throw (ex-info (or (:err result) (:out result)) {})))
       (json/parse-string (:out result) true))))
 
+(defn emit-sse-payload [payload]
+  (write-jsonl-err {:kind "provider_chunk"
+                    :provider "chatgpt.responses"
+                    :event (:event payload)
+                    :chunk (dissoc payload :event)}))
+
 (defn curl-json [url headers body]
-  (let [args (concat ["curl" "-sS" "-X" "POST" url "-H" "content-type: application/json"]
-                     (mapcat (fn [[k v]] ["-H" (str k ": " v)]) (remove (comp nil? val) headers))
-                     ["-d" (json/generate-string body)])
-        result (apply process/shell {:out :string :err :string :continue true} args)]
+  (let [args (concat ["curl" "-sS" "-N" "-X" "POST" url "-H" "content-type: application/json"]
+                      (mapcat (fn [[k v]] ["-H" (str k ": " v)]) (remove (comp nil? val) headers))
+                      ["-d" (json/generate-string body)])
+        proc (apply process/process {:out :stream :err :string :continue true} args)
+        out (sse/read-stream (:out proc) emit-sse-payload)]
+    (let [result @proc]
     (when-not (zero? (:exit result))
       (throw (ex-info (:err result) {})))
-    (sse/decode (:out result))))
+      (sse/decode out))))
 
 (defn assert-chatgpt [config]
   (when-not (= (:provider config) "chatgpt")
