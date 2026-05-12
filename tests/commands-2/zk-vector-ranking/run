@@ -1,0 +1,32 @@
+#!/usr/bin/env nu
+use ../../lib/test.nu *
+
+with-env { STRAP_ZK_EMBED_PROVIDER: "openrouter" } {
+  # Programming cluster
+  call-json [zk create --scope user --title "vec-prog-debug" --body "Debugging segfaults in C programs requires understanding memory layout and pointer arithmetic." --tags vec-rank] | ignore
+  call-json [zk create --scope user --title "vec-prog-api" --body "REST API design patterns include resource naming, pagination, and proper HTTP status codes." --tags vec-rank] | ignore
+  call-json [zk create --scope user --title "vec-prog-test" --body "Unit testing with mocks and stubs helps isolate components during software development." --tags vec-rank] | ignore
+
+  # Cooking cluster
+  call-json [zk create --scope user --title "vec-cook-bread" --body "Sourdough bread requires a mature starter, strong flour, water, and salt with a long bulk fermentation." --tags vec-rank] | ignore
+  call-json [zk create --scope user --title "vec-cook-onion" --body "Caramelizing onions slowly over low heat brings out deep sweetness for French onion soup." --tags vec-rank] | ignore
+  call-json [zk create --scope user --title "vec-cook-choc" --body "Tempering chocolate involves carefully controlling temperature to achieve a glossy snap finish." --tags vec-rank] | ignore
+
+  # Vector search with a programming query
+  let results = (call-json [zk search-vector "How do I write automated tests for my software?" --limit 6])
+  let titles = ($results | get title)
+
+  # Programming notes should appear in results
+  ok ("vec-prog-test" in $titles) "vector search returns relevant programming note (testing)"
+  ok (($titles | where {|t| $t | str starts-with "vec-prog" } | length) >= 2) "vector search returns at least 2 programming notes in top 6"
+
+  # Cooking notes should NOT dominate the top results
+  let top3_titles = ($titles | first 3)
+  ok (($top3_titles | where {|t| $t | str starts-with "vec-cook" } | length) == 0) "vector search top 3 excludes unrelated cooking notes"
+
+  # Reverse: cooking query should find cooking notes, not programming
+  let cook_results = (call-json [zk search-vector "What temperature for baking sourdough bread?" --limit 6])
+  let cook_titles = ($cook_results | get title)
+  ok ("vec-cook-bread" in $cook_titles) "vector search returns relevant cooking note (sourdough)"
+  ok (($cook_titles | first 3 | where {|t| $t | str starts-with "vec-prog" } | length) == 0) "cooking query top 3 excludes unrelated programming notes"
+}
