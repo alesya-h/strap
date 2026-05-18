@@ -1,14 +1,8 @@
 #!/usr/bin/env nu
 
 def roots [] {
-  let configured = ($env.STRAP_MODEL_PATH? | default "" | split row ":" | where {|item| $item != "" })
-  let session = if (($env.STRAP_SESSION? | default "") == "") { [] } else { [($env.STRAP_SESSION | path join overlay models)] }
-  $configured | append $session | append [
-    (($env.STRAP_WORK? | default ((pwd) | path join .strap-user)) | path join models)
-    (($env.STRAP_PROJECT? | default ((pwd) | path join .strap)) | path join models)
-    (($env.STRAP_GLOBAL? | default ($nu.home-dir | path join .config strap)) | path join models)
-    (($env.STRAP_ROOT? | default (pwd)) | path join config strap models)
-  ]
+  let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+  run-external $strap layers roots model | from json | get root
 }
 
 def active-work-root [] {

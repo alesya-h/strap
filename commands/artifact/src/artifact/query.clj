@@ -11,10 +11,11 @@
         (fn [layer]
           (when-let [root (get roots (keyword layer))]
             (discover/discover-artifacts type root layer)))
-        c/layers))))
+        (c/layers)))))
 
 (defn lower-priority? [candidate artifact]
-  (> (.indexOf c/layers (:layer candidate)) (.indexOf c/layers (:layer artifact))))
+  (let [layers (c/layers)]
+    (> (.indexOf layers (:layer candidate)) (.indexOf layers (:layer artifact)))))
 
 (defn visible-status [artifact base]
   (if (#{"session" "user"} (:layer artifact))
@@ -41,7 +42,7 @@
 (defn list-artifacts [type include-paths]
   (let [all (artifacts-by-layer type)
         seen (atom #{})]
-    (->> c/layers
+    (->> (c/layers)
          (mapcat
            (fn [layer]
              (for [artifact (filter #(= (:layer %) layer) all)
@@ -56,7 +57,7 @@
   (into {} (map (fn [type] [type (list-artifacts type include-paths)]) c/artifact-types)))
 
 (defn find-visible [type name all]
-  (let [matches (vec (mapcat (fn [layer] (filter #(and (= (:layer %) layer) (= (:name %) name)) all)) c/layers))]
+  (let [matches (vec (mapcat (fn [layer] (filter #(and (= (:layer %) layer) (= (:name %) name)) all)) (c/layers)))]
     (when (empty? matches)
       (throw (ex-info (str type " artifact not found: " name) {:type type :name name})))
     (first matches)))
@@ -73,10 +74,11 @@
       (throw (ex-info (str type " artifact not found in a " message " layer: " name) {:type type :name name}))))
 
 (defn first-promotable-layer [type name all]
-  (first-layer-with c/mutable-layers type name all "promotable"))
+  (first-layer-with (c/mutable-layers) type name all "promotable"))
 
 (defn first-discardable-layer [type name all]
   (first-layer-with ["session" "user"] type name all "discardable"))
 
 (defn next-layer [layer]
-  (nth c/layers (inc (.indexOf c/layers layer)) nil))
+  (let [layers (c/layers)]
+    (nth layers (inc (.indexOf layers layer)) nil)))

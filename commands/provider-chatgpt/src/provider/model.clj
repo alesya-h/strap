@@ -34,14 +34,13 @@
   (when-let [session (env "STRAP_SESSION")]
     (str (fs/path session "overlay"))))
 
+(defn layer-path [entry]
+  (let [[_ path] (str/split entry #"=" 2)]
+    (str (fs/absolutize (or path entry)))))
+
 (defn roots []
-  (concat
-    (remove str/blank? (str/split (or (env "STRAP_MODEL_PATH") "") (re-pattern java.io.File/pathSeparator)))
-    (when-let [session (session-overlay)] [(str (fs/path session "models"))])
-    [(str (fs/path (work-root) "models"))
-     (str (fs/path (project-root) "models"))
-     (str (fs/path (global-root) "models"))
-     (str (fs/path (root) "config" "strap" "models"))]))
+  (map #(str (fs/path (layer-path %) "models"))
+       (remove str/blank? (str/split (or (env "STRAP_PATH") "") (re-pattern java.io.File/pathSeparator)))))
 
 (defn expand-home [p]
   (if (str/starts-with? (str p) "~")

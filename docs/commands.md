@@ -22,15 +22,13 @@ my-command/
 
 Commands receive:
 
-- `STRAP_ROOT`
-- `STRAP_CONFIG`
-- `STRAP_GLOBAL`
-- `STRAP_PROJECT`
+- `STRAP_PATH`
 - `STRAP_SESSION` when an active session exists
-- `STRAP_WORK`
 - `STRAP_WORKSPACE`
 - `STRAP_CMD_NAME`
 - `STRAP_CMD_DIR`
+
+The runner also exports derived named-layer environment variables such as `STRAP_ROOT`, `STRAP_WORK`, `STRAP_PROJECT`, and `STRAP_GLOBAL` for existing command capsules. New artifact discovery should use `STRAP_PATH` through `strap layers` rather than rebuilding per-root search lists.
 
 Command safety is not described by command-owned metadata. Use launch profiles, sandboxing, and restricted tool/jsmcp configuration for restricted modes.
 

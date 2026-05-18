@@ -1,9 +1,8 @@
 #!/usr/bin/env nu
 
 def command-dirs [] {
-  let configured = ($env.STRAP_COMMAND_PATH? | default "" | split row ":" | where {|item| $item != "" })
-  let session = if (($env.STRAP_SESSION? | default "") == "") { [] } else { [($env.STRAP_SESSION | path join overlay commands)] }
-  $configured | append $session | append [($env.STRAP_WORK | path join commands) ($env.STRAP_PROJECT | path join commands) ($env.STRAP_GLOBAL | path join commands) ($env.STRAP_ROOT | path join commands)]
+  let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+  run-external $strap layers roots command | from json | get root
 }
 
 def read-desc [dir: string] {

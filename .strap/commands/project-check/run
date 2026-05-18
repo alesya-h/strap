@@ -130,7 +130,7 @@ check-content-guards
 check-command-syntax
 check-command-surfaces
 check-capsule-files
-run-external jq empty commands/mcp/package.json config/strap/config.json ...((glob --no-dir "config/strap/models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
+run-external jq empty commands/mcp/package.json config/strap/config.json ...((glob --no-dir "models/*.json") ++ (glob --no-dir "config/strap/tool-groups/*.json") ++ (glob --no-dir "config/strap/zettel/config.json"))
 with-env { STRAP_CMD_DIR: "commands/zk" } { expect-exit2 [bb commands/zk/run --help] }
 with-env { STRAP_CMD_DIR: "commands/zk" } { expect-exit2 [bb commands/zk/inner/index --help] }
 expect-exit2 [bb -cp commands/provider-chatgpt/src -m provider.chatgpt]

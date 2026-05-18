@@ -1,14 +1,8 @@
 #!/usr/bin/env nu
 
 def roots [] {
-  let configured = ($env.STRAP_AGENT_PATH? | default "" | split row ":" | where {|item| $item != "" })
-  let session = if (($env.STRAP_SESSION? | default "") == "") { [] } else { [($env.STRAP_SESSION | path join overlay agents)] }
-  $configured | append $session | append [
-    (($env.STRAP_WORK? | default ((pwd) | path join .strap-user)) | path join agents)
-    (($env.STRAP_PROJECT? | default ((pwd) | path join .strap)) | path join agents)
-    (($env.STRAP_CONFIG? | default (($env.STRAP_ROOT? | default (pwd)) | path join config strap)) | path join agents)
-    (($env.STRAP_ROOT? | default (pwd)) | path join agents)
-  ]
+  let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+  run-external $strap layers roots agent | from json | get root
 }
 
 def trim-quotes [] { $in | str trim | str replace -r '^"|"$' "" }

@@ -38,10 +38,8 @@ def selected [only: string, layer: string] {
   }
 }
 
-def command-path [root: string] {
-  let project_commands = ($root | path join .strap commands)
-  let old = ($env.STRAP_COMMAND_PATH? | default "")
-  if $old == "" { $project_commands } else { $"($project_commands):($old)" }
+def layer-path [root: string, work: string, project: string, global: string] {
+  [($root | path join .strap) $"user=($work)" $"project=($project)" $"global=($global)"] | str join (char esep)
 }
 
 def run-one [test: record, run_id: string, with_paid: bool] {
@@ -63,7 +61,7 @@ def run-one [test: record, run_id: string, with_paid: bool] {
     STRAP_WORK: ($case_tmp | path join work)
     STRAP_PROJECT: ($case_tmp | path join project)
     STRAP_GLOBAL: ($case_tmp | path join global)
-    STRAP_COMMAND_PATH: (command-path $root)
+    STRAP_PATH: (layer-path $root ($case_tmp | path join work) ($case_tmp | path join project) ($case_tmp | path join global))
   }
   if $with_paid { $envs = ($envs | insert STRAP_WITH_PAID_PROVIDERS "1") }
   print $"test ($test.id)"

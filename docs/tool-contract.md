@@ -1,6 +1,6 @@
 # Tool Contract
 
-Tool artifacts are grouped directories under `tools/<group>/` or a directory listed in `STRAP_TOOL_PATH`.
+Tool artifacts are grouped directories under `tools/<group>/` in any layer listed by `STRAP_PATH`.
 
 Required files:
 

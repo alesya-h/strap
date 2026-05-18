@@ -148,7 +148,7 @@ Current state: capability separation is partly implemented, but restricted modes
 
 ## Persistence And Session Management
 
-- State files are explicit JSON documents, and `strap session` provides a user-local session store under `$STRAP_WORK/sessions`.
+- State files are explicit JSON documents, and `strap session` provides a user-local session store under the user layer's `sessions/` directory.
 - Session directories include `meta.json`, `state.json`, `trace.jsonl`, `provider-requests/`, `tool-results/`, `overlay/`, and session-local `.jj/` history.
 - No index of sessions, branches, summaries, and zettelkasten references.
 - No garbage collection/pruning story for old runs.

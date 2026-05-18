@@ -10,14 +10,8 @@ def root [] { $env.STRAP_ROOT? | default (pwd) }
 def workspace [] { $env.STRAP_WORKSPACE? | default (pwd) }
 
 def tool-dirs [] {
-  let configured = (($env.STRAP_TOOL_PATH? | default "") | split row ":" | where {|x| $x != "" })
-  let session = if (($env.STRAP_SESSION? | default "") == "") { [] } else { [($env.STRAP_SESSION | path join overlay tools)] }
-  $configured | append $session | append [
-    ($env.STRAP_WORK? | default (workspace | path join .strap-user) | path join tools)
-    ($env.STRAP_PROJECT? | default (workspace | path join .strap) | path join tools)
-    ($env.STRAP_GLOBAL? | default (($env.XDG_CONFIG_HOME? | default ($env.HOME | path join .config)) | path join strap) | path join tools)
-    (root | path join tools)
-  ]
+  let strap = ($env.STRAP_BIN? | default (root | path join bin strap))
+  run-external $strap layers roots tool | from json | get root
 }
 
 def group-dirs [] {

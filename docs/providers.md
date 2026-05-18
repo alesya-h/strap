@@ -10,7 +10,7 @@ strap state init \
 | strap llm complete --tools all
 ```
 
-Checked-in model profiles live in `config/strap/models/`. `current.json` is a Linux symlink to the selected default profile.
+Checked-in model profiles live in the root layer's `models/` directory. `current.json` selects the default profile.
 
 Inspect and select models with:
 
@@ -160,7 +160,7 @@ Model-profile commands:
 ```bash
 strap llm compile --model current < state.json
 strap llm call --model gpt-5.5-chatgpt < state.json
-strap llm complete --model config/strap/models/gpt-5.1-openai.json < state.json
+strap llm complete --model models/gpt-5.1-openai.json < state.json
 ```
 
 Provider-specific commands are available when you want to target the adapter explicitly:

@@ -1,22 +1,13 @@
 (ns cli.commands
   (:require [babashka.fs :as fs]
             [clojure.string :as str]
-            [cli.env :as env]))
+            [cli.layers :as layers]))
 
 (defn maybe-join [root name]
   (if root [(str (fs/path root name))] []))
 
 (defn command-dirs []
-  (let [configured (remove str/blank?
-                           (str/split (or (env/env "STRAP_COMMAND_PATH") "")
-                                      (re-pattern java.io.File/pathSeparator)))
-        session (env/strap-session-root)]
-    (concat configured
-            (maybe-join (some-> session (fs/path "overlay")) "commands")
-            [(str (fs/path (env/strap-work-root) "commands"))
-             (str (fs/path (env/strap-project-root) "commands"))
-             (str (fs/path (env/strap-global-root) "commands"))
-             (str (fs/path (env/strap-root) "commands"))])))
+  (layers/artifact-dirs "commands"))
 
 (defn command-dir [name]
   (when name

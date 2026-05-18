@@ -6,7 +6,7 @@ This document records what `strap` currently implements.
 
 - Provider-agnostic canonical state format using actors, events, and scopes: `strap.state.v0.2`.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
-- Root/config/project/work/workspace path model via `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_PROJECT`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
+- Unified artifact layer path via `STRAP_PATH`, with `STRAP_WORKSPACE` for filesystem effects.
 - Immutable JSON filter CLIs for state transforms and harness operations.
 - Nu-first local plumbing inside command capsules, exposed through the process `strap <command>` boundary.
 - Basic scope operations for opening/collapsing context regions.

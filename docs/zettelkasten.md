@@ -21,7 +21,7 @@ export STRAP_ZK_SQLITE_VEC_LOAD=/nix/store/.../lib/vec0.so
 The default derived index path is:
 
 1. `STRAP_ZK_DB`, when set;
-2. `$STRAP_WORK/zettel/zettel.sqlite`, when `STRAP_WORK` is set by the command runner; this defaults to `.strap-user/zettel/zettel.sqlite`;
+2. the user layer's `zettel/zettel.sqlite`, which defaults to `.strap-user/zettel/zettel.sqlite`;
 3. `~/.config/strap/zettel.sqlite` as a fallback.
 
 ## Embeddings

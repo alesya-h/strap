@@ -1,21 +1,28 @@
 # Repository Organization
 
-`strap` now uses explicit roots and a filesystem command surface.
+`strap` now uses a unified artifact layer path and a filesystem command surface.
 
-## Roots
+## Layers
 
-- `STRAP_ROOT`: installed harness code root. In development this is the repository root.
-- `STRAP_CONFIG`: static harness config. Defaults to `config/strap` in this repo when present.
-- `STRAP_GLOBAL`: global home-directory artifacts. Defaults to `$XDG_CONFIG_HOME/strap`.
-- `STRAP_PROJECT`: project-shared harness artifacts. Defaults to nearest `.strap`, or `$STRAP_WORKSPACE/.strap`.
-- `STRAP_SESSION`: active session directory. Session-aware commands require this env var and fail when it is absent.
-- `STRAP_WORK`: user/agent-local mutable work directory. Defaults to nearest `.strap-user`, or `$STRAP_WORKSPACE/.strap-user`.
+- `STRAP_PATH`: colon-separated artifact layer roots. Entries may be unnamed paths or `name=/path` entries.
+- `STRAP_WORKSPACE`: filesystem workspace that tools operate in. It defaults to the current working directory.
 
-`STRAP_WORKSPACE` remains the filesystem workspace that tools operate in. It defaults to the current working directory.
+When `STRAP_PATH` is absent, the runner resolves implicit named layers in this order when available:
+
+```text
+session=<active session>/overlay
+user=<nearest .strap-user>
+project=<nearest .strap>
+global=$XDG_CONFIG_HOME/strap
+root=<installed strap root>
+```
+
+When `STRAP_PATH` is set, its entries are used first and missing implicit named layers are appended. The root layer is therefore available without listing it explicitly. An unnamed entry is a plugin layer; a named entry such as `project=/tmp/project-layer` gives the layer a stable role.
 
 Inspect resolution with:
 
 ```bash
+strap layers
 strap paths
 ```
 
@@ -43,15 +50,14 @@ command-name/
 
 Use public commands for the user/agent surface, hidden commands for implementation commands that still need command identity, and `inner/` only for helpers private to one command. For example, `strap provider` is public while `provider-chatgpt` is hidden; `strap zk` is public while `strap inner zk index ...` is private implementation plumbing.
 
-Resolution order lets project/user commands override built-ins:
+Resolution order follows `STRAP_PATH`: leftmost layer wins, and root is the implicit fallback. Every layer has the same artifact subdirectories:
 
 ```text
-STRAP_COMMAND_PATH
-$STRAP_SESSION/overlay/commands
-$STRAP_WORK/commands
-$STRAP_PROJECT/commands
-$STRAP_GLOBAL/commands
-$STRAP_ROOT/commands
+commands/
+tools/
+agents/
+skills/
+models/
 ```
 
 Useful commands:
@@ -84,7 +90,7 @@ config/strap/
   tools/
 ```
 
-For global home-directory overlays, use `~/.config/strap` or set `STRAP_GLOBAL`.
+For global home-directory overlays, use `~/.config/strap` or include `global=/path` in `STRAP_PATH`.
 
 ## Project And User Work
 

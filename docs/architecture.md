@@ -18,19 +18,16 @@ strap <command> [args...]
 
 The runner resolves command directories, builds a standard environment, then spawns the command's `run` file.
 
-## Roots
+## Artifact Layers
 
-| Root | Purpose | Default |
+| Layer | Purpose | Default |
 | --- | --- | --- |
-| `STRAP_ROOT` | Installed harness code | repository root in development |
-| `STRAP_CONFIG` | Static harness config | `config/strap` when present, otherwise `$STRAP_GLOBAL` |
-| `STRAP_GLOBAL` | Global home-directory artifacts | `$XDG_CONFIG_HOME/strap` |
-| `STRAP_PROJECT` | Project-shared harness artifacts | nearest `.strap`, otherwise `$STRAP_WORKSPACE/.strap` |
-| `STRAP_SESSION` | Active session directory | explicit env var; session-aware commands fail when it is absent |
-| `STRAP_WORK` | User/agent-local mutable state | nearest `.strap-user`, otherwise `$STRAP_WORKSPACE/.strap-user` |
+| `STRAP_PATH` | Colon-separated artifact layers | implicit session/user/project/global/root layers |
 | `STRAP_WORKSPACE` | Filesystem workspace for tools | current working directory |
 
-Use `strap paths` or `strap commands roots` to inspect resolution.
+Each `STRAP_PATH` entry is a layer root containing artifact subdirectories such as `commands/`, `tools/`, `agents/`, `skills/`, and `models/`. Entries may be unnamed paths or named entries like `project=/repo/.strap`; unnamed entries are plugin layers. Missing implicit named layers are appended, including root.
+
+Use `strap layers`, `strap layers roots <type>`, or `strap paths` to inspect resolution.
 
 `strap status` reports the active roots, layers, and visible artifact overlays. `strap artifact status --paths` exposes the physical files when debugging is needed.
 
@@ -41,7 +38,7 @@ Commands and tools share a layered artifact model:
 - `session`: active-session overlay under `$STRAP_SESSION/overlay`.
 - `user`: mutable user/agent overlay under `.strap-user`.
 - `project`: shared project artifacts under `.strap`.
-- `global`: home-directory artifacts under `$STRAP_GLOBAL`.
+- `global`: home-directory artifacts, normally `$XDG_CONFIG_HOME/strap`.
 - `root`: installed harness defaults.
 
 The session layer shadows lower layers when `STRAP_SESSION` is set. `strap artifact workon <type> <name>` copies a lower-layer artifact into the session layer, or into the user layer if `STRAP_SESSION` is unset. `strap artifact promote <type> <name>` moves one layer down by default: session to user, user to project, project to global, and global to root. `strap artifact discard <type> <name>` removes the session overlay first, then user overlay.
@@ -53,12 +50,8 @@ Supported artifact types are currently `command`, `tool`, `model`, `agent`, and 
 Commands are searched in this order:
 
 ```text
-STRAP_COMMAND_PATH
-$STRAP_SESSION/overlay/commands
-$STRAP_WORK/commands
-$STRAP_PROJECT/commands
-$STRAP_GLOBAL/commands
-$STRAP_ROOT/commands
+for each layer in STRAP_PATH:
+  <layer>/commands
 ```
 
 The last matching name wins when commands are collected for listing, and the runner resolves from the same ordered roots so project/global commands can override built-ins.
@@ -98,11 +91,8 @@ strap commands validate --json
 Agent profiles are markdown files discovered from:
 
 ```text
-STRAP_AGENT_PATH
-$STRAP_WORK/agents
-$STRAP_PROJECT/agents
-$STRAP_CONFIG/agents
-$STRAP_ROOT/agents
+for each layer in STRAP_PATH:
+  <layer>/agents
 ```
 
 Profiles support OpenCode-style frontmatter with fields like `description`, `permission`, and `color`, followed by instruction text. `strap agents apply <name>` writes the selected profile into a canonical-state actor, usually `actors.assistant`, so provider compilation uses it as the actor frame. `strap agents import-opencode ~/.config/opencode/agents` copies existing OpenCode profiles into the user overlay.
@@ -112,11 +102,8 @@ Profiles support OpenCode-style frontmatter with fields like `description`, `per
 Skills are instruction bundles discovered from:
 
 ```text
-STRAP_SKILL_PATH
-$STRAP_WORK/skills
-$STRAP_PROJECT/skills
-$STRAP_CONFIG/skills
-$STRAP_ROOT/skills
+for each layer in STRAP_PATH:
+  <layer>/skills
 ```
 
 Each skill is a directory containing `SKILL.md`, compatible with OpenCode-style skill directories. `strap skills apply <name>` attaches the skill to an actor without replacing the agent profile. Provider compilation renders applied skills as named instruction blocks after the actor's private instructions. `strap skills import-opencode ~/.config/opencode/skills` copies existing OpenCode skills into the user overlay.
@@ -191,11 +178,8 @@ Tool schemas are exposed through `strap tools list --group <group> --json`:
 Script tools are executable files discovered from:
 
 ```text
-STRAP_TOOL_PATH
-$STRAP_WORK/tools
-$STRAP_PROJECT/tools
-$STRAP_CONFIG/tools
-$STRAP_ROOT/tools
+for each layer in STRAP_PATH:
+  <layer>/tools
 ```
 
 Tool artifacts are grouped directories: `tools/<group>/run`, `tools/<group>/desc`, and either `tools/<group>/meta.json` or `tools/<group>/meta/<action>.json`. Provider-facing names are dotted, for example `fs.read_file` and `jsmcp.list_servers`. Action metadata can set `process_state` to `none` (default), `own`, or `full`; own-state tools read/write `runtime.tools.<group>` through an `own_state` envelope. Results use semantically equivalent `content` and `structuredContent`; `content` should be readable for the specific tool, and result `metadata` is not part of the contract. See `docs/tool-contract.md` for the exact envelope contract.
@@ -211,11 +195,8 @@ Model profiles live in layered `models/` directories and describe model id, prov
 Model roots:
 
 ```text
-STRAP_MODEL_PATH
-$STRAP_WORK/models
-$STRAP_PROJECT/models
-$STRAP_CONFIG/models
-$STRAP_ROOT/models
+for each layer in STRAP_PATH:
+  <layer>/models
 ```
 
 Current provider adapter families:
@@ -250,7 +231,7 @@ The token cache defaults to `~/.config/strap/auth/chatgpt.json`.
 
 `strap work init` creates both project-shared `.strap` and user-local `.strap-user` layouts.
 
-`strap session` stores sessions under `$STRAP_WORK/sessions/`, which defaults to `.strap-user/sessions/`, with:
+`strap session` stores sessions under the user layer's `sessions/` directory, which defaults to `.strap-user/sessions/`, with:
 
 - `meta.json`
 - `state.json`
@@ -268,11 +249,11 @@ Session mutations create jj snapshots in the session directory selected by `STRA
 
 Memory is explicit: agents and humans use `strap zk` or the `zk` script tool to search, create, and update zettelkasten notes. Session commands do not implicitly inject or write memory.
 
-`strap zk` stores markdown notes under `.strap-user/zettel` for user/private memory or `.strap/zettel` for project-shared memory. The user layer is a transparent overlay on the project layer: user notes shadow project notes with the same id, `workon` copies a project note into the user layer, `promote` writes it back, and normal output hides physical `.strap*` paths. Inline `[[wikilinks]]` are the canonical link source; backlinks and ambiguity diagnostics are derived during normal reads/writes. SQLite/FTS/vector data under `$STRAP_WORK/zettel` is a derived cache rebuilt by `strap zk reindex` and on hybrid/vector searches.
+`strap zk` stores markdown notes under `.strap-user/zettel` for user/private memory or `.strap/zettel` for project-shared memory. The user layer is a transparent overlay on the project layer: user notes shadow project notes with the same id, `workon` copies a project note into the user layer, `promote` writes it back, and normal output hides physical `.strap*` paths. Inline `[[wikilinks]]` are the canonical link source; backlinks and ambiguity diagnostics are derived during normal reads/writes. SQLite/FTS/vector data under the user layer's `zettel/` directory is a derived cache rebuilt by `strap zk reindex` and on hybrid/vector searches.
 
 The zettelkasten is a self-contained Babashka command capsule because markdown overlays, wikilinks, tombstones, search/index rebuilds, and tool-mode JSON handling are one conceptual subsystem. Its SQLite/FTS/vector index helper is command-private and reached through `strap inner zk index`; it is not part of the public command surface.
 
-`strap history` wraps the session directory selected by `STRAP_SESSION` as a jj repo. Project-user overlays and private memory remain under `$STRAP_WORK`, but session-local state and session overlays get per-session history without touching the project workspace history.
+`strap history` wraps the active session directory as a jj repo. Project-user overlays and private memory remain under the user layer, but session-local state and session overlays get per-session history without touching the project workspace history.
 
 ## Subprojects
 

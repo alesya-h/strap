@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 cmd="${1:-}"
 [ -n "$cmd" ] || exit 0
-cmd_dir="$($STRAP_ROOT/bin/strap command-dir "$cmd" 2>/dev/null || true)"
+strap_bin=${STRAP_BIN:-"$STRAP_ROOT/bin/strap"}
+cmd_dir="$($strap_bin command-dir "$cmd" 2>/dev/null || true)"
 [ -n "$cmd_dir" ] || exit 0
 [ -f "$cmd_dir/spec.yaml" ] && exit 0
 if [ -x "$cmd_dir/carapace-complete" ]; then

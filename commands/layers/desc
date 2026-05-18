@@ -1,0 +1,11 @@
+List resolved Strap artifact layers.
+
+Usage:
+  strap layers
+  strap layers list
+  strap layers roots <command|tool|agent|skill|model>
+
+`STRAP_PATH` is a colon-separated list of layer roots. Entries may be
+unnamed paths or named entries in `name=/path` form. The runner normalizes it
+and appends implicit named layers such as user, project, global, and root when
+they are not explicitly supplied.

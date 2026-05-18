@@ -1,35 +1,13 @@
 {
   "version": "strap.config.v0.1",
-  "command_roots": [
-    "$STRAP_WORK/commands",
-    "$STRAP_PROJECT/commands",
-    "$STRAP_CONFIG/commands",
-    "$STRAP_ROOT/commands"
-  ],
-  "tool_roots": [
-    "$STRAP_WORK/tools",
-    "$STRAP_PROJECT/tools",
-    "$STRAP_CONFIG/tools",
-    "$STRAP_ROOT/tools"
-  ],
-  "agent_roots": [
-    "$STRAP_WORK/agents",
-    "$STRAP_PROJECT/agents",
-    "$STRAP_CONFIG/agents",
-    "$STRAP_ROOT/agents"
-  ],
-  "skill_roots": [
-    "$STRAP_WORK/skills",
-    "$STRAP_PROJECT/skills",
-    "$STRAP_CONFIG/skills",
-    "$STRAP_ROOT/skills"
-  ],
-  "model_roots": [
-    "$STRAP_WORK/models",
-    "$STRAP_PROJECT/models",
-    "$STRAP_CONFIG/models",
-    "$STRAP_ROOT/models"
-  ],
+  "layer_path": "$STRAP_PATH",
+  "artifact_subdirs": {
+    "command": "commands",
+    "tool": "tools",
+    "agent": "agents",
+    "skill": "skills",
+    "model": "models"
+  },
   "defaults": {
     "model": "current",
     "tool_group": "all"

@@ -4,7 +4,7 @@
 
 - A provider-agnostic canonical state format based on actors, events, and scopes.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
-- Separate harness, static config, global, project, session, user-work, and workspace roots: `STRAP_ROOT`, `STRAP_CONFIG`, `STRAP_GLOBAL`, `STRAP_PROJECT`, `STRAP_SESSION`, `STRAP_WORK`, and `STRAP_WORKSPACE`.
+- A unified layered artifact path, `STRAP_PATH`, plus `STRAP_WORKSPACE` for filesystem effects.
 - Subproject commands for state editing, model request compilation, agent fork/fold, and pending tool execution.
 - Nu-first structured plumbing for model-authored workflows.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
@@ -46,7 +46,7 @@ strap state init \
 | strap state display-last-message
 ```
 
-Use `strap help`, `strap -a`, `strap paths`, and `strap status` to inspect the command surface, resolved roots, and active overlays. See `docs/organization.md`.
+Use `strap help`, `strap -a`, `strap layers`, `strap paths`, and `strap status` to inspect the command surface, resolved layers, and active overlays. See `docs/organization.md`.
 
 Debug command and tool execution without contaminating JSON stdout:
 
@@ -179,7 +179,7 @@ STRAP_ZK_EMBED_PROVIDER=chatgpt strap zk search-hybrid 'semantic recall'
 
 ## Models
 
-Model profiles are JSON files containing `model_id`, provider, auth, endpoint, and default parameters. Runtime commands default to `--model current`. Checked-in configs live in `config/strap/models/`, with `current.json` as a Linux symlink to the selected model profile.
+Model profiles are JSON files containing `model_id`, provider, auth, endpoint, and default parameters. Runtime commands default to `--model current`. Checked-in profiles live in the root layer's `models/` directory.
 
 ```bash
 strap model list

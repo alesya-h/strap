@@ -58,21 +58,6 @@
 (defn session-root []
   (System/getenv "STRAP_SESSION"))
 
-(defn configured-tool-dirs []
-  (remove str/blank?
-          (str/split (env "STRAP_TOOL_PATH" "")
-                     (re-pattern java.io.File/pathSeparator))))
-
-(defn tool-dirs []
-  (let [session (when-let [s (session-root)]
-                  [(str (fs/path s "overlay" "tools"))])]
-    (concat (configured-tool-dirs)
-            session
-            [(str (fs/path (work-root) "tools"))
-             (str (fs/path (project-root) "tools"))
-             (str (fs/path (global-root) "tools"))
-             (str (fs/path (root) "tools"))])))
-
 (defn resolve-workspace [input]
   (let [base (fs/absolutize (workspace))
         resolved (fs/absolutize (fs/path base (or input ".")))

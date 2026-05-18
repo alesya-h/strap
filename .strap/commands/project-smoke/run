@@ -3,11 +3,13 @@
 cd $env.STRAP_ROOT
 
 let strap = ($env.STRAP_ROOT | path join bin strap)
-let project_commands = ($env.STRAP_ROOT | path join .strap commands)
-let old_command_path = ($env.STRAP_COMMAND_PATH? | default "")
-$env.STRAP_COMMAND_PATH = if $old_command_path == "" { $project_commands } else { $"($project_commands):($old_command_path)" }
 $env.STRAP_WORK = "/tmp/strap-work-smoke"
 $env.STRAP_PROJECT = "/tmp/strap-project-smoke"
+$env.STRAP_PATH = [
+  ($env.STRAP_ROOT | path join .strap)
+  $"user=($env.STRAP_WORK)"
+  $"project=($env.STRAP_PROJECT)"
+] | str join (char esep)
 if (($env.STRAP_SESSION? | default "") != "") { hide-env STRAP_SESSION }
 rm -rf $env.STRAP_WORK $env.STRAP_PROJECT
 

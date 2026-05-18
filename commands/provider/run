@@ -2,8 +2,9 @@
 set -euo pipefail
 
 provider="${1:-}"
+strap_bin=${STRAP_BIN:-"$STRAP_ROOT/bin/strap"}
 if [ "$provider" = "list" ]; then
-  printf '%s\n' '["anthropic","chatgpt","openai","openrouter"]' | jq .
+  "$strap_bin" commands list --json --all | jq '[.[].name | select(startswith("provider-")) | sub("^provider-"; "")] | sort'
   exit 0
 fi
 if [ -z "$provider" ]; then
@@ -12,4 +13,4 @@ if [ -z "$provider" ]; then
   exit 2
 fi
 shift
-exec "$STRAP_ROOT/bin/strap" "provider-$provider" "$@"
+exec "$strap_bin" "provider-$provider" "$@"

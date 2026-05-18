@@ -1,5 +1,6 @@
 (ns cli.env
-  (:require [babashka.fs :as fs]))
+  (:require [babashka.fs :as fs]
+            [cli.layers :as layers]))
 
 (defn env [name]
   (System/getenv name))
@@ -18,10 +19,10 @@
       str))
 
 (defn workspace-root []
-  (abs (or (env "STRAP_WORKSPACE") (System/getProperty "user.dir"))))
+  (layers/workspace-root))
 
 (defn strap-root []
-  (abs (or (env "STRAP_ROOT") (default-root))))
+  (or (layers/layer-path "root") (abs (or (env "STRAP_ROOT") (default-root)))))
 
 (defn nearest-dir [name start]
   (loop [dir (fs/absolutize start)]
@@ -33,23 +34,26 @@
         :else (recur parent)))))
 
 (defn strap-global-root []
-  (if-let [root (env "STRAP_GLOBAL")]
-    (abs root)
-    (str (fs/path (or (env "XDG_CONFIG_HOME")
-                      (str (or (env "HOME") "") "/.config"))
-                  "strap"))))
+  (or (layers/layer-path "global")
+      (if-let [root (env "STRAP_GLOBAL")]
+        (abs root)
+        (str (fs/path (or (env "XDG_CONFIG_HOME")
+                          (str (or (env "HOME") "") "/.config"))
+                      "strap")))))
 
 (defn strap-project-root []
-  (if-let [root (env "STRAP_PROJECT")]
-    (abs root)
-    (or (nearest-dir ".strap" (workspace-root))
-        (str (fs/path (workspace-root) ".strap")))))
+  (or (layers/layer-path "project")
+      (if-let [root (env "STRAP_PROJECT")]
+        (abs root)
+        (or (nearest-dir ".strap" (workspace-root))
+            (str (fs/path (workspace-root) ".strap"))))))
 
 (defn strap-work-root []
-  (if-let [root (env "STRAP_WORK")]
-    (abs root)
-    (or (nearest-dir ".strap-user" (workspace-root))
-        (str (fs/path (workspace-root) ".strap-user")))))
+  (or (layers/layer-path "user")
+      (if-let [root (env "STRAP_WORK")]
+        (abs root)
+        (or (nearest-dir ".strap-user" (workspace-root))
+            (str (fs/path (workspace-root) ".strap-user"))))))
 
 (defn strap-config-root []
   (if-let [root (env "STRAP_CONFIG")]
@@ -65,6 +69,7 @@
 (defn env-for [name dir]
   (cond-> (into {} (System/getenv))
     true (assoc "STRAP_ROOT" (strap-root)
+                "STRAP_PATH" (layers/normalized-path)
                 "STRAP_CONFIG" (strap-config-root)
                 "STRAP_GLOBAL" (strap-global-root)
                 "STRAP_PROJECT" (strap-project-root)

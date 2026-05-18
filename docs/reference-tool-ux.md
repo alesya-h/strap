@@ -49,7 +49,7 @@ The useful idea is that a tool can be authored outside the harness as a small sh
 
 For `strap`, the safer version is:
 
-- tool groups live in `tools/<group>/` or directories listed in `STRAP_TOOL_PATH`
+- tool groups live in `tools/<group>/` under layers listed in `STRAP_PATH`
 - action metadata in `meta.json` or `meta/<action>.json` supplies `description`, `inputSchema`, and optional `process_state`
 - input is JSON on stdin, not string interpolation into a shell command
 - output is `content` plus equivalent `structuredContent`

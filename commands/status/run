@@ -3,8 +3,6 @@
          '[cheshire.core :as json]
          '[clojure.java.shell :as sh])
 
-(def layers ["session" "user" "project" "global" "root"])
-
 (defn env [name]
   (System/getenv name))
 
@@ -37,12 +35,8 @@
 
 (defn roots []
   {:workspace (env "STRAP_WORKSPACE")
-   :session (when-let [session (env "STRAP_SESSION")] (path-str session "overlay"))
-   :project (env "STRAP_PROJECT")
-   :work (env "STRAP_WORK")
-   :active_work (if-let [session (env "STRAP_SESSION")] (path-str session "overlay") (env "STRAP_WORK"))
-   :global (env "STRAP_GLOBAL")
-   :root (env "STRAP_ROOT")})
+   :path (env "STRAP_PATH")
+   :layers (run-strap-json ["layers" "list"])})
 
 (defn -main [& args]
   (let [include-paths (boolean (some #{"--paths"} args))]
@@ -50,6 +44,6 @@
       (usage))
     (let [artifact-args (cond-> ["artifact" "status"] include-paths (conj "--paths"))
           artifacts (assoc (run-strap-json artifact-args) :zettel (run-zk-status include-paths))]
-      (json-out {:roots (roots) :layers layers :artifacts artifacts}))))
+      (json-out {:roots (roots) :artifacts artifacts}))))
 
 (apply -main *command-line-args*)

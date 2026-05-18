@@ -9,8 +9,10 @@ export def main [target: string = "all"] {
     "session" => { $env.STRAP_SESSION? | default "" }
     "work" => { $env.STRAP_WORK }
     "workspace" => { $env.STRAP_WORKSPACE }
+    "path" => { $env.STRAP_PATH }
     "all" => {
       [
+        $"STRAP_PATH=($env.STRAP_PATH)"
         $"STRAP_ROOT=($env.STRAP_ROOT)"
         $"STRAP_CONFIG=($env.STRAP_CONFIG)"
         $"STRAP_GLOBAL=($env.STRAP_GLOBAL)"
@@ -20,6 +22,6 @@ export def main [target: string = "all"] {
         $"STRAP_WORKSPACE=($env.STRAP_WORKSPACE)"
       ] | str join "\n"
     }
-    _ => { error make { msg: "Usage: strap paths [root|config|global|project|session|work|workspace|all]" } }
+    _ => { error make { msg: "Usage: strap paths [path|root|config|global|project|session|work|workspace|all]" } }
   }
 }
