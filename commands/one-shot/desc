@@ -1,4 +1,4 @@
 Run an agent once until its first final answer.
 
 Usage:
-  strap one-shot run <task> [--model current|name|path.json] [--agent name] [--skill name ...] [--tools none|all|fs|process|web|agent|scripts|jsmcp] [--max-turns 8] [--dry-run]
+  strap one-shot run <task> [--prepend-stdin|--append-stdin] [--model current|name|path.json] [--agent name] [--skill name ...] [--tools none|all|fs|process|web|agent|scripts|jsmcp] [--max-turns 8] [--dry-run]

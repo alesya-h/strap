@@ -1,10 +1,12 @@
 #!/usr/bin/env nu
 
-use lib/context.nu
+const one_shot_instruction = "You are running as a one-shot agent. Complete the task and return one final answer."
 
-const one_shot_instruction = "You are running as a one-shot agent. Complete the task and return one final answer. Do not assume quoted context is your active dialogue history."
+def append-event [state: record, event: record] {
+  $state | update root.children { append ({ type: "event" } | merge $event) }
+}
 
-def build-state [input: any, has_input: bool, task: string, agent: string, skills: list<string>] {
+def build-state [task: string, agent: string, skills: list<string>] {
   let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
   mut state = (^$strap state init | from json)
   if $agent != "" { $state = ($state | to json | ^$strap agents apply $agent | from json) }
@@ -15,8 +17,7 @@ def build-state [input: any, has_input: bool, task: string, agent: string, skill
     | where {|item| $item != null and $item != "" }
     | str join "\n\n"
   ))
-  if $has_input { $state = ($state | context append-input-context $input) }
-  $state | context append-event { from: "user", to: ["assistant"], kind: "message", text: $task }
+  append-event $state { from: "user", to: ["assistant"], kind: "message", text: $task }
 }
 
 def answer-from [state: record] {
@@ -29,49 +30,31 @@ def answer-from [state: record] {
 
 def usage [] {
   error make {
-    msg: "Usage: strap one-shot run <task> [--model current|name|path.json] [--agent name] [--skill name ...] [--tools none|all|fs|process|web|agent|scripts|jsmcp] [--max-turns 8] [--dry-run] < context.json"
+    msg: "Usage: strap one-shot run <task> [--prepend-stdin|--append-stdin] [--model current|name|path.json] [--agent name] [--skill name ...] [--tools none|all|fs|process|web|agent|scripts|jsmcp] [--max-turns 8] [--dry-run]"
   }
 }
 
-export def main [command?: string, ...task_parts: string, --model: string = "current", --agent: string = "", --skill: string = "", --tools: string = "none", --max-turns: int = 8, --finalize: string = "true", --dry-run] {
+export def main [command?: string, ...task_parts: string, --model: string = "current", --agent: string = "", --skill: string = "", --tools: string = "none", --max-turns: int = 8, --finalize: string = "true", --dry-run, --prepend-stdin, --append-stdin, --input-text: string = ""] {
   if ($command != "run") { usage }
-  let task = ($task_parts | str join " ")
+  if $prepend_stdin and $append_stdin { error make { msg: "Use only one of --prepend-stdin or --append-stdin" } }
+  let arg_task = ($task_parts | str join " ")
+  let task = if $prepend_stdin { [$input_text $arg_task] | str join "" } else if $append_stdin { [$arg_task $input_text] | str join "" } else { $arg_task }
   if $task == "" { usage }
-  let input = ($in | default null)
-  let has_input = ($input != null)
   let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
   let skills = if $skill == "" { [] } else { [$skill] }
-  mut state = (build-state $input $has_input $task $agent $skills)
-  mut turns = 0
-  mut final = false
+  mut state = (build-state $task $agent $skills)
   if not $dry_run {
-    while $turns < $max_turns {
-      $turns = $turns + 1
-      $state = ($state | to json | ^$strap llm complete --model $model --tools $tools | from json)
-      let last = ($state.root.children | last)
-      if (($last.calls? | default [] | length) == 0) { $final = true; break }
-      $state = ($state | to json | ^$strap run-calls --tools $tools | from json)
-    }
-    if (not $final) and ($finalize != "false") {
-      $state = ($state | context append-event {
-        from: "harness"
-        to: ["assistant"]
-        kind: "tool_budget_exhausted"
-        text: $"Tool budget exhausted after ($max_turns) turn(s). Answer now using the gathered context. Do not request more tools."
-      })
-      $state = ($state | to json | ^$strap llm complete --model $model --tools none | from json)
-      let last = ($state.root.children | last)
-      $final = (($last.calls? | default [] | length) == 0)
-    }
+    $state = ($state | to json | ^$strap loop --model $model --tools $tools --max-turns $max_turns --finalize $finalize | from json)
   }
+  let trace = ($state.trace? | default [])
   {
     version: "strap.one-shot.result.v0.1"
     agent: ($state.actors.assistant.agent? | default null)
     skills: ($state.actors.assistant.skills? | default [])
     task: $task
     tools: $tools
-    turns: $turns
-    final: $final
+    turns: ($trace | where kind == loop-turn | where {|item| $item.data.phase == complete } | length)
+    final: (($state.root.children | last | get calls? | default [] | length) == 0)
     dry_run: $dry_run
     answer: (answer-from $state)
     state: $state

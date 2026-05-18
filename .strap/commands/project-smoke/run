@@ -38,7 +38,6 @@ let bm_end = (open /tmp/strap-smoke-bm-2.json | get root.children.1.bookmarks.0.
 save-filter $strap /tmp/strap-smoke-bm-2.json [state fold --from $bm_start --to $bm_end --summary "smoke folded hello/world"] /tmp/strap-smoke-folded-range.json
 save-filter $strap /tmp/strap-smoke-bm-2.json [state extract --from $bm_start --to $bm_end] /tmp/strap-smoke-context.json
 save-filter $strap /tmp/strap-smoke-context.json [context quote] /tmp/strap-smoke-quote.json
-save-filter $strap /tmp/strap-smoke-quote.json [one-shot run "Summarize quoted smoke context" --agent chat-concise --skill concise --dry-run --tools none] /tmp/strap-smoke-one-shot.json
 save-filter $strap /tmp/strap-smoke-quote.json [context summarize "Summarize quoted smoke context" --agent chat-concise --skill concise --dry-run] /tmp/strap-smoke-context-summary.json
 save-filter $strap /tmp/strap-smoke-folded-range.json [state tree --hidden] /tmp/strap-smoke-tree.txt
 save-filter $strap /tmp/strap-smoke-2.json [llm compile --model gpt-5.1-openai] /tmp/strap-model-openai.json

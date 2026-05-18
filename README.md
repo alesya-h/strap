@@ -75,7 +75,7 @@ Session-aware commands use `STRAP_SESSION` and fail when it is absent. Use `stra
 
 See `docs/daily-use.md`, `docs/commands.md`, and `docs/architecture.md`.
 
-Run a one-shot agent over quoted context without mutating a session:
+Summarize extracted context without mutating a session:
 
 ```nu
 open state.json

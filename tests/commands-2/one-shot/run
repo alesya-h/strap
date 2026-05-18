@@ -4,3 +4,11 @@ use ../../lib/test.nu *
 let result = (call-json [one-shot run "Reply with exactly STRAP_ONE_SHOT_OK and no extra words." --tools none --max-turns 1])
 ok ($result.final == true) "one-shot reaches a final answer"
 non-empty $result.answer "one-shot answer is populated by a real model call"
+let appended_result = ("STDIN_TEXT" | run-external (strap-bin) ...(argv [one-shot run "Prompt: " --append-stdin --dry-run]) | complete)
+ok ($appended_result.exit_code == 0) $"strap one-shot append-stdin failed\nstdout:\n($appended_result.stdout)\nstderr:\n($appended_result.stderr)"
+let appended = ($appended_result.stdout | from json)
+has $appended.task "Prompt: STDIN_TEXT" "one-shot can append explicit stdin text to prompt"
+let prepended_result = ("STDIN_TEXT" | run-external (strap-bin) ...(argv [one-shot run " suffix" --prepend-stdin --dry-run]) | complete)
+ok ($prepended_result.exit_code == 0) $"strap one-shot prepend-stdin failed\nstdout:\n($prepended_result.stdout)\nstderr:\n($prepended_result.stderr)"
+let prepended = ($prepended_result.stdout | from json)
+has $prepended.task "STDIN_TEXT suffix" "one-shot can prepend explicit stdin text to prompt"

@@ -7,8 +7,13 @@ let marked2 = ($marked1 | pipe-json [state bookmark add --text "Context says str
 let start = $marked2.root.children.0.bookmarks.0.id
 let end = $marked2.root.children.1.bookmarks.0.id
 let context = ($marked2 | pipe-json [state extract --from $start --to $end])
-let quote = ($context | pipe-json [context quote --title "context test"])
-has $quote.text "strap context works" "context quote includes source text"
-has ($quote | pipe-call [context render --title "rendered context"]) "rendered context" "context render returns text"
-let summary = ($quote | pipe-json [context summarize "Summarize in one short sentence." --tools none --max-turns 1])
-non-empty $summary.summary "context summarize returns a real model-backed summary"
+let context_state = ($context | pipe-json [context quote --title "context test"])
+let last_context_event = ($context_state.root.children | last)
+ok ($context_state.version == "strap.state.v0.2") "context quote returns a normal state"
+ok (($context_state.root.children | length) == 2) "context quote preserves source events as normal state events"
+ok ($last_context_event.kind == "message") "context quote preserves normal event kinds"
+has $last_context_event.text "strap context works" "context quote includes source text"
+has ($context | pipe-call [context render --title "rendered context"]) "rendered context" "context render returns text"
+let summary = ($context | pipe-call [context summarize "Summarize in one short sentence." --tools none --max-turns 1])
+non-empty $summary "context summarize returns summary text"
+ok (($summary | str trim | str starts-with "{") == false) "context summarize does not wrap summary text in JSON"

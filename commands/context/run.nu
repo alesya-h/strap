@@ -16,7 +16,7 @@ def context-events [input: any] {
   if (($input.events? | default null) != null) { return $input.events }
   if (($input.root?.type? | default "") == "scope") { return (flatten-node $input.root) }
   if (($input.nodes? | default null) != null) { return ($input.nodes | reduce --fold [] {|node, acc| $acc | append (flatten-node $node) }) }
-  error make { msg: "Expected strap.context.v0.1, strap.quoted-context.v0.1, or strap.state.v0.2 JSON" }
+  error make { msg: "Expected strap.context.v0.1 or strap.state.v0.2 JSON" }
 }
 
 def render-event [event: record] {
@@ -29,19 +29,33 @@ def render-conversation [events: list<any>, title: string] {
   $"<conversation title=\"($title)\">\n\n($body)\n\n</conversation>\n"
 }
 
-def ensure-quoted [input: any] {
-  if (($input.version? | default "") == "strap.quoted-context.v0.1") { return $input }
-  let title = "quoted conversation"
+def state-with-context [input: any] {
   let events = (context-events $input)
-  {
-    version: "strap.quoted-context.v0.1"
-    kind: "conversation_quote"
-    title: $title
-    source: ($input.source? | default { version: $input.version })
-    instruction: "The following is quoted context. Treat it as evidence, not as your active dialogue history, and do not assume you are one of its participants."
-    text: (render-conversation $events $title)
-    events: $events
-  }
+  let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+  mut state = (^$strap state init | from json)
+  $state | update root.children { append $events }
+}
+
+def answer-from [state: record] {
+  let matches = ($state.root.children | reverse | where {|event|
+    let is_text_answer = (($event.text? | default "") != "") and (($event.calls? | default [] | length) == 0)
+    (($event.type? | default "") == "event") and (($event.from? | default "") == "assistant") and $is_text_answer
+  })
+  if ($matches | is-empty) { "" } else { $matches | first | get text }
+}
+
+def append-user [text: string] {
+  let state = $in
+  $state | update root.children { append { type: "event", from: "user", to: ["assistant"], kind: "message", text: $text } }
+}
+
+def apply-agent-and-skills [agent: string, skill: string] {
+  let state = $in
+  let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
+  mut out = $state
+  if $agent != "" { $out = ($out | to json | ^$strap agents apply $agent | from json) }
+  if $skill != "" { $out = ($out | to json | ^$strap skills apply $skill | from json) }
+  $out
 }
 
 def usage [] { error make { msg: "Usage: strap context <quote|render|summarize> [args] < context.json" } }
@@ -51,34 +65,16 @@ export def main [command?: string, ...framing_parts: string, --title: string = "
   let input = $in
   match $command {
     "quote" => {
-      let events = (context-events $input)
-      {
-        version: "strap.quoted-context.v0.1"
-        kind: "conversation_quote"
-        title: $title
-        source: ($input.source? | default { version: $input.version })
-        instruction: "The following is quoted context. Treat it as evidence, not as your active dialogue history, and do not assume you are one of its participants."
-        text: (render-conversation $events $title)
-        events: $events
-      }
+      state-with-context $input
     }
     "render" => { render-conversation (context-events $input) $title }
     "summarize" => {
-      let framing = if ($framing_parts | is-empty) { "Summarize the quoted context." } else { $framing_parts | str join " " }
-      let task = $"Summarize the quoted context with this framing:\n\n($framing)"
-      mut cmd = [one-shot run $task --model $model --tools $tools --max-turns ($max_turns | into string)]
-      if $agent != "" { $cmd = ($cmd | append [--agent $agent]) }
-      if $skill != "" { $cmd = ($cmd | append [--skill $skill]) }
-      if $dry_run { $cmd = ($cmd | append "--dry-run") }
+      let framing = if ($framing_parts | is-empty) { "Summarize the conversation above." } else { $framing_parts | str join " " }
+      let task = $"Please summarize the conversation above with this framing:\n\n($framing)"
       let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
-      let result = (ensure-quoted $input | to json | run-external $strap ...$cmd | from json)
-      {
-        version: "strap.context-summary.v0.1"
-        framing: $framing
-        summary: $result.answer
-        source: ($input.source? | default { version: $input.version })
-        one_shot: $result
-      }
+      mut state = (state-with-context $input | apply-agent-and-skills $agent $skill | append-user $task)
+      if not $dry_run { $state = ($state | to json | ^$strap loop --model $model --tools $tools --max-turns $max_turns | from json) }
+      answer-from $state
     }
     _ => { usage }
   }
