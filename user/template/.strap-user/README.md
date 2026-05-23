@@ -2,8 +2,7 @@
 
 This directory contains user/agent-local runtime state. It should be ignored by the project VCS.
 
-- `history/`: optional jj-backed state history.
-- `sessions/`: state files, traces, provider requests, and tool results.
+- `sessions/`: state files, traces, provider requests, tool results, and session-local jj history.
 - `logs/`: runtime logs.
 - `cache/`: disposable cache and derived indexes.
 - `branches/`: branch/fork working state.
@@ -14,4 +13,3 @@ This directory contains user/agent-local runtime state. It should be ignored by 
 - `commands/`: temporary generated commands.
 - `tools/`: temporary generated script tools.
 - `zettel/`: private/local memory source.
-- `config/`: user-local project config.

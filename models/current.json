@@ -1,17 +1,1 @@
-{
-  "name": "gpt-5.5-chatgpt",
-  "provider": "chatgpt",
-  "api": "responses",
-  "model_id": "gpt-5.5",
-  "base_url": "https://chatgpt.com/backend-api/codex/responses",
-  "auth": {
-    "type": "chatgpt_oauth",
-    "token_file": "/home/alesya/.config/strap/auth/chatgpt.json",
-    "refresh": true
-  },
-  "stream": true,
-  "parameters": {
-    "store": false,
-    "stream": true
-  }
-}
+gpt-5.5-chatgpt.json

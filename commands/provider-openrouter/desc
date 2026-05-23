@@ -1,4 +1,4 @@
 Hidden OpenRouter provider implementation command.
 
 Usage:
-  strap provider openrouter <compile|call|complete> [args...]
+  strap provider openrouter <compile|call|complete|embed> [args...]

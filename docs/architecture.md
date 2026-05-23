@@ -254,12 +254,13 @@ The zettelkasten is a self-contained Babashka command capsule because markdown o
 
 `strap history` wraps the active session directory as a jj repo. Project-user overlays and private memory remain under the user layer, but session-local state and session overlays get per-session history without touching the project workspace history.
 
-## Subprojects
+## Repository Code Groups
 
-Code is grouped by capability:
+Code is grouped by filesystem role:
 
-- `cli`: Babashka main command dispatcher behind `bin/strap`.
-- `cli`: built-in command capsules.
+- `cli/`: Babashka main command dispatcher behind `bin/strap`.
+- `commands/`: built-in command capsules.
+- `tools/`: built-in grouped tool capsules.
 
 ## Validation
 

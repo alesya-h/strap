@@ -13,9 +13,11 @@
   (str (fs/path (System/getProperty "user.home") ".config" "strap" "auth" "chatgpt.json")))
 
 (defn expand-home [path]
-  (if (str/starts-with? (str path) "~")
-    (str (fs/path (System/getProperty "user.home") (subs path 1)))
-    path))
+  (let [value (str path)]
+    (cond
+      (= value "~") (System/getProperty "user.home")
+      (str/starts-with? value "~/") (str (fs/path (System/getProperty "user.home") (subs value 2)))
+      :else path)))
 
 (defn decode-jwt [jwt]
   (try

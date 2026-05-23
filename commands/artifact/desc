@@ -3,10 +3,10 @@ Manage layered Strap artifacts.
 Usage:
   strap artifact types
   strap artifact roots
-  strap artifact status [command|tool|porcelain] [--paths]
+  strap artifact status [command|tool|agent|skill|model] [--paths]
   strap artifact workon command my-command
   strap artifact promote tool my_tool
   strap artifact promote tool my_tool --from project --to global
-  strap artifact discard porcelain draft
+  strap artifact discard command draft
 
 Layer order is session, user, project, global, root. `workon` writes to the session layer when `STRAP_SESSION` is set, otherwise to the user layer. `promote` moves one layer down by default: session to user, user to project, project to global, global to root. Use `--from` and `--to` for explicit layer moves.

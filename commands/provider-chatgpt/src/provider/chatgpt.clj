@@ -88,9 +88,6 @@
     (assert-chatgpt config)
     (write-json (update input-state :history conj (state/response-event response actor)))))
 
-(defn command-embed [argv]
-  (throw (ex-info "ChatGPT does not support embeddings; use `strap embed --provider openrouter` instead." {})))
-
 (defn command-auth-login [xs token-file]
   (let [[timeout xs] (take-opt xs "--timeout-seconds" "300")
         no-open (some #{"--no-open"} xs)]
@@ -138,7 +135,6 @@
         "compile" (command-compile args)
         "call" (command-call args)
         "complete" (command-complete args)
-        "embed" (command-embed args)
         "auth" (command-auth args)
         (usage))
       (catch Throwable error

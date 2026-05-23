@@ -3,7 +3,7 @@
 def strap-bin [] { $env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap) }
 
 def usage [] {
-  error make { msg: "Usage: strap llm <compile|call|complete> [--model current|name|path.json] [--tools all|fs|process|web|agent|scripts|tools.json] < state.json" }
+  error make { msg: "Usage: strap llm <compile|call|complete> [--model current|name|path.json] [--tools all|fs|process|web|agent|tools.json] < state.json" }
 }
 
 export def main [command?: string, --model: string = "current", --tools: string = "all"] {

@@ -8,4 +8,3 @@ This directory contains project-shared harness artifacts. It may be committed wi
 - `skills/`: project-shared skill instruction bundles.
 - `models/`: project-shared model profile overlays.
 - `zettel/`: shared project memory source.
-- `config/`: project-specific config overrides.

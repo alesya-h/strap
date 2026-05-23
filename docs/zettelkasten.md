@@ -26,7 +26,7 @@ The default derived index path is:
 
 ## Embeddings
 
-For real semantic recall, use OpenAI embeddings:
+For real semantic recall, use OpenAI or OpenRouter embeddings:
 
 ```bash
 export STRAP_ZK_EMBED_PROVIDER=openai
@@ -34,18 +34,16 @@ export OPENAI_API_KEY=...
 export STRAP_ZK_EMBED_MODEL=text-embedding-3-small
 ```
 
-Or use the local ChatGPT subscription OAuth route:
-
 ```bash
-export STRAP_ZK_EMBED_PROVIDER=chatgpt
-export STRAP_ZK_CHATGPT_MODEL=current
+export STRAP_ZK_EMBED_PROVIDER=openrouter
+export OPENROUTER_API_KEY=...
 ```
 
-Provider-backed embeddings are routed through `strap embed`, which delegates to `strap provider <name> embed`. Create the ChatGPT token with `strap provider chatgpt auth login` or import an existing Codex token with `strap provider chatgpt auth import-codex`.
+Provider-backed embeddings are routed through `strap embed`, which delegates to `strap provider <name> embed` when that provider supports embeddings. ChatGPT subscription OAuth is not a supported embeddings API.
 
 ```bash
-printf '{"texts":["semantic recall"]}' | strap embed --provider chatgpt
-printf '{"texts":["semantic recall"]}' | strap provider chatgpt embed
+printf '{"texts":["semantic recall"]}' | strap embed --provider openai
+printf '{"texts":["semantic recall"]}' | strap embed --provider openrouter
 ```
 
 Project-shared notes live under `.strap/zettel`; user/private notes live under `.strap-user/zettel`. Normal `strap zk` output treats them as one zettelkasten: the user layer is a transparent overlay on top of the project layer, and physical `.strap*` paths are hidden unless `--paths` is requested.

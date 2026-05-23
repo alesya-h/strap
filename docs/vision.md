@@ -25,7 +25,7 @@ The harness should make those artifacts legible and governable.
 
 ### Prefer filesystem contracts over registries
 
-The primary extension API is a command directory discovered from project, config, and built-in roots. A command can be copied, edited, validated, hidden, documented, or overridden without changing a central parser.
+The primary extension API is a command directory discovered from `STRAP_PATH` artifact layers and the built-in root. A command can be copied, edited, validated, hidden, documented, or overridden without changing a central parser.
 
 ### Keep roots explicit
 

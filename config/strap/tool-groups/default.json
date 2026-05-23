@@ -1,4 +1,0 @@
-{
-  "name": "default",
-  "groups": ["fs", "process", "web", "kagi", "agent", "json_echo", "zk", "jsmcp"]
-}

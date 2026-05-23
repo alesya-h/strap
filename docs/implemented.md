@@ -22,7 +22,7 @@ This document records what `strap` currently implements.
 
 ## CLIs
 
-- `strap`: main command runner, with commands discovered from project, config, and built-in command directories.
+- `strap`: main command runner, with commands discovered from `STRAP_PATH` artifact layers and the built-in root.
 - `strap state`: initialize, append user/model messages, bookmark/extract/fold history ranges, display last message.
 - `strap llm`: compile state into model-profile requests and call configured providers.
 - `strap loop`: run the Nushell model/tool loop over canonical state.
@@ -52,7 +52,7 @@ This document records what `strap` currently implements.
 - Anthropic Messages route exists.
 - Public OpenAI `/v1/responses` is API-key only in this harness; Codex/ChatGPT OAuth tokens are not compatible with that endpoint.
 - ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`, with tokens managed by `strap provider chatgpt auth`.
-- ChatGPT subscription OAuth token also works for embeddings through `https://api.openai.com/v1/embeddings`.
+- OpenAI API-key and OpenRouter embedding routes are supported through provider commands.
 - `strap provider <name>` dispatches to hidden provider implementation commands such as `provider-chatgpt`.
 - REST-only provider implementations are Nushell capsules; ChatGPT is a Babashka capsule for OAuth/token logic.
 - `strap embed` delegates provider-backed embeddings to `strap provider <name> embed`; the hash provider remains local and deterministic.
@@ -110,7 +110,7 @@ This document records what `strap` currently implements.
 - `docs/vision.md`: product thesis, principles, non-goals, and current priorities.
 - `docs/architecture.md`: implementation architecture and subsystem map.
 - `docs/state-format.md`: canonical `strap.state.v0.4` format specification.
-- `docs/organization.md`: root/config/work organization and command-directory contract.
+- `docs/organization.md`: root/work organization and command-directory contract.
 - `docs/commands.md`: command authoring, validation, and built-in command reference.
 - `docs/providers.md`: model profile and auth notes.
 - `docs/jsmcp.md`: jsmcp bridge and Kagi smoke test notes.

@@ -171,10 +171,11 @@ strap zk backlinks 'Local agent memory'
 
 Agents get the same capability through the grouped `zk.*` tools. See `docs/zettelkasten.md`.
 
-Embeddings can use `OPENAI_API_KEY`, the deterministic hash provider, or the local ChatGPT subscription OAuth path:
+Embeddings can use `OPENAI_API_KEY`, OpenRouter, or the deterministic hash provider for offline/local tests:
 
 ```bash
-STRAP_ZK_EMBED_PROVIDER=chatgpt strap zk search-hybrid 'semantic recall'
+STRAP_ZK_EMBED_PROVIDER=openai strap zk search-hybrid 'semantic recall'
+STRAP_ZK_EMBED_PROVIDER=openrouter strap zk search-hybrid 'semantic recall'
 ```
 
 ## Models
@@ -260,7 +261,7 @@ The active format is flat actors plus flat history.
 
 - `DESIGN.md`: concise current design summary.
 - `docs/vision.md`: vision, design principles, non-goals, strategic priorities.
-- `docs/architecture.md`: roots, command flow, isolation notes, state, loops, tools, providers, sessions, memory, subprojects.
+- `docs/architecture.md`: roots, command flow, isolation notes, state, loops, tools, providers, sessions, and memory.
 - `docs/state-format.md`: canonical `strap.state.v0.4` format specification.
 - `docs/organization.md`: repository, `.strap`, and `.strap-user` organization.
 - `docs/commands.md`: command contract and built-in command reference.

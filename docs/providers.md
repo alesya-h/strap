@@ -45,6 +45,7 @@ Supported `provider` / `api` combinations now:
 - `openai` / `chat`
 - `chatgpt` / `responses` via ChatGPT Codex endpoint
 - `openrouter` / `chat`
+- `openrouter` / `embeddings`
 - `anthropic` / `messages`
 
 ## Provider Command Layout
@@ -54,9 +55,9 @@ Supported `provider` / `api` combinations now:
 | Hidden command | Runtime | Role |
 | --- | --- | --- |
 | `provider-openai` | Nushell | OpenAI REST calls and embeddings. |
-| `provider-openrouter` | Nushell | OpenRouter chat-completions REST calls. |
+| `provider-openrouter` | Nushell | OpenRouter chat-completions REST calls and embeddings. |
 | `provider-anthropic` | Nushell | Anthropic Messages REST calls. |
-| `provider-chatgpt` | Babashka | ChatGPT/Codex backend calls, embeddings, and OAuth token management. |
+| `provider-chatgpt` | Babashka | ChatGPT/Codex backend calls and OAuth token management. |
 
 The rule is: REST-only providers should be small Nu capsules. Use a provider-local Node package only when that provider needs SDKs or other package dependencies. Do not add a shared provider runner; shared provider code recreates the coupling this command split is meant to remove.
 
@@ -113,7 +114,7 @@ strap provider chatgpt auth import-codex
 
 If the access token is near expiry, `strap` refreshes it using OpenAI's OAuth refresh endpoint and writes the updated token file back with mode `0600`. This is an auth-store mutation, not a session-state mutation.
 
-ChatGPT OAuth is a separate auth family from normal OpenAI API-key auth. Do not use ChatGPT OAuth credentials with `https://api.openai.com/v1/responses`; that public endpoint expects API-token/project-key credentials. Use ChatGPT OAuth only with ChatGPT/Codex backend endpoints such as `https://chatgpt.com/backend-api/codex/responses`.
+ChatGPT OAuth is a separate auth family from normal OpenAI API-key auth. Do not use ChatGPT OAuth credentials with public OpenAI API endpoints such as `https://api.openai.com/v1/responses` or `/v1/embeddings`; those endpoints expect API-token/project-key credentials. Use ChatGPT OAuth only with ChatGPT/Codex backend endpoints such as `https://chatgpt.com/backend-api/codex/responses`.
 
 Request headers include:
 
@@ -170,8 +171,8 @@ strap provider list
 strap provider chatgpt compile --model current < state.json
 strap provider openai compile --model gpt-5.1-openai < state.json
 strap provider anthropic complete --model claude-sonnet-4.5-anthropic < state.json
-printf '{"texts":["semantic recall"]}' | strap provider chatgpt embed --model text-embedding-3-small
 printf '{"texts":["semantic recall"]}' | strap provider openai embed --model text-embedding-3-small
+printf '{"texts":["semantic recall"]}' | strap provider openrouter embed
 ```
 
 `strap llm` loads the model profile and dispatches through the matching provider command. `strap provider <name> ...` dispatches to hidden `provider-<name>` implementation commands; `strap embed` is the provider-neutral embedding facade.

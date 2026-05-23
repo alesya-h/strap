@@ -76,23 +76,10 @@ strap edit zk
 strap edit -d zk
 ```
 
-## Static Config
-
-Checked-in default config lives under:
-
-```text
-config/strap/
-  config.json
-  models/
-  tool-groups/
-  zettel/
-  commands/
-  tools/
-```
+## Project And User Work
 
 For global home-directory overlays, use `~/.config/strap` or include `global=/path` in `STRAP_PATH`.
 
-## Project And User Work
 
 Project-shared artifacts live in:
 
@@ -104,7 +91,6 @@ my-project/.strap/
   commands/
   tools/
   zettel/
-  config/
 ```
 
 This directory may be committed with the project. It is where generated capabilities should be promoted when they become part of the project.
@@ -124,7 +110,6 @@ my-project/.strap-user/
   commands/
   tools/
   zettel/
-  config/
 ```
 
 This directory should be ignored by the project VCS. It is where sessions, caches, logs, private memory, and project-user generated commands/tools belong.

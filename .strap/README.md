@@ -8,4 +8,3 @@ Project-shared harness artifacts. This directory may be committed with the proje
 - commands/
 - tools/
 - zettel/
-- config/

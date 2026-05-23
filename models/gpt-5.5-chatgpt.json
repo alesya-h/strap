@@ -6,7 +6,7 @@
   "base_url": "https://chatgpt.com/backend-api/codex/responses",
   "auth": {
     "type": "chatgpt_oauth",
-    "token_file": "/home/alesya/.config/strap/auth/chatgpt.json",
+    "token_file": "~/.config/strap/auth/chatgpt.json",
     "refresh": true
   },
   "stream": true,

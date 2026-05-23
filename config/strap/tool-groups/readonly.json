@@ -1,5 +1,0 @@
-{
-  "name": "readonly",
-  "groups": ["fs", "web", "kagi", "json_echo", "jsmcp"],
-  "notes": "Named preset for read-oriented tool selection."
-}
