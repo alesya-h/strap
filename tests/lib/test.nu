@@ -43,14 +43,14 @@ export def case-tmp [] {
 
 export def tool-state [tool: string, input: record] {
   {
-    version: "strap.state.v0.2"
-    actors: {}
+    version: "strap.state.v0.3"
+    actors: { humans: {}, agents: {}, runtimes: {} }
     root: {
       type: "scope"
       label: "root"
       status: "open"
-      participants: ["assistant" "harness"]
-      children: [{ type: "event", from: "assistant", to: ["harness"], kind: "tool_request", calls: [{ id: "test", tool: $tool, input: $input }] }]
+      participants: ["harness"]
+      children: [{ type: "event", from: "model", kind: "tool_request", calls: [{ id: "test", tool: $tool, input: $input }] }]
     }
   }
 }

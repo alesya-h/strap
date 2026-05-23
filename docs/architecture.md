@@ -95,7 +95,7 @@ for each layer in STRAP_PATH:
   <layer>/agents
 ```
 
-Profiles support OpenCode-style frontmatter with fields like `description`, `permission`, and `color`, followed by instruction text. `strap agents apply <name>` writes the selected profile into a canonical-state actor, usually `actors.assistant`, so provider compilation uses it as the actor frame. `strap agents import-opencode ~/.config/opencode/agents` copies existing OpenCode profiles into the user overlay.
+Profiles support OpenCode-style frontmatter with fields like `description`, `permission`, and `color`, followed by instruction text. `strap agents apply <name>` writes the selected profile into `actors.agents.<name>` by default and sets `runtime.active_agent`, so provider compilation uses it as the actor frame. `strap agents import-opencode ~/.config/opencode/agents` copies existing OpenCode profiles into the user overlay.
 
 ## Skills
 
@@ -114,7 +114,7 @@ The main command runner does not implement access-control rules. Restricted mode
 
 ## Canonical State
 
-The active state format is `strap.state.v0.2`.
+The active state format is `strap.state.v0.3`.
 
 See [`state-format.md`](state-format.md) for the canonical state format specification.
 
@@ -127,7 +127,7 @@ State is provider-agnostic and structured as:
 
 Addressability is optional. `strap state bookmark add` attaches inline bookmarks to visible nodes by unique text match, and `strap state fold --from <bookmark> --to <bookmark>` folds a sibling range into a collapsed scope. This keeps the base state hand-editable while still giving agents stable handles when needed.
 
-`strap state extract --from <bookmark> --to <bookmark>` emits `strap.context.v0.1` for a visible sibling range without mutating state. `strap context quote` converts that extracted context into a normal `strap.state.v0.2` history. `strap context summarize <framing>` runs a summarization loop over that history and prints summary text.
+`strap state extract --from <bookmark> --to <bookmark>` emits `strap.context.v0.1` for a visible sibling range without mutating state. `strap context quote` converts that extracted context into a normal `strap.state.v0.3` history. `strap context summarize <framing>` runs a summarization loop over that history and prints summary text.
 
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 
@@ -160,7 +160,7 @@ Implementation files are intentionally small. The hard cap is 150 lines per sour
 There is one loop surface:
 
 - `strap loop`: Nushell loop for provider/tool orchestration.
-- `strap one-shot`: Nu one-shot runner that builds a temporary child state from optional state/context input and returns the first final assistant answer without mutating sessions.
+- `strap one-shot`: Nu one-shot runner that builds a temporary child state from optional state/context input and returns the first final model answer without mutating sessions.
 
 The loop composes through public commands: `strap llm complete` for provider interaction and `strap run-calls` for tool execution.
 

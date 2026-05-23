@@ -25,7 +25,7 @@ export def request [statev: record, config: record, toolv: list] {
   {
     model: $config.model
     messages: ([{ role: "system", content: (state actor-frame $statev) }] | append ((state flatten $statev.root) | each {|event|
-      { role: (if $event.from == "assistant" { "assistant" } else { "user" }), content: (state event-text $event) }
+      { role: (if $event.from == "model" { "assistant" } else { "user" }), content: (state event-text $event) }
     }))
     tools: ($toolv | each {|tool| tool-spec $tool })
   } | merge $config.parameters
@@ -36,7 +36,7 @@ export def response-event [response: record] {
   let calls = (($message.tool_calls? | default []) | each {|call| response-call $call })
   let base = {
     type: "event"
-    from: "assistant"
+    from: "model"
     to: (if ($calls | is-empty) { ["user"] } else { ["harness"] })
     kind: (if ($calls | is-empty) { "message" } else { "tool_request" })
     text: ($message.content? | default "")

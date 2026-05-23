@@ -16,7 +16,7 @@ def context-events [input: any] {
   if (($input.events? | default null) != null) { return $input.events }
   if (($input.root?.type? | default "") == "scope") { return (flatten-node $input.root) }
   if (($input.nodes? | default null) != null) { return ($input.nodes | reduce --fold [] {|node, acc| $acc | append (flatten-node $node) }) }
-  error make { msg: "Expected strap.context.v0.1 or strap.state.v0.2 JSON" }
+  error make { msg: "Expected strap.context.v0.1 or strap.state.v0.3 JSON" }
 }
 
 def render-event [event: record] {
@@ -39,14 +39,14 @@ def state-with-context [input: any] {
 def answer-from [state: record] {
   let matches = ($state.root.children | reverse | where {|event|
     let is_text_answer = (($event.text? | default "") != "") and (($event.calls? | default [] | length) == 0)
-    (($event.type? | default "") == "event") and (($event.from? | default "") == "assistant") and $is_text_answer
+    (($event.type? | default "") == "event") and (($event.from? | default "") == "model") and $is_text_answer
   })
   if ($matches | is-empty) { "" } else { $matches | first | get text }
 }
 
 def append-user [text: string] {
   let state = $in
-  $state | update root.children { append { type: "event", from: "user", to: ["assistant"], kind: "message", text: $text } }
+  $state | update root.children { append { type: "event", from: "user", kind: "message", text: $text } }
 }
 
 def apply-agent-and-skills [agent: string, skill: string] {

@@ -43,7 +43,7 @@
 (defn command-ask [args]
   (let [dir (c/current-dir) text (clojure.string/join " " args)]
     (when (empty? text) (throw (ex-info "Usage: strap session ask <text>" {})))
-    (let [next-state (state/append-event (files/read-state dir) {:from "user" :to ["assistant"] :kind "message" :text text})]
+    (let [next-state (state/append-event (files/read-state dir) {:from "user" :kind "message" :text text})]
       (files/write-state dir next-state)
       (c/record-trace dir {:kind "session_ask" :text text})
       (c/snapshot-history dir "session ask")

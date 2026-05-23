@@ -52,7 +52,7 @@ These roots separate code, config, mutable state, and effect targets.
 
 ## State
 
-The canonical state format is `strap.state.v0.2`: actors, events, and scopes.
+The canonical state format is `strap.state.v0.3`: actors, events, and scopes.
 
 See [`docs/state-format.md`](docs/state-format.md) for the full format specification.
 

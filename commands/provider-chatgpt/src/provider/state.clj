@@ -19,8 +19,14 @@
     :else
     []))
 
+(defn active-agent [state]
+  (or (get-in state [:runtime :active_agent])
+      (some-> state :actors :agents first val)))
+
 (defn actor-frame [state]
-  (let [actor (get-in state [:actors :assistant])]
+  (let [actor (if (string? (get-in state [:runtime :active_agent]))
+                (get-in state [:actors :agents (keyword (get-in state [:runtime :active_agent]))])
+                (active-agent state))]
     (str/join
       "\n\n"
       (remove
@@ -31,12 +37,13 @@
            (when-let [private (get-in actor [:self :private])]
              (str "<self_private>\n" private "\n</self_private>"))]
           (for [[peer relation] (:peers actor)
-                :when (:contract relation)]
-            (str "<contract peer=\"" (name peer) "\">\n" (:contract relation) "\n</contract>")))))))
+                :let [contract (if (string? relation) relation (:contract relation))]
+                :when contract]
+            (str "<contract peer=\"" (name peer) "\">\n" contract "\n</contract>")))))))
 
 (defn event-text [event]
-  (let [to (if (sequential? (:to event)) (str/join "," (:to event)) (or (:to event) "all"))]
-    (str/trim (str "[" (:from event) " -> " to "; " (or (:kind event) "message") "]\n" (or (:text event) "")))))
+  (let [who (if-let [agent (:agent event)] (str (:from event) ":" agent) (:from event))]
+    (str/trim (str "[" who "; " (or (:kind event) "message") "]\n" (or (:text event) "")))))
 
 (defn tool-result [call]
   (if-not (:ok call)
@@ -69,11 +76,11 @@
         :output (tool-result call)}])))
 
 (defn event-inputs [event]
-  (if (and (= (:from event) "assistant") (seq (:calls event)))
+  (if (and (= (:from event) "model") (seq (:calls event)))
     (concat
       (when (:text event) [{:role "assistant" :content (:text event)}])
       (mapcat function-call-inputs (:calls event)))
-    [{:role (if (= (:from event) "assistant") "assistant" "user")
+    [{:role (if (= (:from event) "model") "assistant" "user")
       :content (or (:text event) (event-text event))}]))
 
 (defn responses-input [state]
@@ -121,7 +128,7 @@
   (let [output (or (:output response) [])
         text (or (:output_text response) (output-text output))
         calls (vec (map response-call (filter #(= (:type %) "function_call") output)))]
-    {:from "assistant"
+    {:from "model"
      :to (if (seq calls) ["harness"] ["user"])
      :kind (if (seq calls) "tool_request" "message")
      :text text

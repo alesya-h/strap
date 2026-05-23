@@ -13,7 +13,7 @@
              {:type "scope"
               :label label
               :status "open"
-              :participants ["assistant" "harness"]
+              :participants ["harness"]
               :children []}))
 
 (defn open-scope? [[_ node]]

@@ -38,8 +38,8 @@
 
 (defn last-text-event [state]
   (let [children (get-in state [:root :children] [])
-        assistant (filter #(and (= "event" (:type %)) (= "assistant" (:from %)) (not-empty (:text %))) children)]
-    (or (last assistant) (last (filter #(and (= "event" (:type %)) (not-empty (:text %))) children)))))
+        model-events (filter #(and (= "event" (:type %)) (= "model" (:from %)) (not-empty (:text %))) children)]
+    (or (last model-events) (last (filter #(and (= "event" (:type %)) (not-empty (:text %))) children)))))
 
 (defn remember-state [args]
   (let [{:keys [opts]} (core/parse-args args)

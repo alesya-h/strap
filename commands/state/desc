@@ -1,4 +1,4 @@
 Transform or display canonical strap state.
 
 Usage:
-  strap state <init|add-user|add-assistant|push|pop|bookmark|extract|fold|locate|show|tree|display-last-message> [args]
+  strap state <init|add-user|add-model|push|pop|bookmark|extract|fold|locate|show|tree|display-last-message|last-model-text> [args]

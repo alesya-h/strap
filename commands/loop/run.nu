@@ -32,7 +32,6 @@ def add-budget-exhausted [turns: int] {
   let event = {
     type: "event"
     from: "harness"
-    to: [assistant]
     kind: "tool_budget_exhausted"
     text: $"Tool budget exhausted after ($turns) turn\(s\). Answer now using the gathered context. Do not request more tools."
   }
@@ -43,7 +42,6 @@ def add-tool-budget-exhausted [calls: int] {
   let event = {
     type: "event"
     from: "harness"
-    to: [assistant]
     kind: "tool_budget_exhausted"
     text: $"Tool call budget exhausted after ($calls) requested call\(s\). Answer now using the gathered context. Do not request more tools."
   }

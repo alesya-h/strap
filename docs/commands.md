@@ -130,7 +130,7 @@ strap with-session my-session strap history log
 | `sandbox` | Run a command through a bubblewrap sandbox profile. |
 | `session` | Create, inspect, update, save, list, and trace user-local project sessions. |
 | `skills` | List, show, apply, and import skill instruction bundles. |
-| `state` | Initialize and transform canonical `strap.state.v0.2` JSON. |
+| `state` | Initialize and transform canonical `strap.state.v0.3` JSON. |
 | `status` | Show roots, layers, and overlayed artifact status. |
 | `work` | Initialize or inspect `.strap` project artifacts and `.strap-user` local work. |
 | `zk` | Use the shared markdown-source zettelkasten with a derived SQLite/FTS/vector index. |
@@ -166,7 +166,7 @@ open state.json | to json | ^strap agents apply chat-concise | save -f next.json
 strap agents import-opencode ~/.config/opencode/agents
 ```
 
-`apply` updates the selected actor, defaulting to `assistant`, with the profile description, instructions, and permission metadata.
+`apply` writes the profile to `actors.agents.<name>` by default, or to `--actor <id>`, and sets `runtime.active_agent`.
 
 ## Skills
 
@@ -179,7 +179,7 @@ open state.json | to json | ^strap skills apply concise | save -f next.json
 strap skills import-opencode ~/.config/opencode/skills
 ```
 
-`apply` attaches the skill to the selected actor, defaulting to `assistant`, without replacing the active agent profile.
+`apply` attaches the skill to the active agent by default, or to `--actor <id>`, without replacing the agent profile.
 
 ## Model Profiles
 

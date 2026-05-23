@@ -5,5 +5,5 @@ let skills = (call-json [skills list])
 ok (($skills | any {|item| $item.name == "concise" })) "concise skill is listed"
 let skill = (call-json [skills show concise])
 has $skill.instructions "concise" "skill instructions are returned"
-let state = (call-json [state init] | pipe-json [skills apply concise])
-ok ("concise" in $state.actors.assistant.skills) "skill applies to assistant actor"
+let state = (call-json [state init] | pipe-json [agents apply chat-concise] | pipe-json [skills apply concise])
+ok ("concise" in $state.actors.agents.chat-concise.skills) "skill applies to active grouped agent actor"

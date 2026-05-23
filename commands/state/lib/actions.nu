@@ -14,16 +14,19 @@ export def append-event [from: string, to: list<string>, kind: string, text: str
 }
 
 export def add-user [text: string] {
-  $in | common append-event { from: "user", to: ["assistant"], kind: "message", text: $text }
+  $in | common append-event { from: "user", kind: "message", text: $text }
 }
 
-export def add-assistant [text: string] {
-  $in | common append-event { from: "assistant", to: ["user"], kind: "message", text: $text }
+export def add-model [text: string] {
+  let state = $in
+  let agent = ($state | get --optional runtime.active_agent | default "")
+  let event = { from: "model", kind: "message", text: $text }
+  $state | common append-event (if $agent == "" { $event } else { $event | insert agent $agent })
 }
 
 export def push [label: string] {
   $in | update root.children {
-    append { type: "scope", label: $label, status: "open", participants: ["assistant", "harness"], children: [] }
+    append { type: "scope", label: $label, status: "open", participants: ["model", "harness"], children: [] }
   }
 }
 
@@ -46,7 +49,7 @@ export def bookmark-list [--hidden] {
   $in | bookmark list $hidden
 }
 
-export def bookmark-add [--text: string, --label: string = "", --id: string = "", --created-by: string = "assistant"] {
+export def bookmark-add [--text: string, --label: string = "", --id: string = "", --created-by: string = "model"] {
   let state = $in
   let bookmark_id = if $id == "" {
     $"bm_((date now | format date '%s'))_((random uuid) | str substring 0..3)"
@@ -93,13 +96,13 @@ export def locate-bookmark [id: string, --hidden] {
 }
 
 export def display-last-message [] {
-  let events = ($in | get root.children | where type == "event" and from == "assistant" and text != "")
+  let events = ($in | get root.children | where type == "event" and from == "model" and text != "")
   if ($events | is-empty) { "" } else { $events | last | get text }
 }
 
 export def add-tool-request [tool: string, input: record] {
   $in | common append-event {
-    from: "assistant"
+    from: "model"
     to: ["harness"]
     kind: "tool_request"
     text: ""

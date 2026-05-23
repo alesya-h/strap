@@ -3,9 +3,11 @@ use ../../lib/test.nu *
 
 let parent = (state-with-user "parent request")
 let child = ($parent | pipe-json [agent fork --prompt "child investigation"])
-ok ($child.parent.fork_prompt == "child investigation") "agent fork records prompt"
+ok (($child.root.children | last | get text) == "child investigation") "agent fork creates child task"
 let child_file = (case-tmp | path join child.json)
 $child | to json | save -f $child_file
 let folded = ($parent | pipe-json [agent fold --child $child_file --summary "child summary"])
 let last = ($folded.root.children | last)
-ok ($last.kind == "agent_fold") "agent fold appends fold event"
+ok ($last.kind == "tool_request") "agent fold appends fork tool result"
+ok ($last.calls.0.tool == "agent.fork") "agent fold is represented as agent.fork call"
+ok ($last.calls.0.output.summary == "child summary") "agent fork call has parent-visible summary"

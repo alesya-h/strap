@@ -8,7 +8,7 @@ def call-run [command: string, name: any, paths: bool, actor: string] {
   if ($name | is-empty) { run $command --paths=$paths --actor $actor } else { run $command $name --paths=$paths --actor $actor }
 }
 
-def main [command?: string, name?: string, --paths, --actor: string = "assistant"] {
+def main [command?: string, name?: string, --paths, --actor: string = ""] {
   if ($command | default "") == "apply" {
     open --raw /dev/stdin | from json | call-run $command $name $paths $actor | write-json
   } else {

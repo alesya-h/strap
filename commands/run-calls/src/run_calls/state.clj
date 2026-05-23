@@ -2,9 +2,10 @@
   (:require [run-calls.common :as c]))
 
 (defn normalize [state]
-  (if (= "scope" (get-in state [:root :type]))
+  (if (and (= "strap.state.v0.3" (:version state))
+           (= "scope" (get-in state [:root :type])))
     state
-    (throw (ex-info "Expected strap.state.v0.2 state with root scope" {}))))
+    (throw (ex-info "Expected strap.state.v0.3 state with root scope" {}))))
 
 (defn flatten-visible
   ([node] (flatten-visible node []))
@@ -22,7 +23,7 @@
   (update-in state [:root :children] conj (merge {:type "event"} event)))
 
 (defn create-state []
-  {:version "strap.state.v0.2" :actors {}
+  {:version "strap.state.v0.3" :actors {:humans {} :agents {} :runtimes {}}
    :root {:type "scope" :label "root" :status "open" :participants [] :children []}})
 
 (defn read-state [file]

@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 use ../../lib/test.nu *
 
-let state = (state-with-user "PROVIDER_SHAPE_USER" | upsert actors.assistant.self.private "PROVIDER_SHAPE_SYSTEM")
+let state = (state-with-user "PROVIDER_SHAPE_USER" | upsert actors.agents.coding-agent.self.private "PROVIDER_SHAPE_SYSTEM" | upsert runtime.active_agent "coding-agent")
 
 let chatgpt = ($state | pipe-json [provider-chatgpt compile --tools json_echo])
 has $chatgpt.instructions "PROVIDER_SHAPE_SYSTEM" "chatgpt compile includes system instructions"

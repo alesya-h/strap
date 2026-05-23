@@ -12,7 +12,7 @@ export def dispatch [
   --summary: string = "",
   --label: string = "folded conversation segment",
   --text: string = "",
-  --created-by: string = "assistant",
+  --created-by: string = "model",
   --id: string = "",
   --hidden,
   --bookmark: string = ""
@@ -23,13 +23,13 @@ export def dispatch [
       $in | actions append-event ($sub | default "") ($args | get 0) ($args | get 1) ($args | get 2 | default "")
     }
     "add-user" => { $in | actions add-user (text-arg $sub $args) }
-    "add-assistant" => { $in | actions add-assistant (text-arg $sub $args) }
+    "add-model" => { $in | actions add-model (text-arg $sub $args) }
     "add-tool-request" => { $in | actions add-tool-request ($sub | default "") ($args | first | default {}) }
     "push" => { $in | actions push ([($sub | default "scope")] | append $args | where {|item| $item != "" } | str join " ") }
     "pop" => { $in | actions pop (text-arg $sub $args) }
     "open-scope" => { $in | actions push ($sub | default "scope") }
     "collapse-last-scope" => { $in | actions pop ([($sub | default "")] | append $args | str join " ") }
-    "last-assistant-text" => { $in | actions display-last-message }
+    "last-model-text" => { $in | actions display-last-message }
     "add-trace" => { $in | actions add-trace ($sub | default "") ($args | first | default null) }
     "bookmark" => { dispatch-bookmark ($sub | default "") $args $text $label $id $created_by $hidden }
     "bookmark-list" => { $in | actions bookmark-list --hidden=$hidden }

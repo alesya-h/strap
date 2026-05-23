@@ -106,17 +106,16 @@ function findCallResult(state, toolName) {
 
 function oneCallState(tool, input) {
   return {
-    version: "strap.state.v0.2",
-    actors: {},
+    version: "strap.state.v0.3",
+    actors: { humans: {}, agents: {}, runtimes: {} },
     root: {
       type: "scope",
       label: "root",
       status: "open",
-      participants: ["assistant", "harness"],
+      participants: ["harness"],
       children: [{
         type: "event",
-        from: "assistant",
-        to: ["harness"],
+        from: "model",
         kind: "tool_request",
         calls: [{ id: "mcp-call", tool, input }],
       }],

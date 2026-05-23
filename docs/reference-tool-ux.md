@@ -61,7 +61,7 @@ This preserves the unix-ish extensibility while making quoting, injection, and s
 
 The shared ChatGPT format discussion changes the state direction from a flat message log to a nested actor/event/scope model:
 
-- Actors are first-class: user, assistant, harness, subagents, editors, interpreters, remote agents.
+- Actors are first-class and grouped by kind: humans, agents, runtimes, editors, interpreters, and remote agents.
 - Events are actor-to-actor communication: `from`, `to`, `kind`, `text`, `calls`, `results`.
 - Tool calls are structured communication, not a unique role.
 - Scopes represent branchable or compactable regions.

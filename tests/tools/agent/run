@@ -3,7 +3,7 @@ use ../../lib/test.nu *
 
 let pushed = (tool-state agent.context_push { label: "tool scope" } | pipe-json [run-calls --tools agent])
 ok (($pushed.root.children | last).type == "scope") "agent.context_push opens a scope"
-let requested = ($pushed | update root.children { append { type: "event", from: "assistant", to: ["harness"], kind: "tool_request", calls: [{ id: "pop", tool: "agent.context_pop", input: { summary: "scope summary" } }] } })
+let requested = ($pushed | update root.children { append { type: "event", from: "model", to: ["harness"], kind: "tool_request", calls: [{ id: "pop", tool: "agent.context_pop", input: { summary: "scope summary" } }] } })
 let popped = ($requested | pipe-json [run-calls --tools agent])
 let scopes = ($popped.root.children | where {|item| ($item.type? | default "") == "scope" and ($item.label? | default "") == "tool scope" })
 ok (($scopes | first).status == "collapsed") "agent.context_pop collapses scope"

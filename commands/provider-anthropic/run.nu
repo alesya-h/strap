@@ -30,6 +30,11 @@ def prepare [model_name: string, tools_name: string] {
   }
 }
 
+def model-event [state: record, event: record] {
+  let agent = ($state | get --optional runtime.active_agent | default "")
+  if $agent == "" { $event } else { $event | insert agent $agent }
+}
+
 export def main [command?: string, --model: string = "current", --tools: string = "all"] {
   let input = $in
   match ($command | default "") {
@@ -44,7 +49,7 @@ export def main [command?: string, --model: string = "current", --tools: string 
     "complete" => {
       let prepared = ($input | prepare $model $tools)
       let response = (common post-json $prepared.config.base_url (headers $prepared.config) $prepared.body)
-      $prepared.state | update root.children { append (compile response-event $response) }
+      $prepared.state | update root.children { append (model-event $prepared.state (compile response-event $response)) }
     }
     _ => usage
   }

@@ -83,9 +83,10 @@
         config (model/load-model model-name)
         input-state (read-json)
         body (state/compile-request input-state config (load-tools tools-name))
-        response (curl-json (:base_url config) (auth/auth-headers config) body)]
+        response (curl-json (:base_url config) (auth/auth-headers config) body)
+        agent (get-in input-state [:runtime :active_agent])]
     (assert-chatgpt config)
-    (write-json (update-in input-state [:root :children] conj (assoc (state/response-event response) :type "event")))))
+    (write-json (update-in input-state [:root :children] conj (cond-> (assoc (state/response-event response) :type "event") agent (assoc :agent agent))))))
 
 (defn command-embed [argv]
   (throw (ex-info "ChatGPT does not support embeddings; use `strap embed --provider openrouter` instead." {})))

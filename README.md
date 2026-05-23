@@ -243,17 +243,17 @@ This keeps the `ai-say` idea of shell-authored tools, but avoids `{{arg}}` strin
 
 ## Canonical State
 
-The active format is `strap.state.v0.2`:
+The active format is `strap.state.v0.3`:
 
 ```json
 {
-  "version": "strap.state.v0.2",
-  "actors": {},
+  "version": "strap.state.v0.3",
+  "actors": {"humans": {}, "agents": {}, "runtimes": {}},
   "root": {
     "type": "scope",
     "label": "root",
     "status": "open",
-    "participants": ["user", "assistant", "harness"],
+    "participants": [],
     "children": []
   }
 }
@@ -266,7 +266,7 @@ The active format is the actor/event/scope shape.
 - `DESIGN.md`: concise current design summary.
 - `docs/vision.md`: vision, design principles, non-goals, strategic priorities.
 - `docs/architecture.md`: roots, command flow, isolation notes, state, loops, tools, providers, sessions, memory, subprojects.
-- `docs/state-format.md`: canonical `strap.state.v0.2` format specification.
+- `docs/state-format.md`: canonical `strap.state.v0.3` format specification.
 - `docs/organization.md`: repository, `.strap`, and `.strap-user` organization.
 - `docs/commands.md`: command contract and built-in command reference.
 - `docs/providers.md`: model profiles and auth modes.

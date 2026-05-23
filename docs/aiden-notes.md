@@ -11,7 +11,7 @@ The loop was:
 
 1. Keep conversation history in `msgs.yaml`.
 2. Send history to Anthropic Messages.
-3. Treat assistant text as Ruby code, after stripping code fences.
+3. Treat model text as Ruby code, after stripping code fences.
 4. Ask the human to inspect/confirm the code.
 5. Evaluate the code with `$aiden.instance_eval`.
 6. Capture stdout/stderr/errors and append that captured output as the next user message.
@@ -47,7 +47,7 @@ So the model effectively inhabited a persistent Ruby object. It could define new
 
 Raw model-written `eval` is now the wrong primitive:
 
-- tool calls give us structured intent instead of hoping assistant text is executable code
+- tool calls give us structured intent instead of hoping model text is executable code
 - arbitrary eval collapses planning, permissions, execution, and persistence into one unsafe operation
 - provenance and rollback are poor if new methods are appended into one mutable file
 - failures become transcript text rather than typed tool results
@@ -78,7 +78,7 @@ This preserves Aiden’s self-extension loop while using current tool-call machi
 
 Aiden’s `$aiden` object is an ancestor of strap’s actor model:
 
-- `$aiden` persistent methods → `actors.assistant.self` plus installed tools
+- `$aiden` persistent methods → `actors.agents.<agent>.self` plus installed tools
 - `$alesya.tell/ask` → user-facing event/call tools
 - `aiden_self.rb` → versioned capability bundle or script tool directory
 - captured stdout as next user message → structured tool result event

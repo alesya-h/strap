@@ -9,7 +9,7 @@ export def main [
   --summary: string = "",
   --label: string = "folded conversation segment",
   --text: string = "",
-  --created-by: string = "assistant",
+  --created-by: string = "model",
   --id: string = "",
   --hidden,
   --bookmark: string = ""

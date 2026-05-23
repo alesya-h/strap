@@ -4,7 +4,7 @@ This document records what `strap` currently implements.
 
 ## Core Harness
 
-- Provider-agnostic canonical state format using actors, events, and scopes: `strap.state.v0.2`.
+- Provider-agnostic canonical state format using actors, events, and scopes: `strap.state.v0.3`.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
 - Unified artifact layer path via `STRAP_PATH`, with `STRAP_WORKSPACE` for filesystem effects.
 - Immutable JSON filter CLIs for state transforms and harness operations.
@@ -24,7 +24,7 @@ This document records what `strap` currently implements.
 ## CLIs
 
 - `strap`: main command runner, with commands discovered from project, config, and built-in command directories.
-- `strap state`: initialize, append user/assistant messages, push/pop scopes, display last message.
+- `strap state`: initialize, append user/model messages, push/pop scopes, display last message.
 - `strap llm`: compile state into model-profile requests and call configured providers.
 - `strap loop`: run the Nushell model/tool loop over canonical state.
 - `strap one-shot`: run a temporary child agent until its first final answer.
@@ -93,7 +93,7 @@ This document records what `strap` currently implements.
 - sqlite-vec vector search.
 - Hybrid text/vector search.
 - List, delete, tags, and search commands.
-- Remember latest assistant output from a state as a note.
+- Remember latest model output from a state as a note.
 - Tags and aliases stored on notes.
 - `search-hybrid` and `reindex` rebuild the derived SQLite FTS/vector index from markdown notes.
 - Embedding providers:
@@ -110,7 +110,7 @@ This document records what `strap` currently implements.
 - `DESIGN.md`: concise current design summary.
 - `docs/vision.md`: product thesis, principles, non-goals, and current priorities.
 - `docs/architecture.md`: implementation architecture and subsystem map.
-- `docs/state-format.md`: canonical `strap.state.v0.2` format specification.
+- `docs/state-format.md`: canonical `strap.state.v0.3` format specification.
 - `docs/organization.md`: root/config/work organization and command-directory contract.
 - `docs/commands.md`: command authoring, validation, and built-in command reference.
 - `docs/providers.md`: model profile and auth notes.

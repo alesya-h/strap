@@ -4,5 +4,5 @@ use ../../lib/test.nu *
 let state = (state-with-user "Reply with exactly STRAP_LOOP_OK and no tool calls.")
 let completed = ($state | pipe-json [loop --tools none --max-turns 1])
 let last = ($completed.root.children | last)
-ok ($last.from == "assistant") "loop appends assistant response"
+ok ($last.from == "model") "loop appends model response"
 ok (($completed.trace | length) >= 1) "loop records turn trace"

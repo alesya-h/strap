@@ -11,19 +11,19 @@ def build-state [task: string, agent: string, skills: list<string>] {
   mut state = (^$strap state init | from json)
   if $agent != "" { $state = ($state | to json | ^$strap agents apply $agent | from json) }
   for skill in $skills { $state = ($state | to json | ^$strap skills apply $skill | from json) }
-  let current_private = ($state.actors.assistant.self.private? | default "")
-  $state = ($state | update actors.assistant.self.private (
-    [$current_private $one_shot_instruction]
-    | where {|item| $item != null and $item != "" }
-    | str join "\n\n"
-  ))
-  append-event $state { from: "user", to: ["assistant"], kind: "message", text: $task }
+  let agent_id = ($state | get --optional runtime.active_agent | default "default")
+  let agents = ($state.actors.agents? | default {})
+  let current = ($agents | get --optional $agent_id | default { self: {}, peers: {} })
+  let current_private = ($current.self.private? | default "")
+  let private = ([$current_private $one_shot_instruction] | where {|item| $item != null and $item != "" } | str join "\n\n")
+  $state = ($state | upsert actors.agents ($agents | upsert $agent_id ($current | upsert self.private $private)) | upsert runtime.active_agent $agent_id)
+  append-event $state { from: "user", kind: "message", text: $task }
 }
 
 def answer-from [state: record] {
   let matches = ($state.root.children | reverse | where {|event|
     let is_text_answer = (($event.text? | default "") != "") and (($event.calls? | default [] | length) == 0)
-    (($event.type? | default "") == "event") and (($event.from? | default "") == "assistant") and $is_text_answer
+    (($event.type? | default "") == "event") and (($event.from? | default "") == "model") and $is_text_answer
   })
   if ($matches | is-empty) { "" } else { $matches | first | get text }
 }
@@ -49,8 +49,8 @@ export def main [command?: string, ...task_parts: string, --model: string = "cur
   let trace = ($state.trace? | default [])
   {
     version: "strap.one-shot.result.v0.1"
-    agent: ($state.actors.assistant.agent? | default null)
-    skills: ($state.actors.assistant.skills? | default [])
+    agent: ($state | get --optional runtime.active_agent | default null)
+    skills: ($state.actors.agents | get --optional ($state | get --optional runtime.active_agent | default "") | get skills? | default [])
     task: $task
     tools: $tools
     turns: ($trace | where kind == loop-turn | where {|item| $item.data.phase == complete } | length)

@@ -5,18 +5,18 @@ use ./run.nu
 def write-json [] { $in | to json --indent 2 | print }
 
 def usage [] {
-  print -e "Usage: strap state <init|add-user|add-assistant|push|pop|bookmark|extract|fold|locate|show|tree|display-last-message> [args] < state.json > next.json"
+  print -e "Usage: strap state <init|add-user|add-model|push|pop|bookmark|extract|fold|locate|show|tree|display-last-message|last-model-text> [args] < state.json > next.json"
   exit 2
 }
 
 def --wrapped main [
   command?: string, sub?: string, ...args: string, --from: string = "", --to: string = "",
   --summary: string = "", --label: string = "folded conversation segment", --text: string = "",
-  --created-by: string = "assistant", --id: string = "", --hidden, --bookmark: string = ""
+  --created-by: string = "model", --id: string = "", --hidden, --bookmark: string = ""
 ] {
   if ($command | is-empty) { usage }
   if $command == "init" { run init | write-json; return }
   let words = ([($sub | default "")] | append $args | where {|item| $item != "" })
   let result = (open --raw /dev/stdin | from json | run $command ($words | first | default "") ...($words | skip 1) --from $from --to $to --summary $summary --label $label --text $text --created-by $created_by --id $id --hidden=$hidden --bookmark $bookmark)
-  if $command == "tree" or $command == "display-last-message" { print $result } else { $result | write-json }
+  if $command == "tree" or $command == "display-last-message" or $command == "last-model-text" { print $result } else { $result | write-json }
 }

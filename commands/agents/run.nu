@@ -67,15 +67,17 @@ def load-profile [name: string, include_paths: bool] {
 
 def apply-profile [profile: record, actor_id: string] {
   let state = $in
-  let current = ($state.actors | get --optional $actor_id | default { kind: "agent", self: {}, peers: {} })
+  let agent_id = if $actor_id == "" { $profile.name } else { $actor_id }
+  let agents = ($state.actors.agents? | default {})
+  let current = ($agents | get --optional $agent_id | default { self: {}, peers: {} })
   let self = ($current.self? | default {} | upsert public (if $profile.description == "" { $current.self?.public? | default $"($profile.name) agent." } else { $profile.description }) | upsert private $profile.instructions)
-  let actor = ($current | upsert kind "agent" | upsert agent $profile.name | upsert agent_profile { name: $profile.name, description: $profile.description, source: $profile.source } | upsert self $self)
-  $state | update actors { upsert $actor_id $actor }
+  let actor = ($current | upsert self $self | upsert profile { name: $profile.name, description: $profile.description, source: $profile.source })
+  $state | upsert actors.agents ($agents | upsert $agent_id $actor) | upsert runtime.active_agent $agent_id
 }
 
 def usage [] { error make { msg: "Usage: strap agents <list|show|apply|roots|import-opencode> [args]" } }
 
-export def main [command?: string, name?: string, --paths, --actor: string = "assistant"] {
+export def main [command?: string, name?: string, --paths, --actor: string = ""] {
   let input = $in
   match ($command | default "") {
     "list" => { list-profiles $paths | each {|item| $item | reject instructions } }

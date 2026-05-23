@@ -28,7 +28,7 @@ def responses-call [item: record] {
 
 def event-base [response: record, provider_name: string, text: string, calls: list] {
   let base = {
-    from: "assistant"
+    from: "model"
     to: (if ($calls | is-empty) { ["user"] } else { ["harness"] })
     kind: (if ($calls | is-empty) { "message" } else { "tool_request" })
     text: $text
