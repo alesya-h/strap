@@ -6,9 +6,9 @@ let dir = $created.dir
 ok ($dir | path exists) "session new creates a session directory"
 with-env { STRAP_SESSION: $dir } {
   let asked = (call-json [session ask "remember session test"])
-  ok (($asked.root.children | length) == 1) "session ask appends user event"
+  ok (($asked.history | length) == 1) "session ask appends user event"
   let shown = (call-json [session show])
-  ok (($shown.root.children | length) == 1) "session show returns saved state"
+  ok (($shown.history | length) == 1) "session show returns saved state"
   let saved = ($shown | pipe-json [session save])
   ok ($saved.ok == true) "session save accepts stdin state"
   let copy = (call-json [session copy "session command copy"])

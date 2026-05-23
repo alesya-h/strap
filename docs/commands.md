@@ -130,7 +130,7 @@ strap with-session my-session strap history log
 | `sandbox` | Run a command through a bubblewrap sandbox profile. |
 | `session` | Create, inspect, update, save, list, and trace user-local project sessions. |
 | `skills` | List, show, apply, and import skill instruction bundles. |
-| `state` | Initialize and transform canonical `strap.state.v0.3` JSON. |
+| `state` | Initialize and transform canonical `strap.state.v0.4` JSON. |
 | `status` | Show roots, layers, and overlayed artifact status. |
 | `work` | Initialize or inspect `.strap` project artifacts and `.strap-user` local work. |
 | `zk` | Use the shared markdown-source zettelkasten with a derived SQLite/FTS/vector index. |
@@ -166,7 +166,7 @@ open state.json | to json | ^strap agents apply chat-concise | save -f next.json
 strap agents import-opencode ~/.config/opencode/agents
 ```
 
-`apply` writes the profile to `actors.agents.<name>` by default, or to `--actor <id>`, and sets `runtime.active_agent`.
+`apply` writes the profile to `actors.<name>` by default, or to `--actor <id>`, and sets `runtime.active_model`.
 
 ## Skills
 
@@ -226,7 +226,7 @@ strap state with-extract bm_start bm_end -- jq 'map(.text |= ascii_upcase)' < st
 
 ## Bookmark Addressability
 
-Canonical state does not require permanent IDs on every event. When an agent needs a stable handle, it can place optional inline bookmarks on visible messages/scopes:
+Canonical state does not require permanent IDs on every history item. When an actor needs a stable handle, it can place optional inline bookmarks on visible messages:
 
 ```bash
 strap state bookmark add --text "unique substring" --label fold-start < state.json > next.json

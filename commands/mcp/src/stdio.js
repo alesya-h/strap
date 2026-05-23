@@ -93,33 +93,20 @@ function publicTool(tool) {
 }
 
 function findCallResult(state, toolName) {
-  const stack = [state?.root].filter(Boolean);
-  while (stack.length > 0) {
-    const node = stack.pop();
-    for (const call of node.calls || []) {
+  for (const item of state?.history || []) {
+    for (const call of item.calls || []) {
       if (call.tool === toolName) return call;
     }
-    for (const child of node.children || []) stack.push(child);
   }
   throw new Error(`No tool result found for: ${toolName}`);
 }
 
 function oneCallState(tool, input) {
   return {
-    version: "strap.state.v0.3",
-    actors: { humans: {}, agents: {}, runtimes: {} },
-    root: {
-      type: "scope",
-      label: "root",
-      status: "open",
-      participants: ["harness"],
-      children: [{
-        type: "event",
-        from: "model",
-        kind: "tool_request",
-        calls: [{ id: "mcp-call", tool, input }],
-      }],
-    },
+    version: "strap.state.v0.4",
+    actors: { model: { kind: "model" } },
+    runtime: { active_model: "model" },
+    history: [{ from: "model", calls: [{ id: "mcp-call", tool, input }] }],
   };
 }
 

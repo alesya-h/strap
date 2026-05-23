@@ -1,57 +1,33 @@
 (ns tool.main
   (:require [cheshire.core :as json]))
 
-(defn read-json []
-  (json/parse-string (slurp *in*) true))
+(defn read-json [] (json/parse-string (slurp *in*) true))
+(defn write-json [value] (println (json/generate-string value {:pretty true})))
 
-(defn write-json [value]
-  (println (json/generate-string value {:pretty true})))
+(defn ensure-strap [state]
+  (assoc-in state [:actors :strap] {:kind "runtime" :self {:public "Local Strap harness."}}))
 
-(defn push-scope [state label]
-  (update-in state [:root :children]
-             conj
-             {:type "scope"
-              :label label
-              :status "open"
-              :participants ["harness"]
-              :children []}))
-
-(defn open-scope? [[_ node]]
-  (and (= "scope" (:type node))
-       (= "open" (:status node))))
-
-(defn pop-scope [state summary]
-  (let [children (get-in state [:root :children])
-        match (last (filter open-scope? (map-indexed vector children)))]
-    (when-not match
-      (throw (ex-info "No open scope found" {})))
-    (let [[idx scope] match
-          collapsed (assoc scope
-                           :status "collapsed"
-                           :summary summary
-                           :hidden {:children (:children scope)}
-                           :children [])]
-      (assoc-in state [:root :children idx] collapsed))))
+(defn append-message [state message]
+  (update (ensure-strap state) :history conj message))
 
 (defn text-result [text]
   (let [value {:text text}]
     {:content [{:type "text" :text (json/generate-string value {:pretty true})}]
      :structuredContent value}))
 
+(defn push-context [state label]
+  (append-message state {:from "strap" :kind "context" :text (str "opened context: " label)}))
+
+(defn pop-context [state summary]
+  (let [call {:id "context_summary" :tool "history.summarize" :input {} :ok true :output {:summary summary}}]
+    (append-message state {:from "strap" :kind "context" :text "" :calls [call]})))
+
 (defn run-action [action]
-  (let [envelope (read-json)
-        state (:state envelope)
-        args (:arguments envelope)]
+  (let [envelope (read-json) state (:state envelope) args (:arguments envelope)]
     (case action
-      "context_push"
-      (write-json {:state (push-scope state (:label args))
-                   :result (text-result (str "opened scope: " (:label args)))})
-      "context_pop"
-      (write-json {:state (pop-scope state (:summary args))
-                   :result (text-result (:summary args))})
+      "context_push" (write-json {:state (push-context state (:label args)) :result (text-result (str "opened context: " (:label args)))})
+      "context_pop" (write-json {:state (pop-context state (:summary args)) :result (text-result (:summary args))})
       (throw (ex-info (str "Unknown agent action: " action) {})))))
 
 (defn -main [& args]
-  (if-let [action (first args)]
-    (run-action action)
-    (write-json ["context_push" "context_pop"])))
+  (if-let [action (first args)] (run-action action) (write-json ["context_push" "context_pop"])))

@@ -8,7 +8,6 @@ let chat_event = (response-event {
   choices: [{ message: { content: "", tool_calls: [{ id: "call_oa_chat", type: "function", function: { name: "json_echo__echo", arguments: '{"value":"openai-chat-fixture"}' } }] } }]
   usage: {}
 } "chat")
-ok ($chat_event.kind == "tool_request") "openai chat parser converts tool_calls into tool_request"
 ok ($chat_event.calls.0.input.value == "openai-chat-fixture") "openai chat parser decodes tool arguments"
 
 let responses_event = (response-event {
@@ -18,7 +17,5 @@ let responses_event = (response-event {
   output: [{ type: "function_call", id: "fc_1", call_id: "call_oa_resp", name: "json_echo__echo", arguments: '{"value":"openai-responses-fixture"}' }]
   usage: {}
 } "responses")
-ok ($responses_event.kind == "tool_request") "openai responses parser converts function_call into tool_request"
-ok ($responses_event.to.0 == "harness") "openai responses tool request targets harness"
 ok ($responses_event.calls.0.tool == "json_echo.echo") "openai responses parser decodes provider-safe tool name"
 ok ($responses_event.calls.0.input.value == "openai-responses-fixture") "openai responses parser decodes tool arguments"

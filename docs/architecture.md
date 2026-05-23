@@ -95,7 +95,7 @@ for each layer in STRAP_PATH:
   <layer>/agents
 ```
 
-Profiles support OpenCode-style frontmatter with fields like `description`, `permission`, and `color`, followed by instruction text. `strap agents apply <name>` writes the selected profile into `actors.agents.<name>` by default and sets `runtime.active_agent`, so provider compilation uses it as the actor frame. `strap agents import-opencode ~/.config/opencode/agents` copies existing OpenCode profiles into the user overlay.
+Profiles support OpenCode-style frontmatter with fields like `description`, `permission`, and `color`, followed by instruction text. `strap agents apply <name>` writes the selected profile into `actors.<name>` by default and sets `runtime.active_model`, so provider compilation uses it as the actor frame. `strap agents import-opencode ~/.config/opencode/agents` copies existing OpenCode profiles into the user overlay.
 
 ## Skills
 
@@ -114,20 +114,19 @@ The main command runner does not implement access-control rules. Restricted mode
 
 ## Canonical State
 
-The active state format is `strap.state.v0.3`.
+The active state format is `strap.state.v0.4`.
 
 See [`state-format.md`](state-format.md) for the canonical state format specification.
 
 State is provider-agnostic and structured as:
 
-- `actors`: known humans, agents, and harness participants;
-- `root`: a tree of events and scopes;
-- events: messages, tool requests, tool results, memory context, fork/fold records;
-- scopes: branchable/collapsible regions that can hold summaries and hidden children.
+- `actors`: a flat actor map keyed by actor id;
+- `history`: a flat list of actor-authored message/action items;
+- history items: text, tool calls/results, attachments, and hidden storage/debug data.
 
-Addressability is optional. `strap state bookmark add` attaches inline bookmarks to visible nodes by unique text match, and `strap state fold --from <bookmark> --to <bookmark>` folds a sibling range into a collapsed scope. This keeps the base state hand-editable while still giving agents stable handles when needed.
+Addressability is optional. `strap state bookmark add` attaches inline bookmarks to history items by unique text match, and `strap state fold --from <bookmark> --to <bookmark>` compacts a history range into a `history.summarize` tool result with absorbed messages under `hidden.messages`.
 
-`strap state extract --from <bookmark> --to <bookmark>` emits `strap.context.v0.1` for a visible sibling range without mutating state. `strap context quote` converts that extracted context into a normal `strap.state.v0.3` history. `strap context summarize <framing>` runs a summarization loop over that history and prints summary text.
+`strap state extract --from <bookmark> --to <bookmark>` emits `strap.context.v0.1` for a visible sibling range without mutating state. `strap context quote` converts that extracted context into a normal `strap.state.v0.4` history. `strap context summarize <framing>` runs a summarization loop over that history and prints summary text.
 
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 

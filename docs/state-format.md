@@ -1,195 +1,276 @@
 # Canonical State Format
 
-Current version: `strap.state.v0.3`.
+This document specifies the canonical Strap state format.
 
-Canonical state is the provider-agnostic source of truth for an agent session. Provider payloads are compiled projections; provider continuation IDs are not canonical state.
+## Core Shape
 
-## Top-level object
+State is a flat transcript plus actor metadata. The transcript does not encode scopes or recipients.
 
 ```json
 {
-  "version": "strap.state.v0.3",
-  "actors": {
-    "humans": {},
-    "agents": {},
-    "runtimes": {}
-  },
-  "root": {
-    "type": "scope",
-    "label": "root",
-    "status": "open",
-    "participants": [],
-    "children": []
-  }
+  "version": "strap.state.v0.4",
+  "actors": {},
+  "runtime": {},
+  "history": []
 }
 ```
 
-`strap state init` intentionally emits empty actor groups. Projects or sessions can add local human/agent facts explicitly.
-
-## Actors
-
-Actors are grouped by kind instead of overloaded with transcript roles:
+`actors` is a flat map keyed by actor id. Actor kind is metadata, not a top-level schema axis.
 
 ```json
 {
   "actors": {
-    "humans": {
-      "alesya": {
-        "self": {
-          "public": "My name is Alesya. I'm autistic; be precise and reduce sycophancy."
-        },
-        "peers": {
-          "coding-agent": "Please ask before doing anything risky."
-        }
+    "alesya": {
+      "kind": "human",
+      "self": {
+        "public": "My name is Alesya. I'm autistic; please be precise and reduce sycophancy."
+      },
+      "peers": {
+        "coding-agent": "Please ask before doing anything risky."
       }
     },
-    "agents": {
-      "coding-agent": {
-        "self": {
-          "public": "Software engineering agent for driving implementation.",
-          "private": "Keep files under 150 lines. Write tests. Prefer immutable plain data."
-        },
-        "peers": {
-          "alesya": "Prefers when I use jsmcp."
-        }
+    "coding-agent": {
+      "kind": "model",
+      "self": {
+        "public": "Software engineering agent for driving implementation.",
+        "private": "I try to keep files under 150 lines and functions under 7 lines. I write tests. I prefer immutable plain data."
+      },
+      "peers": {
+        "alesya": "Prefers when I use jsmcp."
       }
     },
-    "runtimes": {}
+    "strap": {
+      "kind": "runtime",
+      "self": {
+        "public": "Local command, provider, and tool execution harness."
+      }
+    }
   },
   "runtime": {
-    "active_agent": "coding-agent"
+    "active_model": "coding-agent"
   }
 }
 ```
 
-`self.public` is visible identity. `self.private` is model instruction material for agents. `peers` values may be strings or records with `contract`.
+`kind` is used by provider compilers and UI. For example, an API adapter may map `kind: "model"` to provider `role: "assistant"`, and render other visible actors as user/context input.
 
-`strap agents apply <name>` writes to `actors.agents.<name>` and sets `runtime.active_agent`. `strap skills apply <name>` attaches skill fields to the active agent.
+## History Items
 
-## Events
-
-Events are ordered transcript messages produced by broad roles:
+A history item is one actor-authored message/action appended to the shared transcript.
 
 ```json
 {
-  "type": "event",
-  "from": "user",
-  "kind": "message",
-  "text": "Investigate the provider streaming issue."
+  "from": "alesya",
+  "text": "Please inspect the provider code."
 }
 ```
 
-Model-produced events use `from: "model"`, never `from: "assistant"`. When an active agent is known, model events include `agent`:
+Model-produced messages use the actual model actor id in `from`, not a generic `model` role.
 
 ```json
 {
-  "type": "event",
-  "from": "model",
-  "agent": "coding-agent",
-  "kind": "message",
-  "text": "The issue is in the SSE decoder."
+  "from": "coding-agent",
+  "text": "I will inspect the provider state compiler."
 }
 ```
 
-Harness events use `from: "harness"`. `to` is optional and not required for normal chat.
+There is no `to`. Sending work to the harness is a tool call. Branching, targeted work, subagents, and private context are represented through fork/subagent tools rather than transcript recipients.
 
-## Tool calls
+History items may contain any combination of:
 
-Tool use is a model event with `kind: "tool_request"` and `calls`:
+- `from`: required actor id;
+- `text`: optional human-readable message text;
+- `calls`: optional tool calls authored by that actor;
+- `attachments`: optional message attachments;
+- `hidden`: optional storage/debug data not exposed by default;
+- `kind`: optional, but valid only for runtime-authored items.
+
+`type` is not needed because everything in `history` is a message/action item.
+
+## Runtime Items
+
+`kind` is reserved for runtime actors such as `strap`. Normal human/model messages should not need it.
 
 ```json
 {
-  "type": "event",
-  "from": "model",
-  "agent": "coding-agent",
-  "kind": "tool_request",
-  "text": "",
+  "from": "strap",
+  "kind": "checkpoint",
+  "text": "State saved after provider inspection."
+}
+```
+
+Validation rule:
+
+```text
+if history[i].kind exists:
+  actors[history[i].from].kind must be "runtime"
+```
+
+## Tool Calls
+
+Tool calls are allowed on any actor's history item. This means humans and models can use the same tool surface.
+
+```json
+{
+  "from": "alesya",
+  "text": "Run the project tests.",
   "calls": [
     {
-      "id": "call_123",
-      "tool": "json_echo.echo",
-      "input": {"value": "hello"},
+      "id": "call_1",
+      "tool": "process.shell",
+      "input": {
+        "command": "./bin/strap project-test"
+      },
       "ok": true,
       "output": {
-        "content": [{"type": "text", "text": "hello"}],
-        "structuredContent": {"value": "hello"}
+        "content": [{ "type": "text", "text": "tests passed" }],
+        "structuredContent": { "exit_code": 0 }
       }
     }
   ]
 }
 ```
 
-Tool results are attached to the call. Separate visible tool-result events are not required. `run-calls` skips calls where `ok` is already present.
+Tool results are attached to the call itself. They do not need separate visible result messages.
 
-## Scopes and collapsing
+## Forks And Subagents
 
-Scopes are storage/presentation structure:
+Forking is a tool call, not transcript surgery and not a special event kind.
 
-```json
-{
-  "type": "scope",
-  "label": "repo scan",
-  "status": "open",
-  "children": []
-}
-```
-
-Collapsed scopes expose a harness summary while retaining hidden children:
+The parent-visible result is a summary. The child transcript is retained for UI/debug/storage under `hidden.messages` and is not exposed to the parent model by default.
 
 ```json
 {
-  "type": "scope",
-  "label": "old context",
-  "status": "collapsed",
-  "summary": "Earlier context established the provider split.",
-  "children": [],
-  "hidden": {"children": []}
-}
-```
-
-Provider compilation renders collapsed scopes as summary events and does not expose hidden children.
-
-## Forks
-
-Forking is represented as an `agent.fork` tool call, not as separate semantic fork/fold transcript events. Parent-visible state stores only the summary in the call output. The child transcript is retained for UI/debug/storage under `hidden.messages`:
-
-```json
-{
-  "type": "event",
-  "from": "model",
-  "agent": "coding-agent",
-  "kind": "tool_request",
+  "from": "coding-agent",
   "text": "",
   "calls": [
     {
-      "id": "fork_123",
+      "id": "fork_1",
       "tool": "agent.fork",
-      "input": {"task": "Investigate the provider streaming issue."},
+      "input": {
+        "agent": "reviewer-agent",
+        "task": "Review the provider state compiler."
+      },
       "ok": true,
-      "output": {"summary": "The child found buffered SSE decoding."},
-      "hidden": {"messages": []}
+      "output": {
+        "summary": "Reviewer found that provider roles should be derived from actor kind."
+      },
+      "hidden": {
+        "messages": [
+          {
+            "from": "reviewer-agent",
+            "text": "I will review the provider state compiler."
+          },
+          {
+            "from": "reviewer-agent",
+            "text": "The compiler should map actor kind=model to assistant role."
+          }
+        ]
+      }
     }
   ]
 }
 ```
 
-The parent model sees only the tool output summary.
+A subagent tool can use memory or avoid memory depending on its input contract. That distinction belongs to the tool, not the transcript shape.
 
-## Bookmarks and extracted context
+## Summarization And Compaction
 
-Bookmarks are optional inline addressability markers on events or scopes. They are created only when needed:
+Summaries are tool call results. There is no `kind: "summary"` for normal history.
 
-```bash
-strap state bookmark add --text "unique substring" --label start < state.json > marked.json
-strap state extract --from bm_start --to bm_end < marked.json > context.json
+A summarization tool can return a summary and absorb part of the prior transcript into `hidden.messages`.
+
+```json
+{
+  "from": "coding-agent",
+  "text": "",
+  "calls": [
+    {
+      "id": "compact_1",
+      "tool": "history.summarize",
+      "input": {
+        "start": 0,
+        "end": 3
+      },
+      "ok": true,
+      "output": {
+        "summary": "Alesya asked for a simpler state model. The agreed shape is flat actors plus flat history, no scopes and no recipients."
+      },
+      "hidden": {
+        "messages": [
+          { "from": "alesya", "text": "..." },
+          { "from": "coding-agent", "text": "..." }
+        ]
+      }
+    }
+  ]
+}
 ```
 
-Extracted context remains `strap.context.v0.1`; its `source.state_version` is `strap.state.v0.3`. `strap context quote` returns a normal `strap.state.v0.3` state.
+The model sees the summary through the tool result. Hidden absorbed history exists for UI/debug/storage only.
 
-## Provider rendering
+## Complete Example
 
-Provider adapters map canonical `from: "model"` events to provider assistant roles. All other visible events are rendered as user/input context unless the provider has a more specific native item type. The active agent frame from `actors.agents[runtime.active_agent]` becomes provider instructions/system content.
-
-## Compatibility
-
-`strap.state.v0.3` is the only canonical state format for this project. There are no legacy state fallbacks.
+```json
+{
+  "version": "strap.state.v0.4",
+  "actors": {
+    "alesya": {
+      "kind": "human",
+      "self": {
+        "public": "My name is Alesya. I'm autistic; please be precise and reduce sycophancy."
+      }
+    },
+    "coding-agent": {
+      "kind": "model",
+      "self": {
+        "private": "Software engineering agent for implementation."
+      }
+    },
+    "strap": {
+      "kind": "runtime",
+      "self": {
+        "public": "Local harness."
+      }
+    }
+  },
+  "runtime": {
+    "active_model": "coding-agent"
+  },
+  "history": [
+    {
+      "from": "alesya",
+      "text": "Please inspect the provider code."
+    },
+    {
+      "from": "coding-agent",
+      "text": "",
+      "calls": [
+        {
+          "id": "call_1",
+          "tool": "fs.read_file",
+          "input": {
+            "path": "commands/provider-openai/lib/state.nu"
+          },
+          "ok": true,
+          "output": {
+            "content": [{ "type": "text", "text": "..." }],
+            "structuredContent": {
+              "path": "commands/provider-openai/lib/state.nu"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "from": "coding-agent",
+      "text": "The provider code maps transcript events into API-specific roles."
+    },
+    {
+      "from": "strap",
+      "kind": "checkpoint",
+      "text": "State saved after provider inspection."
+    }
+  ]
+}
+```

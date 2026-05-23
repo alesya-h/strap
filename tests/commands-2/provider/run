@@ -5,7 +5,7 @@ let providers = (call-json [provider list])
 ok ("chatgpt" in $providers) "provider list includes chatgpt"
 let state = (state-with-user "Reply with exactly STRAP_PROVIDER_OK and no extra words.")
 let completed = ($state | pipe-json [provider chatgpt complete --tools none])
-let last = ($completed.root.children | last)
+let last = ($completed.history | last)
 ok ($last.from == "model") "provider facade appends model response"
 non-empty $last.text "provider facade returns ChatGPT text"
 has $last.text "STRAP_PROVIDER_OK" "provider facade returns requested sentinel"

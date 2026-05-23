@@ -9,8 +9,6 @@ let event = (response-event {
   usage: {}
 })
 
-ok ($event.kind == "tool_request") "anthropic response parser converts tool_use into tool_request"
-ok ($event.to.0 == "harness") "anthropic tool request targets harness"
 ok ($event.calls.0.tool == "json_echo.echo") "anthropic parser decodes provider-safe tool name"
 ok ($event.calls.0.input.value == "anthropic-fixture") "anthropic parser preserves tool input"
 has $event.text "Need the echo tool." "anthropic parser preserves model text"

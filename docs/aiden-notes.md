@@ -64,7 +64,7 @@ In strap terms:
    - executable script
    - grouped tool action metadata with schema and description
    - tests or smoke examples
-2. The proposal lives in a scope or child agent branch.
+2. The proposal lives in a history range or child agent branch.
 3. The harness runs validation in a sandbox.
 4. A human approval gate approves installation.
 5. Once installed, the tool appears through a `STRAP_PATH` layer or a future tool registry.
@@ -78,7 +78,7 @@ This preserves Aiden’s self-extension loop while using current tool-call machi
 
 Aiden’s `$aiden` object is an ancestor of strap’s actor model:
 
-- `$aiden` persistent methods → `actors.agents.<agent>.self` plus installed tools
+- `$aiden` persistent methods → `actors.<agent>.self` plus installed tools
 - `$alesya.tell/ask` → user-facing event/call tools
 - `aiden_self.rb` → versioned capability bundle or script tool directory
 - captured stdout as next user message → structured tool result event

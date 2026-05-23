@@ -4,14 +4,13 @@ use ../../lib/test.nu *
 let state = (state-with-user "Summarize this quoted context." | pipe-json [state add-model "Context says strap context works."])
 let marked1 = ($state | pipe-json [state bookmark add --text "Summarize this quoted context." --label start])
 let marked2 = ($marked1 | pipe-json [state bookmark add --text "Context says strap context works." --label end])
-let start = $marked2.root.children.0.bookmarks.0.id
-let end = $marked2.root.children.1.bookmarks.0.id
+let start = $marked2.history.0.bookmarks.0.id
+let end = $marked2.history.1.bookmarks.0.id
 let context = ($marked2 | pipe-json [state extract --from $start --to $end])
 let context_state = ($context | pipe-json [context quote --title "context test"])
-let last_context_event = ($context_state.root.children | last)
-ok ($context_state.version == "strap.state.v0.3") "context quote returns a normal state"
-ok (($context_state.root.children | length) == 2) "context quote preserves source events as normal state events"
-ok ($last_context_event.kind == "message") "context quote preserves normal event kinds"
+let last_context_event = ($context_state.history | last)
+ok ($context_state.version == "strap.state.v0.4") "context quote returns a normal state"
+ok (($context_state.history | length) == 2) "context quote preserves source events as normal state events"
 has $last_context_event.text "strap context works" "context quote includes source text"
 has ($context | pipe-call [context render --title "rendered context"]) "rendered context" "context render returns text"
 let summary = ($context | pipe-call [context summarize "Summarize in one short sentence." --tools none --max-turns 1])

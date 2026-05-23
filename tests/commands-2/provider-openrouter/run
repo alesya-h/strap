@@ -5,5 +5,5 @@ let state = (state-with-user "Reply with exactly STRAP_OPENROUTER_OK and no extr
 let compiled = ($state | pipe-json [provider-openrouter compile --model nvidia-nemotron-3-super-120b-a12b-openrouter --tools none])
 ok ($compiled.model == "nvidia/nemotron-3-super-120b-a12b:free") "openrouter compile selects free NVIDIA completion model"
 let completed = ($state | pipe-json [provider-openrouter complete --model nvidia-nemotron-3-super-120b-a12b-openrouter --tools none])
-non-empty (($completed.root.children | last).text) "openrouter complete returns text"
-has (($completed.root.children | last).text) "STRAP_OPENROUTER_OK" "openrouter complete returns requested sentinel"
+non-empty (($completed.history | last).text) "openrouter complete returns text"
+has (($completed.history | last).text) "STRAP_OPENROUTER_OK" "openrouter complete returns requested sentinel"

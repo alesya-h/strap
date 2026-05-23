@@ -4,12 +4,11 @@ This document records what `strap` currently implements.
 
 ## Core Harness
 
-- Provider-agnostic canonical state format using actors, events, and scopes: `strap.state.v0.3`.
+- Provider-agnostic canonical state format using flat actors and flat history: `strap.state.v0.4`.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
 - Unified artifact layer path via `STRAP_PATH`, with `STRAP_WORKSPACE` for filesystem effects.
 - Immutable JSON filter CLIs for state transforms and harness operations.
 - Nu-first local plumbing inside command capsules, exposed through the process `strap <command>` boundary.
-- Basic scope operations for opening/collapsing context regions.
 - Bookmark-based state extraction into `strap.context.v0.1`.
 - Quoted context rendering with `strap context quote`.
 - Context summarization with `strap context summarize`.
@@ -24,7 +23,7 @@ This document records what `strap` currently implements.
 ## CLIs
 
 - `strap`: main command runner, with commands discovered from project, config, and built-in command directories.
-- `strap state`: initialize, append user/model messages, push/pop scopes, display last message.
+- `strap state`: initialize, append user/model messages, bookmark/extract/fold history ranges, display last message.
 - `strap llm`: compile state into model-profile requests and call configured providers.
 - `strap loop`: run the Nushell model/tool loop over canonical state.
 - `strap one-shot`: run a temporary child agent until its first final answer.
@@ -110,7 +109,7 @@ This document records what `strap` currently implements.
 - `DESIGN.md`: concise current design summary.
 - `docs/vision.md`: product thesis, principles, non-goals, and current priorities.
 - `docs/architecture.md`: implementation architecture and subsystem map.
-- `docs/state-format.md`: canonical `strap.state.v0.3` format specification.
+- `docs/state-format.md`: canonical `strap.state.v0.4` format specification.
 - `docs/organization.md`: root/config/work organization and command-directory contract.
 - `docs/commands.md`: command authoring, validation, and built-in command reference.
 - `docs/providers.md`: model profile and auth notes.

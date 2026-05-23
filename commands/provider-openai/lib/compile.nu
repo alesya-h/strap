@@ -29,8 +29,6 @@ def responses-call [item: record] {
 def event-base [response: record, provider_name: string, text: string, calls: list] {
   let base = {
     from: "model"
-    to: (if ($calls | is-empty) { ["user"] } else { ["harness"] })
-    kind: (if ($calls | is-empty) { "message" } else { "tool_request" })
     text: $text
     provider: { name: $provider_name, id: $response.id, model: $response.model, usage: ($response.usage? | default null) }
   }
@@ -64,7 +62,7 @@ def compile-responses [statev: record, config: record, toolv: list] {
   {
     model: $config.model
     instructions: (state actor-frame $statev)
-    input: ((state flatten $statev.root) | each {|event| state event-text $event } | str join "\n\n")
+    input: ((state history $statev) | each {|event| state event-text $event } | str join "\n\n")
     tools: ($toolv | each {|tool| responses-tool $tool })
   } | merge $config.parameters
 }

@@ -1,4 +1,4 @@
-export def append-event [event: record] {
+export def append-message [message: record] {
   let state = $in
-  $state | update root.children { append ({ type: "event" } | merge $event) }
+  $state | update history { append $message }
 }

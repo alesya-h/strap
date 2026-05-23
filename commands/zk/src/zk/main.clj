@@ -37,9 +37,9 @@
       (print (core/call-index [command query "--limit" limit "--db" db])))))
 
 (defn last-text-event [state]
-  (let [children (get-in state [:root :children] [])
-        model-events (filter #(and (= "event" (:type %)) (= "model" (:from %)) (not-empty (:text %))) children)]
-    (or (last model-events) (last (filter #(and (= "event" (:type %)) (not-empty (:text %))) children)))))
+  (let [history (:history state)
+        model-events (filter #(and (not-empty (:text %)) (= "model" (get-in state [:actors (keyword (:from %)) :kind]))) history)]
+    (or (last model-events) (last (filter #(not-empty (:text %)) history)))))
 
 (defn remember-state [args]
   (let [{:keys [opts]} (core/parse-args args)

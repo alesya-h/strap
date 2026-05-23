@@ -37,18 +37,16 @@ def command-call [model_name: string, tools_name: string] {
   common post-json $prepared.config.base_url [$"Authorization: Bearer (common secret $prepared.config.auth)"] $prepared.body
 }
 
-def active-agent [state: record] { $state | get --optional runtime.active_agent | default "" }
+def active-agent [state: record] { $state | get --optional runtime.active_model | default "model" }
 
 def model-event [state: record, event: record] {
-  let agent = (active-agent $state)
-  let base = ({ type: "event" } | merge $event)
-  if $agent == "" { $base } else { $base | insert agent $agent }
+  $event | upsert from (active-agent $state)
 }
 
 def command-complete [model_name: string, tools_name: string] {
   let prepared = ($in | prepare $model_name $tools_name)
   let response = (common post-json $prepared.config.base_url [$"Authorization: Bearer (common secret $prepared.config.auth)"] $prepared.body)
-  $prepared.state | update root.children { append (model-event $prepared.state (compile response-event $response $prepared.config.api)) }
+  $prepared.state | update history { append (model-event $prepared.state (compile response-event $response $prepared.config.api)) }
 }
 
 def command-embed [model_name: string, dimensions: string] {

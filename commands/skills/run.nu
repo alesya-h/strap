@@ -61,18 +61,18 @@ def load-skill [name: string, include_paths: bool] {
 
 def apply-skill [profile: record, actor_id: string] {
   let state = $in
-  let agent_id = if $actor_id != "" { $actor_id } else { $state | get --optional runtime.active_agent | default "default" }
-  let agents = ($state.actors.agents? | default {})
-  let current = ($agents | get --optional $agent_id | default { self: {}, peers: {} })
+  let agent_id = if $actor_id != "" { $actor_id } else { $state | get --optional runtime.active_model | default "default" }
+  let current = ($state.actors | get --optional $agent_id | default { kind: "model", self: {}, peers: {} })
   let skills = ($current.skills? | default [])
   let next_skills = if ($profile.name in $skills) { $skills } else { $skills | append $profile.name }
   let existing_profiles = ($current.skill_profiles? | default [] | where name != $profile.name)
   let actor = ($current
+    | upsert kind ($current.kind? | default "model")
     | upsert self ($current.self? | default {})
     | upsert skills $next_skills
     | upsert skill_profiles ($existing_profiles | append { name: $profile.name, description: $profile.description, source: $profile.source })
     | upsert skill_instructions (($current.skill_instructions? | default {}) | upsert $profile.name $profile.instructions))
-  $state | upsert actors.agents ($agents | upsert $agent_id $actor) | upsert runtime.active_agent $agent_id
+  $state | upsert actors ($state.actors | upsert $agent_id $actor) | upsert runtime.active_model $agent_id
 }
 
 def usage [] { error make { msg: "Usage: strap skills <list|show|apply|roots|import-opencode> [args]" } }

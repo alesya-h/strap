@@ -2,7 +2,7 @@
 
 `strap` is a Linux-only, unix-ish agent harness scaffold. The repo currently contains:
 
-- A provider-agnostic canonical state format based on actors, events, and scopes.
+- A provider-agnostic canonical state format based on flat actors and flat history.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
 - A unified layered artifact path, `STRAP_PATH`, plus `STRAP_WORKSPACE` for filesystem effects.
 - Subproject commands for state editing, model request compilation, agent fork/fold, and pending tool execution.
@@ -243,30 +243,25 @@ This keeps the `ai-say` idea of shell-authored tools, but avoids `{{arg}}` strin
 
 ## Canonical State
 
-The active format is `strap.state.v0.3`:
+The active format is `strap.state.v0.4`:
 
 ```json
 {
-  "version": "strap.state.v0.3",
-  "actors": {"humans": {}, "agents": {}, "runtimes": {}},
-  "root": {
-    "type": "scope",
-    "label": "root",
-    "status": "open",
-    "participants": [],
-    "children": []
-  }
+  "version": "strap.state.v0.4",
+  "actors": {},
+  "runtime": {},
+  "history": []
 }
 ```
 
-The active format is the actor/event/scope shape.
+The active format is flat actors plus flat history.
 
 ## Documentation Map
 
 - `DESIGN.md`: concise current design summary.
 - `docs/vision.md`: vision, design principles, non-goals, strategic priorities.
 - `docs/architecture.md`: roots, command flow, isolation notes, state, loops, tools, providers, sessions, memory, subprojects.
-- `docs/state-format.md`: canonical `strap.state.v0.3` format specification.
+- `docs/state-format.md`: canonical `strap.state.v0.4` format specification.
 - `docs/organization.md`: repository, `.strap`, and `.strap-user` organization.
 - `docs/commands.md`: command contract and built-in command reference.
 - `docs/providers.md`: model profiles and auth modes.

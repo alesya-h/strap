@@ -6,5 +6,5 @@ ok (($profiles | any {|item| $item.name == "chat-concise" })) "chat-concise prof
 let profile = (call-json [agents show chat-concise])
 has $profile.instructions "concise" "agent instructions are returned"
 let state = (call-json [state init] | pipe-json [agents apply chat-concise])
-ok ($state.runtime.active_agent == "chat-concise") "agent profile becomes active"
-ok ($state.actors.agents.chat-concise.profile.name == "chat-concise") "agent profile applies to grouped agent actor"
+ok ($state.runtime.active_model == "chat-concise") "agent profile becomes active"
+ok ($state.actors.chat-concise.profile.name == "chat-concise") "agent profile applies to flat actor"

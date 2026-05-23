@@ -59,11 +59,10 @@ This preserves the unix-ish extensibility while making quoting, injection, and s
 
 ## Format Implications
 
-The shared ChatGPT format discussion changes the state direction from a flat message log to a nested actor/event/scope model:
+The shared ChatGPT format discussion changes the state direction from a provider message log to flat actors plus flat history:
 
-- Actors are first-class and grouped by kind: humans, agents, runtimes, editors, interpreters, and remote agents.
-- Events are actor-to-actor communication: `from`, `to`, `kind`, `text`, `calls`, `results`.
-- Tool calls are structured communication, not a unique role.
-- Scopes represent branchable or compactable regions.
-- Collapsed scopes expose `summary` and retain the full subtree under `hidden`.
+- Actors are first-class and keyed by actor id, with `kind` as metadata.
+- History items are actor-authored messages/actions: `from`, `text`, `calls`, `attachments`, and `hidden`.
+- Tool calls are structured actor actions, not a unique role.
+- Branching, subagents, and compaction are represented as tool calls with hidden child messages where needed.
 - Provider requests remain compiled projections, never canonical state.

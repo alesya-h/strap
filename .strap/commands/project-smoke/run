@@ -35,8 +35,8 @@ save-filter $strap /tmp/strap-smoke-2.json [state add-model world] /tmp/strap-sm
 save-filter-log $strap /tmp/strap-smoke-3.json [state bookmark add --text hello --label smoke-start] /tmp/strap-smoke-bm-1.json /tmp/strap-smoke-bm-1.log
 save-filter-log $strap /tmp/strap-smoke-bm-1.json [state bookmark add --text world --label smoke-end] /tmp/strap-smoke-bm-2.json /tmp/strap-smoke-bm-2.log
 save-filter $strap /tmp/strap-smoke-bm-2.json [state bookmark list] /tmp/strap-smoke-bookmarks.json
-let bm_start = (open /tmp/strap-smoke-bm-2.json | get root.children.0.bookmarks.0.id)
-let bm_end = (open /tmp/strap-smoke-bm-2.json | get root.children.1.bookmarks.0.id)
+let bm_start = (open /tmp/strap-smoke-bm-2.json | get history.0.bookmarks.0.id)
+let bm_end = (open /tmp/strap-smoke-bm-2.json | get history.1.bookmarks.0.id)
 save-filter $strap /tmp/strap-smoke-bm-2.json [state fold --from $bm_start --to $bm_end --summary "smoke folded hello/world"] /tmp/strap-smoke-folded-range.json
 save-filter $strap /tmp/strap-smoke-bm-2.json [state extract --from $bm_start --to $bm_end] /tmp/strap-smoke-context.json
 save-filter $strap /tmp/strap-smoke-context.json [context quote] /tmp/strap-smoke-quote.json
@@ -87,14 +87,14 @@ save-call $strap [session ask "remember this smoke question"] /tmp/strap-session
 save-call $strap [session show] /tmp/strap-session-before-copy.json
 save-filter-log $strap /tmp/strap-session-before-copy.json [state bookmark add --text "remember this smoke question" --label session-copy-point] /tmp/strap-session-bookmarked.json /tmp/strap-session-bookmark.log
 save-filter $strap /tmp/strap-session-bookmarked.json [session save] /tmp/strap-session-save-bookmarked.json
-let bm_session = (open /tmp/strap-session-bookmarked.json | get root.children.0.bookmarks.0.id)
+let bm_session = (open /tmp/strap-session-bookmarked.json | get history.0.bookmarks.0.id)
 save-call $strap [session copy "smoke copied session" --at $bm_session] /tmp/strap-session-copy.json
 $env.STRAP_SESSION = (open /tmp/strap-session-copy.json | get dir)
 save-call $strap [session show] /tmp/strap-session-show.json
 save-call $strap [session state] /tmp/strap-session-state.txt
 save-call $strap [history snapshot --message "smoke session state"] /tmp/strap-history-snapshot.json
 
-run-external $strap ...[state init] | from json | update root.children { append { type: "event", from: "model", to: ["harness"], kind: "tool_request", calls: [{ id: "echo", tool: "json_echo.echo", input: { value: "ok" } }] } } | to json | run-external $strap ...[run-calls --tools json_echo] | save -f /tmp/strap-json-echo-tool.json
+run-external $strap ...[state init] | from json | update history { append { from: "model", calls: [{ id: "echo", tool: "json_echo.echo", input: { value: "ok" } }] } } | to json | run-external $strap ...[run-calls --tools json_echo] | save -f /tmp/strap-json-echo-tool.json
 
 rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
 with-hash { save-call $strap [zk create --scope user --title "Local hash memory" --body "Offline smoke indexing works without network." --tags smoke] /tmp/strap-zk-create.json }
@@ -107,7 +107,7 @@ save-call $strap [zk promote "Smoke linked memory"] /tmp/strap-zk-promote.json
 with-hash { save-call $strap [zk search-hybrid --db /tmp/strap-zk-smoke.sqlite "offline indexing"] /tmp/strap-zk-search.json }
 with-hash { save-call $strap [zk list --scope all] /tmp/strap-zk-list.json }
 with-hash { save-call $strap [zk tags] /tmp/strap-zk-tags.json }
-run-external $strap ...[state init] | from json | update root.children { append { type: "event", from: "model", to: ["harness"], kind: "tool_request", calls: [{ id: "zk", tool: "zk.search_hybrid", input: { db: "/tmp/strap-zk-smoke.sqlite", query: "offline indexing", limit: 2 } }] } } | to json | with-env { STRAP_ZK_EMBED_PROVIDER: "hash" } { run-external $strap ...[run-calls --tools zk] } | save -f /tmp/strap-zk-tool.json
+run-external $strap ...[state init] | from json | update history { append { from: "model", calls: [{ id: "zk", tool: "zk.search_hybrid", input: { db: "/tmp/strap-zk-smoke.sqlite", query: "offline indexing", limit: 2 } }] } } | to json | with-env { STRAP_ZK_EMBED_PROVIDER: "hash" } { run-external $strap ...[run-calls --tools zk] } | save -f /tmp/strap-zk-tool.json
 
 rm -f /tmp/strap-md-zk-smoke.sqlite /tmp/strap-md-zk-smoke.sqlite-shm /tmp/strap-md-zk-smoke.sqlite-wal
 with-hash { save-call $strap [zk create --scope user --title "Markdown smoke memory" --body "Markdown zettel source can rebuild the sqlite index." --tags "smoke,markdown"] /tmp/strap-zk-md-create.json }

@@ -15,11 +15,11 @@ Current state: generated commands/tools can be written and run cheaply, and a ba
 ## Branch, Fold, And Context-Pop Semantics
 
 - Basic fork/fold exists.
-- Basic open/collapse scope exists.
+- History is now flat; branch and compaction semantics should be represented as tool calls with hidden messages.
 - No robust branch comparison workflow.
 - No automatic context compaction.
-- No `context.pop` command that removes/replaces a scope while preserving summary semantics.
-- Provider compilation does not yet deeply exploit collapsed scope structure.
+- No mature `history.summarize` tool that removes/replaces ranges while preserving summary semantics.
+- Provider compilation does not yet deeply exploit hidden summary/tool-result structure.
 
 Current state: the tree-shaped state model exists, but branch/context operations are still starter primitives.
 

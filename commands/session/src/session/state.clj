@@ -1,18 +1,15 @@
 (ns session.state)
 
 (defn create-state []
-  {:version "strap.state.v0.3"
-   :actors {:humans {} :agents {} :runtimes {}}
-   :root {:type "scope" :label "root" :status "open" :participants [] :children []}})
+  {:version "strap.state.v0.4" :actors {} :runtime {} :history []})
 
 (defn normalize [state]
-  (if (and (= "strap.state.v0.3" (:version state))
-           (= "scope" (get-in state [:root :type])))
+  (if (and (= "strap.state.v0.4" (:version state)) (vector? (:history state)))
     state
-    (throw (ex-info "Expected strap.state.v0.3 state with root scope" {}))))
+    (throw (ex-info "Expected strap.state.v0.4 state with history" {}))))
 
 (defn append-event [state event]
-  (update-in state [:root :children] conj (merge {:type "event"} event)))
+  (update state :history conj event))
 
 (defn bookmark-id [bookmark]
   (if (string? bookmark) bookmark (:id bookmark)))
@@ -25,19 +22,11 @@
     (if-not (seq xs)
       nil
       (let [node (first xs)]
-        (cond
-          (some #{bookmark-id} (bookmark-ids node))
+        (if (some #{bookmark-id} (bookmark-ids node))
           (conj out node)
-
-          (and (= "scope" (:type node)) (not= "collapsed" (:status node)))
-          (if-let [truncated (truncate-children (:children node []) bookmark-id)]
-            (conj out (assoc node :children truncated))
-            (recur (conj out node) (rest xs)))
-
-          :else
           (recur (conj out node) (rest xs)))))))
 
 (defn truncate-after-bookmark [state bookmark-id]
-  (if-let [children (truncate-children (get-in state [:root :children]) bookmark-id)]
-    (assoc-in state [:root :children] children)
+  (if-let [history (truncate-children (:history state) bookmark-id)]
+    (assoc state :history history)
     (throw (ex-info (str "Bookmark not found: " bookmark-id) {}))))

@@ -43,21 +43,16 @@ export def case-tmp [] {
 
 export def tool-state [tool: string, input: record] {
   {
-    version: "strap.state.v0.3"
-    actors: { humans: {}, agents: {}, runtimes: {} }
-    root: {
-      type: "scope"
-      label: "root"
-      status: "open"
-      participants: ["harness"]
-      children: [{ type: "event", from: "model", kind: "tool_request", calls: [{ id: "test", tool: $tool, input: $input }] }]
-    }
+    version: "strap.state.v0.4"
+    actors: { model: { kind: "model" } }
+    runtime: { active_model: "model" }
+    history: [{ from: "model", calls: [{ id: "test", tool: $tool, input: $input }] }]
   }
 }
 
 export def tool-call [group: string, tool: string, input: record] {
   let next = (tool-state $tool $input | pipe-json [run-calls --tools $group])
-  $next.root.children.0.calls.0
+  $next.history.0.calls.0
 }
 
 export def tool-output [group: string, tool: string, input: record] {

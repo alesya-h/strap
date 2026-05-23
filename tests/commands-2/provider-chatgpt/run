@@ -9,7 +9,7 @@ ok ($result.exit_code == 0) $"strap provider-chatgpt complete failed\nstdout:\n(
 let chunks = ($result.stderr | lines | where {|line| ($line | str trim) != "" } | each {|line| $line | from json })
 ok (($chunks | any {|item| $item.kind == "provider_chunk" })) "provider-chatgpt streams provider chunks to stderr as jsonl"
 let completed = ($result.stdout | from json)
-let last = ($completed.root.children | last)
+let last = ($completed.history | last)
 ok ($last.provider.name == "chatgpt.responses") "provider-chatgpt records provider metadata"
 non-empty $last.text "provider-chatgpt complete returns text"
 has $last.text "STRAP_CHATGPT_OK" "provider-chatgpt complete returns requested sentinel"

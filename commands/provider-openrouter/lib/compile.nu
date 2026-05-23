@@ -24,8 +24,8 @@ def response-call [call: record] {
 export def request [statev: record, config: record, toolv: list] {
   {
     model: $config.model
-    messages: ([{ role: "system", content: (state actor-frame $statev) }] | append ((state flatten $statev.root) | each {|event|
-      { role: (if $event.from == "model" { "assistant" } else { "user" }), content: (state event-text $event) }
+    messages: ([{ role: "system", content: (state actor-frame $statev) }] | append ((state history $statev) | each {|event|
+      { role: (state provider-role $statev $event), content: (state event-text $event) }
     }))
     tools: ($toolv | each {|tool| tool-spec $tool })
   } | merge $config.parameters
@@ -35,10 +35,7 @@ export def response-event [response: record] {
   let message = ($response.choices.0.message? | default {})
   let calls = (($message.tool_calls? | default []) | each {|call| response-call $call })
   let base = {
-    type: "event"
     from: "model"
-    to: (if ($calls | is-empty) { ["user"] } else { ["harness"] })
-    kind: (if ($calls | is-empty) { "message" } else { "tool_request" })
     text: ($message.content? | default "")
     provider: { name: "openrouter.chat", id: $response.id, model: $response.model, usage: ($response.usage? | default null) }
   }
