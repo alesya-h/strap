@@ -4,7 +4,7 @@ This document records what `strap` currently implements.
 
 ## Core Harness
 
-- Provider-agnostic canonical state format using flat actors and flat history: `strap.state.v0.4`.
+- Provider-agnostic canonical state format using flat actors and linear visible history, with hidden child/cut history attached to tool-call events: `strap.state.v0.4`.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
 - Unified artifact layer path via `STRAP_PATH`, with `STRAP_WORKSPACE` for filesystem effects.
 - Immutable JSON filter CLIs for state transforms and harness operations.

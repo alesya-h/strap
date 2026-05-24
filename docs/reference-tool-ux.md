@@ -59,7 +59,7 @@ This preserves the unix-ish extensibility while making quoting, injection, and s
 
 ## Format Implications
 
-The shared ChatGPT format discussion changes the state direction from a provider message log to flat actors plus flat history:
+The shared ChatGPT format discussion changes the state direction from a provider message log to actors plus linear visible history, with non-visible tree material attached to tool-call events:
 
 - Actors are first-class and keyed by actor id, with `kind` as metadata.
 - History items are actor-authored messages/actions: `from`, `text`, `calls`, `attachments`, and `hidden`.

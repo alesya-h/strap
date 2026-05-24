@@ -5,7 +5,8 @@ let client = (case-tmp | path join mcp-client.mjs)
 '
 import { spawn } from "node:child_process";
 const strap = process.argv[2];
-const child = spawn(strap, ["mcp", "json_echo"], { stdio: ["pipe", "pipe", "pipe"] });
+const group = process.argv[3] || "json_echo";
+const child = spawn(strap, ["mcp", group], { stdio: ["pipe", "pipe", "pipe"] });
 let buffer = Buffer.alloc(0);
 let nextId = 1;
 const pending = new Map();
@@ -36,10 +37,19 @@ child.stdout.on("data", chunk => {
 child.stderr.on("data", chunk => process.stderr.write(chunk));
 await send("initialize", { protocolVersion: "2024-11-05" });
 const listed = await send("tools/list");
-if (!listed.tools.some(tool => tool.name === "json_echo.echo")) throw new Error("missing json_echo.echo");
-const result = await send("tools/call", { name: "json_echo.echo", arguments: { value: "mcp-ok" } });
-if (result.structuredContent.value !== "mcp-ok") throw new Error("bad mcp tool result");
+if (group === "json_echo") {
+  if (!listed.tools.some(tool => tool.name === "json_echo.echo")) throw new Error("missing json_echo.echo");
+  const result = await send("tools/call", { name: "json_echo.echo", arguments: { value: "mcp-ok" } });
+  if (result.structuredContent.value !== "mcp-ok") throw new Error("bad mcp tool result");
+}
+if (group === "all") {
+  if (!listed.tools.some(tool => tool.name === "json_echo.echo")) throw new Error("mcp all missing local json_echo tool");
+  if (listed.tools.some(tool => tool.name.startsWith("jsmcp."))) throw new Error("mcp all must not expose jsmcp tools");
+  if (listed.tools.some(tool => tool.name.startsWith("kagi."))) throw new Error("mcp all must not expose removed kagi tools");
+}
 child.kill();
 ' | save -f $client
-let result = (run-external node $client (strap-bin) | complete)
-ok ($result.exit_code == 0) $"mcp json_echo initialize/list/call failed\n($result.stderr)\n($result.stdout)"
+let echo_result = (run-external node $client (strap-bin) json_echo | complete)
+ok ($echo_result.exit_code == 0) $"mcp json_echo initialize/list/call failed\n($echo_result.stderr)\n($echo_result.stdout)"
+let all_result = (run-external node $client (strap-bin) all | complete)
+ok ($all_result.exit_code == 0) $"mcp all visibility check failed\n($all_result.stderr)\n($all_result.stdout)"

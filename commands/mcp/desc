@@ -6,3 +6,5 @@ Usage:
   strap mcp web
   strap mcp agent
   strap mcp all
+
+`all` exposes local Strap tool groups but excludes `jsmcp`; request `jsmcp` explicitly if needed.

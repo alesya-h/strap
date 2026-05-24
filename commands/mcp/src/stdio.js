@@ -80,7 +80,9 @@ async function callTool(group, name, input) {
 }
 
 async function toolsWithGroups(group) {
-  const tools = await runStrapJson(["tools", "list", "--group", String(group || "all"), "--json", "--internal"]);
+  const requested = String(group || "all");
+  let tools = await runStrapJson(["tools", "list", "--group", requested, "--json", "--internal"]);
+  if (requested === "all") tools = tools.filter((tool) => tool.group !== "jsmcp");
   return tools.map((tool) => ({ group: tool.group, tool: publicTool(tool) }));
 }
 

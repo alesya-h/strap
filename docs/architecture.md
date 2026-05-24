@@ -121,7 +121,7 @@ See [`state-format.md`](state-format.md) for the canonical state format specific
 State is provider-agnostic and structured as:
 
 - `actors`: a flat actor map keyed by actor id;
-- `history`: a flat list of actor-authored message/action items;
+- `history`: a linear visible list of actor-authored message/action items, with folded or child history attached under tool-call `hidden.messages`;
 - history items: text, tool calls/results, attachments, and hidden storage/debug data.
 
 Addressability is optional. `strap state bookmark add` attaches inline bookmarks to history items by unique text match, and `strap state fold --from <bookmark> --to <bookmark>` compacts a history range into a `history.summarize` tool result with absorbed messages under `hidden.messages`.

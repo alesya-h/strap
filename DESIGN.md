@@ -52,7 +52,7 @@ These roots separate code, config, mutable state, and effect targets.
 
 ## State
 
-The canonical state format is `strap.state.v0.4`: a flat actor map plus flat history.
+The canonical state format is `strap.state.v0.4`: a flat actor map plus linear visible history. Tree-shaped material exists where ranges or child transcripts are attached to relevant tool-call events under `hidden.messages`; there are no special scope/container history items.
 
 See [`docs/state-format.md`](docs/state-format.md) for the full format specification.
 

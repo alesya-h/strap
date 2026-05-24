@@ -35,7 +35,7 @@ This makes mutability and operational isolation discussable.
 
 ### Keep state provider-agnostic
 
-Canonical state stores actors and flat history items with text, tool calls, attachments, hidden data, and tool results. Provider payloads are projections, not the source of truth.
+Canonical state stores actors and linear visible history items with text, tool calls, attachments, hidden data, and tool results. Folded ranges and child transcripts live under tool-call `hidden.messages`, so provider payloads remain projections rather than the source of truth.
 
 ### Put isolation outside the artifact
 

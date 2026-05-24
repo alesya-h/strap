@@ -4,7 +4,7 @@ This document specifies the canonical Strap state format.
 
 ## Core Shape
 
-State is a flat transcript plus actor metadata. The transcript does not encode scopes or recipients.
+State has actor metadata plus a linear visible transcript. It does not encode recipients or special scope/container items. Tree-shaped material, such as folded ranges or child-agent transcripts, is attached to the relevant tool-call event under `hidden.messages`.
 
 ```json
 {
@@ -194,7 +194,7 @@ A summarization tool can return a summary and absorb part of the prior transcrip
       },
       "ok": true,
       "output": {
-        "summary": "Alesya asked for a simpler state model. The agreed shape is flat actors plus flat history, no scopes and no recipients."
+        "summary": "Alesya asked for a simpler state model. The agreed shape is flat actors plus linear visible history, no scope containers and no recipients."
       },
       "hidden": {
         "messages": [

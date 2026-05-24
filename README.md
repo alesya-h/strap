@@ -2,7 +2,7 @@
 
 `strap` is a Linux-only, unix-ish agent harness scaffold. The repo currently contains:
 
-- A provider-agnostic canonical state format based on flat actors and flat history.
+- A provider-agnostic canonical state format based on flat actors and linear visible history, with cut or child history retained under tool-call `hidden.messages`.
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
 - A unified layered artifact path, `STRAP_PATH`, plus `STRAP_WORKSPACE` for filesystem effects.
 - Subproject commands for state editing, model request compilation, agent fork/fold, and pending tool execution.
@@ -255,7 +255,7 @@ The active format is `strap.state.v0.4`:
 }
 ```
 
-The active format is flat actors plus flat history.
+The active format is flat actors plus linear visible history. Branches, folded ranges, and child-agent transcripts are represented as tool-call results with absorbed history under `hidden.messages`, not as special scope/container events.
 
 ## Documentation Map
 
