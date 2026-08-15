@@ -55,7 +55,7 @@ This document records what `strap` currently implements.
 - OpenAI API-key and OpenRouter embedding routes are supported through provider commands.
 - `strap provider <name>` dispatches to hidden provider implementation commands such as `provider-chatgpt`.
 - REST-only provider implementations are Elvish capsules with native `run.elv` surfaces; ChatGPT is a Babashka capsule for OAuth/token logic.
-- `strap embed` delegates provider-backed embeddings to `strap provider <name> embed`; the hash provider remains local and deterministic.
+- `strap embed` delegates embeddings to `strap provider <name> embed`.
 
 ## Tooling
 
@@ -98,7 +98,6 @@ This document records what `strap` currently implements.
 - Embedding providers:
   - OpenAI API key.
   - ChatGPT subscription OAuth via `strap provider chatgpt auth` token cache.
-  - Deterministic local hash provider for offline tests.
   - Custom embedding command via `STRAP_ZK_EMBED_CMD`.
 - Agent-facing `zk` script tool.
 - Smoke-tested concurrent writes.

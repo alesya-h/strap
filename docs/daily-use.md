@@ -26,7 +26,7 @@ Store and recall useful conclusions through the zettelkasten:
 
 ```bash
 strap zk create --scope user --title "Repo architecture" --body "Useful local observation." --tags session,summary
-STRAP_ZK_EMBED_PROVIDER=hash strap zk search-hybrid "repo architecture"
+STRAP_ZK_EMBED_PROVIDER=openrouter strap zk search-hybrid "repo architecture"
 ```
 
 Memory is explicit: use `strap zk` directly or let the agent call the `zk` tool. Session commands do not implicitly inject or write memory.
@@ -69,7 +69,7 @@ Create memory and rebuild the derived SQLite index:
 ```bash
 strap zk create --scope user --title "Session note" --body "Useful local observation." --tags session
 strap zk backlinks "Session note"
-STRAP_ZK_EMBED_PROVIDER=hash strap zk reindex --scope all
+STRAP_ZK_EMBED_PROVIDER=openrouter strap zk reindex --scope all
 ```
 
 Add user-local temporary commands:

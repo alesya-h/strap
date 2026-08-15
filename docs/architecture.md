@@ -212,7 +212,7 @@ Provider commands are split by provider. `strap provider` is a public dispatcher
 - `provider-anthropic`: Elvish REST capsule.
 - `provider-chatgpt`: Babashka capsule for ChatGPT/Codex backend calls and OAuth token management.
 
-`strap embed` is a provider-neutral facade. Local hash embeddings are implemented in `embed`; provider-backed embeddings delegate to `strap provider <name> embed`.
+`strap embed` is a provider-neutral facade that delegates to `strap provider <name> embed`.
 
 ChatGPT OAuth is managed by:
 

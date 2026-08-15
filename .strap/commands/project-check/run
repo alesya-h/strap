@@ -141,5 +141,5 @@ expect-exit2 [bb -cp commands/artifact/src -m artifact.main --help]
 run-external bb ...[-cp cli/src -e "(require 'main)"]
 run-external bb ...[-cp commands/run-calls/src -e "(require 'run-calls.main)"]
 with-env { STRAP_CMD_DIR: "commands/status" } { expect-exit2 [bb commands/status/run --help] }
-'{"texts":["check"]}' | run-external bb ...[commands/embed/run --provider hash] | from json | ignore
+expect-exit2 [bb commands/embed/run --help]
 run-external ($env.STRAP_BIN? | default "./bin/strap") tool-contract-check

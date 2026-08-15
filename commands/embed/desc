@@ -1,8 +1,7 @@
 Embed text through the selected provider.
 
 Usage:
-  printf '{"texts":["hello"]}' | strap embed --provider hash
   printf '{"texts":["hello"]}' | strap embed --provider openai
   printf '{"texts":["hello"]}' | strap embed --provider openrouter
 
-`hash` is local and deterministic. Provider-backed embeddings are delegated through `strap provider <name> embed` when that provider supports embeddings.
+Embedding requests are delegated through `strap provider <name> embed` when that provider supports embeddings. OpenRouter is the default provider.

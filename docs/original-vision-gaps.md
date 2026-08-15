@@ -56,7 +56,7 @@ Completed slices:
 - `bin/strap` is a shell exec wrapper into the Babashka root `cli` runner and no longer imports shared `#strap/*` libraries.
 - Several root commands have Nu capsule implementations: `agent`, `agents`, `commands`, `context`, `model`, `nu`, `one-shot`, `paths`, `skills`, `state`, and `work`.
 - `zk` is now a self-contained Babashka capsule over markdown notes, with a command-private Babashka SQLite/FTS/vector helper at `strap inner zk index`.
-- `embed` exists as a public embedding facade. Local hash embeddings are implemented in the command; provider-backed embeddings route to `strap provider <name> embed`.
+- `embed` exists as a public embedding facade that routes to `strap provider <name> embed`.
 - `provider` now dispatches to hidden `provider-*` implementation commands, preserving a clean public surface while allowing provider-local command identity.
 - Hidden provider commands now have provider-owned implementations: `provider-openai`, `provider-openrouter`, and `provider-anthropic` are Elvish REST capsules with native data surfaces; `provider-chatgpt` is a Babashka capsule. The old provider and llm JS entrypoints, the provider-command library, and the bad intermediate shared runner have been removed.
 

@@ -159,19 +159,19 @@ The jsmcp config may be YAML or JSON. This bridge does not parse it; `jsmcp` doe
 `strap zk` stores notes as markdown under `.strap/zettel` or `.strap-user/zettel`, presented as one overlayed zettelkasten. Inline `[[wikilinks]]` provide links/backlinks, and SQLite, FTS5, and `sqlite-vec` are used as a derived index for text/vector/hybrid search.
 
 ```bash
-STRAP_ZK_EMBED_PROVIDER=hash strap zk create \
+strap zk create \
   --scope user \
   --title 'Local agent memory' \
   --body 'Agents can store and recall semantically related notes.' \
   --tags strap,memory
 
-STRAP_ZK_EMBED_PROVIDER=hash strap zk search-hybrid 'semantic recall'
+strap zk search-hybrid 'semantic recall'
 strap zk backlinks 'Local agent memory'
 ```
 
 Agents get the same capability through the grouped `zk.*` tools. See `docs/zettelkasten.md`.
 
-Embeddings can use `OPENAI_API_KEY`, OpenRouter, or the deterministic hash provider for offline/local tests:
+Embeddings can use OpenRouter or `OPENAI_API_KEY`:
 
 ```bash
 STRAP_ZK_EMBED_PROVIDER=openai strap zk search-hybrid 'semantic recall'

@@ -61,7 +61,7 @@ Supported `provider` / `api` combinations now:
 
 The rule is: REST-only providers should be small Elvish capsules with native `run.elv` data surfaces and JSON only in executable wrappers. Use a provider-local Node package only when that provider needs SDKs or other package dependencies. Do not add a shared provider runner; shared provider code recreates the coupling this command split is meant to remove.
 
-`strap embed` is the provider-neutral facade. It implements deterministic local `hash` embeddings itself and delegates provider-backed embeddings to `strap provider <name> embed`.
+`strap embed` is the provider-neutral facade. It delegates embeddings to `strap provider <name> embed`.
 
 ## Auth Modes
 

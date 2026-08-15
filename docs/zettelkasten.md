@@ -53,7 +53,7 @@ strap zk create --scope user --title "Local preference" --body "User prefers CLI
 strap zk create --scope project --title "Launch isolation" --body "Restricted modes come from the launch environment." --tags strap,architecture
 strap zk list --scope all
 strap zk search "isolation"
-STRAP_ZK_EMBED_PROVIDER=hash strap zk reindex --scope all
+STRAP_ZK_EMBED_PROVIDER=openrouter strap zk reindex --scope all
 ```
 
 The markdown format uses simple frontmatter:
@@ -77,13 +77,7 @@ This refines [[Provider state is not canonical]].
 
 Links are inline `[[wikilinks]]`; there is no separate canonical link table. Use `[[Title]]` for ordinary links and `[[zk_id|label]]` when a link needs to survive title changes or resolve ambiguity.
 
-For offline tests, use the deterministic hash embedding provider:
-
-```bash
-export STRAP_ZK_EMBED_PROVIDER=hash
-```
-
-You can also provide your own embedding command:
+You can provide your own embedding command for local integrations or test fixtures:
 
 ```bash
 export STRAP_ZK_EMBED_CMD='my-embedder --json'

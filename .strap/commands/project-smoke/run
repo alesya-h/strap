@@ -39,8 +39,22 @@ def save-filter-log [strap: string, input_file: string, args: list<any>, out: st
   save-result $result $out $err
 }
 
-def with-hash [block: closure] {
-  with-env { STRAP_ZK_EMBED_PROVIDER: "hash" } $block
+let embed_bin = "/tmp/strap-smoke-bin"
+rm -rf $embed_bin
+mkdir $embed_bin
+'#!/usr/bin/env bash
+body=$(cat)
+printf "%s" "$body" | jq -c "{data: [.input[] | {embedding: [1.0, 0.0, 0.0]}]}"
+' | save -f ($embed_bin | path join curl)
+chmod +x ($embed_bin | path join curl)
+
+def with-embeddings [block: closure] {
+  with-env {
+    PATH: ($env.PATH | prepend $embed_bin)
+    OPENROUTER_API_KEY: fixture
+    STRAP_OPENROUTER_EMBED_MODEL: "nvidia/nemotron-3-embed-1b:free"
+    STRAP_ZK_EMBED_PROVIDER: openrouter
+  } $block
 }
 
 save-call $strap [state init] /tmp/strap-smoke.json
@@ -111,20 +125,20 @@ save-call $strap [history snapshot --message "smoke session state"] /tmp/strap-h
 run-external $strap ...[state init] | from json | update history { append { from: "model", calls: [{ id: "echo", tool: "json_echo.echo", input: { value: "ok" } }] } } | to json | run-external $strap ...[run-calls --tools json_echo] | save -f /tmp/strap-json-echo-tool.json
 
 rm -f /tmp/strap-zk-smoke.sqlite /tmp/strap-zk-smoke.sqlite-shm /tmp/strap-zk-smoke.sqlite-wal
-with-hash { save-call $strap [zk create --scope user --title "Local hash memory" --body "Offline smoke indexing works without network." --tags smoke] /tmp/strap-zk-create.json }
-with-hash { save-call $strap [zk create --scope project --title "Smoke linked memory" --body "Linked target." --tags smoke] /tmp/strap-zk-linked-create.json }
-with-hash { save-call $strap [zk update "Local hash memory" --body "Offline smoke indexing works without network. See [[Smoke linked memory]]."] /tmp/strap-zk-update.json }
+with-embeddings { save-call $strap [zk create --scope user --title "Local vector memory" --body "Fixture-backed smoke indexing works without network." --tags smoke] /tmp/strap-zk-create.json }
+with-embeddings { save-call $strap [zk create --scope project --title "Smoke linked memory" --body "Linked target." --tags smoke] /tmp/strap-zk-linked-create.json }
+with-embeddings { save-call $strap [zk update "Local vector memory" --body "Fixture-backed smoke indexing works without network. See [[Smoke linked memory]]."] /tmp/strap-zk-update.json }
 save-call $strap [zk backlinks "Smoke linked memory"] /tmp/strap-zk-backlinks.json
-save-call $strap [zk links "Local hash memory"] /tmp/strap-zk-links.json
+save-call $strap [zk links "Local vector memory"] /tmp/strap-zk-links.json
 save-call $strap [zk workon "Smoke linked memory"] /tmp/strap-zk-workon.json
 save-call $strap [zk promote "Smoke linked memory"] /tmp/strap-zk-promote.json
-with-hash { save-call $strap [zk search-hybrid --db /tmp/strap-zk-smoke.sqlite "offline indexing"] /tmp/strap-zk-search.json }
-with-hash { save-call $strap [zk list --scope all] /tmp/strap-zk-list.json }
-with-hash { save-call $strap [zk tags] /tmp/strap-zk-tags.json }
-run-external $strap ...[state init] | from json | update history { append { from: "model", calls: [{ id: "zk", tool: "zk.search_hybrid", input: { db: "/tmp/strap-zk-smoke.sqlite", query: "offline indexing", limit: 2 } }] } } | to json | with-env { STRAP_ZK_EMBED_PROVIDER: "hash" } { run-external $strap ...[run-calls --tools zk] } | save -f /tmp/strap-zk-tool.json
+with-embeddings { save-call $strap [zk search-hybrid --db /tmp/strap-zk-smoke.sqlite "offline indexing"] /tmp/strap-zk-search.json }
+with-embeddings { save-call $strap [zk list --scope all] /tmp/strap-zk-list.json }
+with-embeddings { save-call $strap [zk tags] /tmp/strap-zk-tags.json }
+run-external $strap ...[state init] | from json | update history { append { from: "model", calls: [{ id: "zk", tool: "zk.search_hybrid", input: { db: "/tmp/strap-zk-smoke.sqlite", query: "offline indexing", limit: 2 } }] } } | to json | with-embeddings { run-external $strap ...[run-calls --tools zk] } | save -f /tmp/strap-zk-tool.json
 
 rm -f /tmp/strap-md-zk-smoke.sqlite /tmp/strap-md-zk-smoke.sqlite-shm /tmp/strap-md-zk-smoke.sqlite-wal
-with-hash { save-call $strap [zk create --scope user --title "Markdown smoke memory" --body "Markdown zettel source can rebuild the sqlite index." --tags "smoke,markdown"] /tmp/strap-zk-md-create.json }
+with-embeddings { save-call $strap [zk create --scope user --title "Markdown smoke memory" --body "Markdown zettel source can rebuild the sqlite index." --tags "smoke,markdown"] /tmp/strap-zk-md-create.json }
 save-call $strap [zk search "Markdown zettel"] /tmp/strap-zk-md-search.json
-with-hash { save-call $strap [zk reindex --scope user --db /tmp/strap-md-zk-smoke.sqlite] /tmp/strap-zk-md-reindex.json }
-with-hash { save-call $strap [zk search-hybrid --db /tmp/strap-md-zk-smoke.sqlite "rebuild sqlite index"] /tmp/strap-zk-md-index-search.json }
+with-embeddings { save-call $strap [zk reindex --scope user --db /tmp/strap-md-zk-smoke.sqlite] /tmp/strap-zk-md-reindex.json }
+with-embeddings { save-call $strap [zk search-hybrid --db /tmp/strap-md-zk-smoke.sqlite "rebuild sqlite index"] /tmp/strap-zk-md-index-search.json }
