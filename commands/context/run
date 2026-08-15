@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def emit [] {
   let value = $in
@@ -8,5 +9,5 @@ def emit [] {
 }
 
 def main [command?: string, ...framing_parts: string, --title: string = "quoted conversation", --model: string = "current", --agent: string = "", --skill: string = "", --tools: string = "none", --max-turns: int = 8, --dry-run] {
-  open --raw /dev/stdin | from json | run ($command | default "") ...$framing_parts --title $title --model $model --agent $agent --skill $skill --tools $tools --max-turns $max_turns --dry-run=$dry_run | emit
+  open --raw /dev/stdin | from json | impl ($command | default "") ...$framing_parts --title $title --model $model --agent $agent --skill $skill --tools $tools --max-turns $max_turns --dry-run=$dry_run | emit
 }

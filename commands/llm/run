@@ -1,7 +1,8 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def main [command?: string, --model: string = "current", --tools: string = "all"] {
-  open --raw /dev/stdin | from json | run ($command | default "") --model $model --tools $tools | to json --indent 2 | print
+  open --raw /dev/stdin | from json | impl ($command | default "") --model $model --tools $tools | to json --indent 2 | print
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def write-json [] { $in | to json --indent 2 | print }
 
@@ -15,8 +16,8 @@ def --wrapped main [
   --created-by: string = "model", --id: string = "", --hidden, --bookmark: string = ""
 ] {
   if ($command | is-empty) { usage }
-  if $command == "init" { run init | write-json; return }
+  if $command == "init" { impl init | write-json; return }
   let words = ([($sub | default "")] | append $args | where {|item| $item != "" })
-  let result = (open --raw /dev/stdin | from json | run $command ($words | first | default "") ...($words | skip 1) --from $from --to $to --summary $summary --label $label --text $text --created-by $created_by --id $id --hidden=$hidden --bookmark $bookmark)
+  let result = (open --raw /dev/stdin | from json | impl $command ($words | first | default "") ...($words | skip 1) --from $from --to $to --summary $summary --label $label --text $text --created-by $created_by --id $id --hidden=$hidden --bookmark $bookmark)
   if $command == "tree" or $command == "display-last-message" or $command == "last-model-text" { print $result } else { $result | write-json }
 }

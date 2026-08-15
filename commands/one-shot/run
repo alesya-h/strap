@@ -1,8 +1,9 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def main [command?: string, ...task_parts: string, --model: string = "current", --agent: string = "", --skill: string = "", --tools: string = "none", --max-turns: int = 8, --finalize: string = "true", --dry-run, --prepend-stdin, --append-stdin] {
   let stdin_text = if $prepend_stdin or $append_stdin { open --raw /dev/stdin } else { "" }
-  run ($command | default "") ...$task_parts --model $model --agent $agent --skill $skill --tools $tools --max-turns $max_turns --finalize $finalize --dry-run=$dry_run --prepend-stdin=$prepend_stdin --append-stdin=$append_stdin --input-text $stdin_text | to json --indent 2 | print
+  impl ($command | default "") ...$task_parts --model $model --agent $agent --skill $skill --tools $tools --max-turns $max_turns --finalize $finalize --dry-run=$dry_run --prepend-stdin=$prepend_stdin --append-stdin=$append_stdin --input-text $stdin_text | to json --indent 2 | print
 }

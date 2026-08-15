@@ -1,5 +1,6 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
-def main [command: string = "init"] { run $command | to json --indent 2 | print }
+def main [command: string = "init"] { impl $command | to json --indent 2 | print }

@@ -1,7 +1,8 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def main [command?: string, ...args: string, --prompt: string = "", --child: string = "", --summary: string = ""] {
-  open --raw /dev/stdin | from json | run ($command | default "") ...$args --prompt $prompt --child $child --summary $summary | to json --indent 2 | print
+  open --raw /dev/stdin | from json | impl ($command | default "") ...$args --prompt $prompt --child $child --summary $summary | to json --indent 2 | print
 }

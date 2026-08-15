@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 use ./run.nu
+alias impl = run
 
 def main [command: string = "list", kind?: string] {
-  if ($kind | is-empty) { run $command | to json --indent 2 | print } else { run $command $kind | to json --indent 2 | print }
+  if ($kind | is-empty) { impl $command | to json --indent 2 | print } else { impl $command $kind | to json --indent 2 | print }
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def emit [] {
   let value = $in
@@ -18,15 +19,15 @@ def validate-lines [results: list<any>] {
 def main [command?: string, name?: string, --json, --all] {
   let command = ($command | default "")
   match $command {
-    "list" => { run list --json=$json --all=$all | emit }
-    "roots" => { run roots | emit }
-    "manifest" => { run manifest $name | emit }
+    "list" => { impl list --json=$json --all=$all | emit }
+    "roots" => { impl roots | emit }
+    "manifest" => { impl manifest $name | emit }
     "validate" => {
-      let results = if ($name | is-empty) { run validate --json --all=$all } else { run validate $name --json --all=$all }
+      let results = if ($name | is-empty) { impl validate --json --all=$all } else { impl validate $name --json --all=$all }
       if $json { $results | emit } else { print --no-newline (validate-lines $results) }
       if ($results | any {|result| not $result.ok }) { exit 1 }
     }
-    "new" => { run new $name | emit }
-    _ => { run $command | emit }
+    "new" => { impl new $name | emit }
+    _ => { impl $command | emit }
   }
 }

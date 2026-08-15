@@ -1,17 +1,18 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def write-json [] { $in | to json --indent 2 | print }
 
 def main [command?: string, arg1?: string, arg2?: string, --paths, --set-model-id: string = ""] {
   match ($command | default "") {
-    "list" => { run list --paths=$paths | write-json }
-    "show" => { run show ($arg1 | default "current") --paths=$paths | write-json }
-    "current" => { run current --paths=$paths | write-json }
-    "roots" => { run roots --paths=$paths | write-json }
-    "use" => { run use ($arg1 | default "") --paths=$paths --set-model-id $set_model_id | write-json }
-    "fork" => { run fork ($arg1 | default "") ($arg2 | default "") --paths=$paths --set-model-id $set_model_id | write-json }
-    _ => { run ($command | default "") }
+    "list" => { impl list --paths=$paths | write-json }
+    "show" => { impl show ($arg1 | default "current") --paths=$paths | write-json }
+    "current" => { impl current --paths=$paths | write-json }
+    "roots" => { impl roots --paths=$paths | write-json }
+    "use" => { impl use ($arg1 | default "") --paths=$paths --set-model-id $set_model_id | write-json }
+    "fork" => { impl fork ($arg1 | default "") ($arg2 | default "") --paths=$paths --set-model-id $set_model_id | write-json }
+    _ => { impl ($command | default "") }
   }
 }

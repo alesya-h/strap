@@ -1,10 +1,11 @@
 #!/usr/bin/env nu
 
 use ./run.nu
+alias impl = run
 
 def main [--model: string = "current", --tools: string = "all", --max-turns: int = 8, --no-finalize, --finalize: any = "true", --max-tool-calls: int = 64] {
   open --raw /dev/stdin | from json
-  | run --model $model --tools $tools --max-turns $max_turns --no-finalize=$no_finalize --finalize $finalize --max-tool-calls $max_tool_calls
+  | impl --model $model --tools $tools --max-turns $max_turns --no-finalize=$no_finalize --finalize $finalize --max-tool-calls $max_tool_calls
   | to json --indent 2
   | print
 }
