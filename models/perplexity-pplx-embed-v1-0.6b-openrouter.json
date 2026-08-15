@@ -1,0 +1,11 @@
+{
+  "name": "perplexity-pplx-embed-v1-0.6b-openrouter",
+  "provider": "openrouter",
+  "api": "embeddings",
+  "model_id": "perplexity/pplx-embed-v1-0.6b",
+  "auth": {
+    "type": "api_key",
+    "env": "OPENROUTER_API_KEY"
+  },
+  "parameters": {}
+}

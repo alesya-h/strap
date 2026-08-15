@@ -22,7 +22,7 @@ fn prepare {|input model-name tools-name|
 fn embedding-config {|model-name|
   var selected = $model-name
   if (eq $selected current) {
-    set selected = (env-or STRAP_OPENROUTER_EMBED_MODEL (env-or STRAP_EMBED_MODEL (env-or STRAP_ZK_EMBED_MODEL 'nvidia/llama-nemotron-embed-vl-1b-v2:free')))
+    set selected = (env-or STRAP_OPENROUTER_EMBED_MODEL (env-or STRAP_EMBED_MODEL (env-or STRAP_ZK_EMBED_MODEL 'perplexity/pplx-embed-v1-0.6b')))
   }
   if (str:contains $selected /) {
     put [&model=$selected &base_url=https://openrouter.ai/api/v1/embeddings]

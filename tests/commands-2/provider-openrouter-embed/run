@@ -12,14 +12,15 @@ chmod +x $fake_curl
 let envs = {
   PATH: ($env.PATH | prepend $fake_bin)
   OPENROUTER_API_KEY: fixture
+  STRAP_OPENROUTER_EMBED_MODEL: "nvidia/nemotron-3-embed-1b:free"
   STRAP_ZK_EMBED_PROVIDER: openrouter
 }
 
 let embedded = with-env $envs {
   { texts: ["openrouter provider embedding"] }
-  | pipe-json [embed --provider openrouter --model nvidia-llama-nemotron-embed-vl-1b-v2-openrouter]
+  | pipe-json [embed --provider openrouter]
 }
-ok ($embedded.model == "nvidia/llama-nemotron-embed-vl-1b-v2:free") "embed facade selects OpenRouter NVIDIA model"
+ok ($embedded.model == "nvidia/nemotron-3-embed-1b:free") "embed facade honors test model override"
 ok (($embedded.embeddings.0 | length) == 3) "embed facade returns fixture vector"
 ok ($embedded.dimensions == 3) "embed facade reports vector dimensions"
 
