@@ -54,12 +54,12 @@ Supported `provider` / `api` combinations now:
 
 | Hidden command | Runtime | Role |
 | --- | --- | --- |
-| `provider-openai` | Nushell | OpenAI REST calls and embeddings. |
-| `provider-openrouter` | Nushell | OpenRouter chat-completions REST calls and embeddings. |
-| `provider-anthropic` | Nushell | Anthropic Messages REST calls. |
+| `provider-openai` | Elvish | OpenAI REST calls and embeddings. |
+| `provider-openrouter` | Elvish | OpenRouter chat-completions REST calls and embeddings. |
+| `provider-anthropic` | Elvish | Anthropic Messages REST calls. |
 | `provider-chatgpt` | Babashka | ChatGPT/Codex backend calls and OAuth token management. |
 
-The rule is: REST-only providers should be small Nu capsules. Use a provider-local Node package only when that provider needs SDKs or other package dependencies. Do not add a shared provider runner; shared provider code recreates the coupling this command split is meant to remove.
+The rule is: REST-only providers should be small Elvish capsules with native `run.elv` data surfaces and JSON only in executable wrappers. Use a provider-local Node package only when that provider needs SDKs or other package dependencies. Do not add a shared provider runner; shared provider code recreates the coupling this command split is meant to remove.
 
 `strap embed` is the provider-neutral facade. It implements deterministic local `hash` embeddings itself and delegates provider-backed embeddings to `strap provider <name> embed`.
 

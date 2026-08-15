@@ -47,8 +47,9 @@ Memory is useful only when it is inspectable and attributable. Agents should use
 
 ### Use languages by role
 
-- Nu: command orchestration, REST/JSON plumbing, reference loops, and SQLite CLI orchestration.
-- Babashka/Clojure: richer local data, auth, state, and router logic that gets awkward in Nu.
+- Elvish: preferred shell orchestration, REST/JSON plumbing, and native command data surfaces.
+- Nu: existing structured pipelines and native adapters during migration.
+- Babashka/Clojure: richer local data, auth, state, and router logic that gets awkward in shell languages.
 - Node: MCP and real package/runtime pressure only.
 
 ## Non-goals For Now

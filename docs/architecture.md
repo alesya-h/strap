@@ -4,9 +4,9 @@ This document describes the current architecture of `strap` as implemented in th
 
 ## DEFAULT IMPLEMENTATION LANGUAGE POLICY
 
-**DEFAULT TO NUSHELL. USE BABASHKA/CLOJURE WHEN NU GETS AWKWARD. USE JAVASCRIPT ONLY WHEN THE COMMAND NEEDS AN NPM SDK, A NODE-ONLY PACKAGE, OR A NODE-SPECIFIC RUNTIME SURFACE.**
+**DEFAULT TO ELVISH FOR SHELL, JSON, REST, FILESYSTEM, AND PROCESS CAPSULES. USE BABASHKA/CLOJURE FOR RICHER LOCAL DATA OR STATE LOGIC. KEEP NUSHELL FOR EXISTING CAPSULES AND NATIVE ADAPTERS DURING MIGRATION. USE JAVASCRIPT ONLY FOR NPM OR NODE-SPECIFIC RUNTIME PRESSURE.**
 
-REST calls, JSON shaping, filesystem orchestration, provider request compilation, and command plumbing should be Nu first. Rich local data logic, auth/state transformations, SQLite-style local work, or code that benefits from immutable data structures should use Babashka/Clojure. JavaScript is not the default command language; it is an escape hatch for package/runtime dependency pressure.
+REST calls, JSON shaping, filesystem orchestration, provider request compilation, and command plumbing should prefer Elvish native values. Rich local data logic, auth/state transformations, SQLite-style local work, or code that benefits from immutable data structures should use Babashka/Clojure. Existing Nu capsules may remain and `run.nu` may provide a native Nu adapter. JavaScript remains an escape hatch for package/runtime dependency pressure.
 
 ## System Shape
 
@@ -130,13 +130,13 @@ Addressability is optional. `strap state bookmark add` attaches inline bookmarks
 
 Provider request payloads are compiled projections. Provider continuation IDs or protocol-specific metadata are not the canonical state.
 
-## Nu Implementation Surface
+## Native Language Surfaces
 
-Nu is the preferred implementation surface for local structured data plumbing inside command capsules. There is intentionally no grouped native `use strap` module and no cross-command Nu import layer.
+Elvish is the preferred implementation surface for new shell-oriented structured data plumbing. Nu remains for existing capsules and native adapters during migration. There is intentionally no grouped native `use strap` module and no cross-command language import layer.
 
-Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. For Nu-native capsules, `run.nu` is command-local implementation code. Additional `.nu` files are command-local modules for `run.nu`, not alternate entrypoints or public imports.
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by the top-level `strap` runner. Elvish-native capsules keep native implementation functions in `run.elv` and command-local `.elv` modules. The executable `run` owns stdin/stdout JSON handling and calls `run.elv` with native Elvish values.
 
-`run.nu` stays native inside its command capsule: it accepts and returns Nushell values, and does not read stdin, write stdout, or expose command-boundary text JSON flags. The executable `run` owns stdin/stdout text JSON handling before delegating to `run.nu`: it parses stdin when the command logically takes input, ignores stdin when it does not, and prints text JSON or plain text as the process result.
+A command-local `run.nu` can either remain an existing Nu implementation or act as a native Nu adapter through the executable process boundary. Command-local language modules are not alternate public entrypoints or cross-command imports.
 
 Command input does not use compatibility switches. The public surface is data-in/data-out over stdin/stdout.
 
@@ -150,7 +150,7 @@ strap state map-events -- jq '. + {"reviewed": true}' < state.json > next.json
 strap state with-extract bm_start bm_end -- jq 'map(.text |= ascii_upcase)' < state.json > next.json
 ```
 
-The intended boundary is: Nu owns local dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Babashka owns richer local algorithms and state/auth logic that are awkward in Nu but do not need a package ecosystem; Node is reserved for MCP and real package/runtime pressure only.
+The intended boundary is: Elvish owns new shell dataflow, filesystem work, JSON plumbing, and REST-only command capsules; Nu remains for existing structured pipelines and native adapters during migration; Babashka owns richer local algorithms and state/auth logic that are awkward in shell languages; Node is reserved for MCP and real package/runtime pressure only.
 
 Implementation files are intentionally small. The hard cap is 150 lines per source file, command `run` script, or helper; prefer even smaller files when a command has separable concepts. Command-local modules are the escape hatch for complexity, not shared repo libraries. Existing oversized files must appear in `.strap/config/line-cap-exceptions.txt` until they are split.
 
@@ -207,9 +207,9 @@ Current provider adapter families:
 
 Provider commands are split by provider. `strap provider` is a public dispatcher. The provider implementations are hidden commands:
 
-- `provider-openai`: Nushell REST capsule.
-- `provider-openrouter`: Nushell REST capsule.
-- `provider-anthropic`: Nushell REST capsule.
+- `provider-openai`: Elvish REST capsule.
+- `provider-openrouter`: Elvish REST capsule.
+- `provider-anthropic`: Elvish REST capsule.
 - `provider-chatgpt`: Babashka capsule for ChatGPT/Codex backend calls and OAuth token management.
 
 `strap embed` is a provider-neutral facade. Local hash embeddings are implemented in `embed`; provider-backed embeddings delegate to `strap provider <name> embed`.

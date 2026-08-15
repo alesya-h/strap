@@ -60,8 +60,9 @@ Provider payloads are compiled projections. Provider-managed continuation state 
 
 ## Language Split
 
-- Nu: command orchestration, REST/JSON plumbing, reference loops, and zettelkasten SQLite orchestration.
-- Babashka/Clojure: richer local data, auth, state, and router logic that gets awkward in Nu.
+- Elvish: preferred shell orchestration, REST/JSON plumbing, and native command data surfaces.
+- Nu: existing structured pipelines and native adapters during migration.
+- Babashka/Clojure: richer local data, auth, state, and router logic that gets awkward in shell languages.
 - Node: MCP and real package/runtime pressure only.
 
 ## Isolation Direction

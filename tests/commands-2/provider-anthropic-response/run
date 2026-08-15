@@ -1,14 +1,25 @@
 #!/usr/bin/env nu
 use ../../lib/test.nu *
-use ../../../commands/provider-anthropic/lib/compile.nu *
 
-let event = (response-event {
-  id: "msg_fixture"
-  model: "claude-fixture-model"
-  content: [{ type: "text", text: "Need the echo tool." }, { type: "tool_use", id: "toolu_1", name: "json_echo__echo", input: { value: "anthropic-fixture" } }]
-  usage: {}
-})
+let fake_bin = (case-tmp | path join bin)
+mkdir $fake_bin
+let fake_curl = ($fake_bin | path join curl)
+'#!/usr/bin/env bash
+cat >/dev/null
+cat <<JSON
+{"id":"msg_fixture","model":"claude-fixture-model","content":[{"type":"text","text":"Need the echo tool."},{"type":"tool_use","id":"toolu_1","name":"json_echo__echo","input":{"value":"anthropic-fixture"}}],"usage":{}}
+JSON
+' | save -f $fake_curl
+chmod +x $fake_curl
 
+let state = (state-with-user "Use the echo tool.")
+let completed = with-env {
+  PATH: ($env.PATH | prepend $fake_bin)
+  ANTHROPIC_API_KEY: fixture
+} {
+  $state | pipe-json [provider-anthropic complete --model claude-haiku-4.5-anthropic --tools none]
+}
+let event = ($completed.history | last)
 ok ($event.calls.0.tool == "json_echo.echo") "anthropic parser decodes provider-safe tool name"
 ok ($event.calls.0.input.value == "anthropic-fixture") "anthropic parser preserves tool input"
 has $event.text "Need the echo tool." "anthropic parser preserves model text"

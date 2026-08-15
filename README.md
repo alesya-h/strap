@@ -6,7 +6,7 @@
 - A filesystem-discovered `strap <command>` interface inspired by project-local `run` scripts.
 - A unified layered artifact path, `STRAP_PATH`, plus `STRAP_WORKSPACE` for filesystem effects.
 - Subproject commands for state editing, model request compilation, agent fork/fold, and pending tool execution.
-- Nu-first structured plumbing for model-authored workflows.
+- Elvish-first structured shell/REST plumbing, with native data surfaces inside capsules.
 - Stdio MCP servers for filesystem, process/tmux/nushell, web, and agent/context primitives.
 - Executable script tools discovered from overlayed session/user/project/global/root tool dirs.
 - A shared markdown-source zettelkasten CLI and script tool for agent memory, with inline wikilinks and a derived SQLite/sqlite-vec index.
@@ -104,9 +104,9 @@ open state.json | to json | ^strap skills apply concise | save -f concise-state.
 strap skills import-opencode ~/.config/opencode/skills
 ```
 
-## Nushell
+## Elvish And Nushell
 
-Nushell remains an implementation language for many commands, but there is no grouped native `use strap` module. The supported integration boundary is the normal process surface: `strap <command>` reads JSON from stdin and writes JSON to stdout.
+Elvish is the preferred language for new shell/JSON/REST capsules. Nushell remains an implementation language for existing commands and a native adapter surface. There is no grouped native `use strap` module; the supported cross-capsule boundary is the normal process surface: `strap <command>` reads JSON from stdin and writes JSON to stdout.
 
 ```nu
 strap state init
@@ -118,7 +118,7 @@ strap state init
 | from json
 ```
 
-Command-local `run.nu` files are implementation modules used by their owning executable `run` scripts. They are not a public import surface.
+A capsule may expose a native `run.elv` implementation while its executable `run` owns JSON serialization. A command-local `run.nu` may adapt native Nu values through that executable. These files are command-local surfaces, not cross-command imports.
 
 ## MCP Servers
 

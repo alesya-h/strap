@@ -4,9 +4,9 @@ The public extension API is a command directory.
 
 ## DEFAULT COMMAND LANGUAGE POLICY
 
-**DEFAULT TO NUSHELL. USE BABASHKA/CLOJURE WHEN NU GETS AWKWARD. USE JAVASCRIPT ONLY WHEN THE COMMAND NEEDS AN NPM SDK, A NODE-ONLY PACKAGE, OR A NODE-SPECIFIC RUNTIME SURFACE.**
+**DEFAULT TO ELVISH FOR SHELL, JSON, REST, FILESYSTEM, AND PROCESS CAPSULES. USE BABASHKA/CLOJURE FOR RICHER LOCAL DATA OR STATE LOGIC. KEEP NUSHELL FOR EXISTING CAPSULES AND NATIVE ADAPTERS DURING MIGRATION. USE JAVASCRIPT ONLY FOR NPM OR NODE-SPECIFIC RUNTIME PRESSURE.**
 
-Do not choose JavaScript just because JSON objects are convenient there. Use Nu for command orchestration, JSON, REST, filesystem discovery, and process composition. Use Babashka/Clojure when the logic wants richer data transformations or local state handling. Use command-local JavaScript only for SDK/package/runtime requirements that Nu or Babashka cannot reasonably cover.
+Do not choose JavaScript just because JSON objects are convenient there. Prefer Elvish native values inside new command capsules and keep JSON serialization at executable process boundaries. Use Babashka/Clojure when the logic wants richer transformations, auth, or local state handling. Existing Nu capsules may remain until migrated, and `run.nu` may adapt native Nu values through a capsule's executable `run`.
 
 ```text
 my-command/
@@ -41,7 +41,7 @@ A capsule command may use:
 - Its own command directory through `STRAP_CMD_DIR`.
 - The public Strap environment variables listed above.
 - Stdin/stdout JSON protocols.
-- Standard external runtimes and tools such as `nu`, `bash`, `node`, `jq`, `sqlite`, or `jj`.
+- Standard external runtimes and tools such as `elvish`, `nu`, `bash`, `node`, `jq`, `sqlite`, or `jj`.
 - Other Strap commands through the public process boundary, for example `strap state init | strap agents apply chat-concise`.
 
 A capsule command must not use:
@@ -75,7 +75,7 @@ Examples:
 
 - `strap provider` is public; `provider-chatgpt` is hidden behind `strap provider chatgpt ...`.
 - `strap zk` is public; `strap inner zk index ...` is a private implementation boundary for its derived index.
-- REST-only provider commands are Nu capsules. Provider commands that need richer local auth logic can use Babashka. Use a provider-local Node package only when SDKs or package dependencies are required.
+- REST-only provider commands are Elvish capsules with native `run.elv` surfaces. Provider commands that need richer local auth logic can use Babashka. Use a provider-local Node package only when SDKs or package dependencies are required.
 
 Create a temporary command under the active session overlay, or under `.strap-user/commands` when `STRAP_SESSION` is unset:
 
@@ -194,9 +194,9 @@ strap model fork current next-chatgpt --set-model-id gpt-next
 
 `current.json` is a Linux symlink to the selected profile in the active overlay.
 
-## Nushell Implementation Surface
+## Elvish And Nushell Native Surfaces
 
-Nu is an implementation language for command capsules, not a separate public command layer. There is no grouped native `use strap` module. Use the process boundary from Nu the same way shell callers do:
+Elvish is preferred for new shell-oriented command implementations; Nu remains useful for existing structured pipelines and native adapters. Neither language creates a separate public command layer. Use the process boundary from Nu the same way other callers do:
 
 ```nu
 strap state init
@@ -208,13 +208,13 @@ strap state init
 | from json
 ```
 
-Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. For Nu-native commands, `run.nu` is command-local implementation code. Additional `.nu` files may exist only as modules used by `run.nu`.
+Every capsule exposes executable `run` with a shebang; this is the process entrypoint used by `strap <command>`. An Elvish-native capsule keeps implementation functions in `run.elv` and command-local `.elv` modules. The executable `run` owns JSON parsing/printing and calls `run.elv` with native values.
 
-The boundary split is strict: `run.nu` accepts and returns native Nushell data. It must not read stdin, write stdout, or expose command-boundary text JSON flags. The executable `run` owns process concerns: parsing stdin text JSON when the command logically takes input, ignoring stdin when it does not, printing text JSON or plain text, and delegating to `run.nu` for the actual work.
+A command-local `run.nu` may expose a native Nushell adapter by serializing to the executable `run` process and parsing its result. Existing Nu-native capsules may still use `run.nu` as their implementation module. Neither form is a cross-command import surface.
 
 Do not add stdin/file-switch compatibility flags for command input. Data comes in through stdin and goes out through stdout at command boundaries.
 
-When a command is not Nu-native, omit `run.nu`. Do not add `main.nu`; that entrypoint shape is retired.
+Do not add `main.nu`; that entrypoint shape is retired. Keep `run.nu` only when it is the current native implementation or a useful Nu adapter to another native implementation.
 
 State lens operations are over top-level events: they return full state with the selected events replaced. Provide an external JSON filter after `--`, or plain command words that default to `strap <command> ...`.
 

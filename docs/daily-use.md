@@ -109,7 +109,7 @@ strap state init
 | from json
 ```
 
-Command-local `run.nu` files are implementation details, not a public import surface.
+Command-local `run.elv` native implementations and `run.nu` adapters/legacy implementations are not cross-command import surfaces.
 
 Use process filters for state combinators:
 

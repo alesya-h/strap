@@ -74,6 +74,7 @@ def check-content-guards [] {
   rg-forbid "Non-MCP Node surfaces are retired; use Nu/Babashka command boundaries instead." '#strap/(core|providers|jsmcp|loop)|\^node' ["." "--glob" "*.js" "--glob" "*.json" "--glob" "*.md" "--glob" "*.nu" "--glob" "*.clj" "--glob" "*.sh" "--glob" "!.git/**" "--glob" "!subprojects/mcp/**"]
   rg-forbid "Nu command run scripts must delegate to run.nu, not main.nu." 'main[.]nu' [commands --glob run]
   rg-forbid "run.nu must not read/write process stdin or stdout." 'open --raw /dev/stdin|\^cat|\bprint\b' [commands --glob run.nu]
+  rg-forbid "run.elv must stay native; JSON parsing and printing belong in executable wrappers." '\b(from-json|to-json)\b' [commands --glob run.elv]
   rg-forbid "Command input must be data-in/data-out; do not add generic stdin/file input flags." '[-][-](stdin|file)([^A-Za-z0-9_-]|$)' [commands .strap/commands README.md docs --glob "*.nu" --glob "*.clj" --glob "*.md" --glob run]
 }
 
@@ -81,9 +82,11 @@ def check-command-syntax [] {
   for file in (files-for ["commands/*/run" "commands/*/inner/*" "tests/commands-*/*/run" "tests/tools/*/run" ".strap/commands/*/run" ".strap-user/commands/*/run"]) {
     let shebang = (open --raw $file | lines | first | default "")
     if ($shebang | str contains "bash") { run-external bash ...[-n $file] }
+    if ($shebang | str contains "elvish") { run-external elvish ...[-compileonly $file] }
     if ($shebang | str contains "node") { run-external node ...[--check $file] }
     if ($shebang | str contains "nu") { run-external nu ...[--ide-check 20 $file] | ignore }
   }
+  for file in (files-for ["commands/**/*.elv"]) { run-external elvish ...[-compileonly $file] }
   for file in (files-for ["commands/*/run.nu" "tests/lib/*.nu"]) { run-external nu ...[--ide-check 20 $file] | ignore }
   for file in (glob --no-dir "commands/provider-*/main.nu") { run-external nu ...[--ide-check 20 $file] | ignore }
 }

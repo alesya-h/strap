@@ -1,7 +1,29 @@
 #!/usr/bin/env nu
 use ../../lib/test.nu *
 
-let embedded = ({ texts: ["openrouter provider embedding"] } | pipe-json [provider-openrouter embed --model nvidia-llama-nemotron-embed-vl-1b-v2-openrouter])
-ok ($embedded.model == "nvidia/llama-nemotron-embed-vl-1b-v2:free") "provider-openrouter embed uses NVIDIA free model"
-ok (($embedded.embeddings | length) > 0) "provider-openrouter embed returns at least one vector"
-ok (($embedded.embeddings.0 | length) == $embedded.dimensions) "provider-openrouter embed reports vector dimensions"
+let fake_bin = (case-tmp | path join bin)
+mkdir $fake_bin
+let fake_curl = ($fake_bin | path join curl)
+'#!/usr/bin/env bash
+body=$(cat)
+printf "%s" "$body" | jq -c "{data: [.input[] | {embedding: [1.0, 0.0, 0.0]}]}"
+' | save -f $fake_curl
+chmod +x $fake_curl
+let envs = {
+  PATH: ($env.PATH | prepend $fake_bin)
+  OPENROUTER_API_KEY: fixture
+  STRAP_ZK_EMBED_PROVIDER: openrouter
+}
+
+let embedded = with-env $envs {
+  { texts: ["openrouter provider embedding"] }
+  | pipe-json [embed --provider openrouter --model nvidia-llama-nemotron-embed-vl-1b-v2-openrouter]
+}
+ok ($embedded.model == "nvidia/llama-nemotron-embed-vl-1b-v2:free") "embed facade selects OpenRouter NVIDIA model"
+ok (($embedded.embeddings.0 | length) == 3) "embed facade returns fixture vector"
+ok ($embedded.dimensions == 3) "embed facade reports vector dimensions"
+
+call-json [zk create --scope user --title "OpenRouter ZK regression" --body "Hybrid search reaches the provider embed facade." --tags regression] | ignore
+let db = (case-tmp | path join openrouter-zk.sqlite)
+let results = with-env $envs { call-json [zk search-hybrid --db $db "provider embed facade"] }
+ok (($results | length) > 0) "zk search-hybrid works through OpenRouter embed facade"

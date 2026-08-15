@@ -1,13 +1,24 @@
 #!/usr/bin/env nu
 use ../../lib/test.nu *
-use ../../../commands/provider-openrouter/lib/compile.nu *
 
-let event = (response-event {
-  id: "or_fixture"
-  model: "openrouter-fixture-model"
-  choices: [{ message: { content: "", tool_calls: [{ id: "call_or_1", type: "function", function: { name: "json_echo__echo", arguments: '{"value":"openrouter-fixture"}' } }] } }]
-  usage: {}
-})
+let fake_bin = (case-tmp | path join bin)
+mkdir $fake_bin
+let fake_curl = ($fake_bin | path join curl)
+'#!/usr/bin/env bash
+cat >/dev/null
+cat <<JSON
+{"id":"or_fixture","model":"openrouter-fixture-model","choices":[{"message":{"content":"","tool_calls":[{"id":"call_or_1","type":"function","function":{"name":"json_echo__echo","arguments":"{\\"value\\":\\"openrouter-fixture\\"}"}}]}}],"usage":{}}
+JSON
+' | save -f $fake_curl
+chmod +x $fake_curl
 
+let state = (state-with-user "Use the echo tool.")
+let completed = with-env {
+  PATH: ($env.PATH | prepend $fake_bin)
+  OPENROUTER_API_KEY: fixture
+} {
+  $state | pipe-json [provider-openrouter complete --model nvidia-nemotron-3-super-120b-a12b-openrouter --tools none]
+}
+let event = ($completed.history | last)
 ok ($event.calls.0.tool == "json_echo.echo") "openrouter parser decodes provider-safe tool name"
 ok ($event.calls.0.input.value == "openrouter-fixture") "openrouter parser decodes tool arguments"

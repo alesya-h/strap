@@ -8,7 +8,7 @@ This document records what `strap` currently implements.
 - Filesystem-discovered `strap <command>` interface with command-local docs, completions, and inner helpers.
 - Unified artifact layer path via `STRAP_PATH`, with `STRAP_WORKSPACE` for filesystem effects.
 - Immutable JSON filter CLIs for state transforms and harness operations.
-- Nu-first local plumbing inside command capsules, exposed through the process `strap <command>` boundary.
+- Elvish-first shell/REST plumbing with native command data surfaces, exposed through the process `strap <command>` boundary; existing Nu capsules remain during migration.
 - Bookmark-based state extraction into `strap.context.v0.1`.
 - Quoted context rendering with `strap context quote`.
 - Context summarization with `strap context summarize`.
@@ -54,7 +54,7 @@ This document records what `strap` currently implements.
 - ChatGPT/Codex-backend OAuth route works for `gpt-5.5` via `https://chatgpt.com/backend-api/codex/responses`, with tokens managed by `strap provider chatgpt auth`.
 - OpenAI API-key and OpenRouter embedding routes are supported through provider commands.
 - `strap provider <name>` dispatches to hidden provider implementation commands such as `provider-chatgpt`.
-- REST-only provider implementations are Nushell capsules; ChatGPT is a Babashka capsule for OAuth/token logic.
+- REST-only provider implementations are Elvish capsules with native `run.elv` surfaces; ChatGPT is a Babashka capsule for OAuth/token logic.
 - `strap embed` delegates provider-backed embeddings to `strap provider <name> embed`; the hash provider remains local and deterministic.
 
 ## Tooling

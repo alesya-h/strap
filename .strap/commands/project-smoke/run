@@ -13,16 +13,30 @@ $env.STRAP_PATH = [
 if (($env.STRAP_SESSION? | default "") != "") { hide-env STRAP_SESSION }
 rm -rf $env.STRAP_WORK $env.STRAP_PROJECT
 
+def save-result [result: record, out: string, err: string = ""] {
+  $result.stdout | save -f $out
+  if $err != "" { $result.stderr | save -f $err }
+  if $result.exit_code != 0 {
+    if $result.stderr != "" { print -e --no-newline $result.stderr }
+    exit $result.exit_code
+  }
+}
+
 def save-call [strap: string, args: list<any>, out: string] {
-  run-external $strap ...($args | each {|arg| $arg | into string }) | save -f $out
+  let result = (run-external $strap ...($args | each {|arg| $arg | into string }) | complete)
+  save-result $result $out
 }
 
 def save-filter [strap: string, input_file: string, args: list<any>, out: string] {
-  open --raw $input_file | run-external $strap ...($args | each {|arg| $arg | into string }) | save -f $out
+  let input = (open --raw $input_file)
+  let result = ($input | run-external $strap ...($args | each {|arg| $arg | into string }) | complete)
+  save-result $result $out
 }
 
 def save-filter-log [strap: string, input_file: string, args: list<any>, out: string, err: string] {
-  open --raw $input_file | run-external $strap ...($args | each {|arg| $arg | into string }) e> $err | save -f $out
+  let input = (open --raw $input_file)
+  let result = ($input | run-external $strap ...($args | each {|arg| $arg | into string }) | complete)
+  save-result $result $out $err
 }
 
 def with-hash [block: closure] {

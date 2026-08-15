@@ -250,13 +250,13 @@ The model sees the summary through the tool result. Hidden absorbed history exis
           "id": "call_1",
           "tool": "fs.read_file",
           "input": {
-            "path": "commands/provider-openai/lib/state.nu"
+            "path": "commands/provider-openai/lib/state.elv"
           },
           "ok": true,
           "output": {
             "content": [{ "type": "text", "text": "..." }],
             "structuredContent": {
-              "path": "commands/provider-openai/lib/state.nu"
+              "path": "commands/provider-openai/lib/state.elv"
             }
           }
         }

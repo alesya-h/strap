@@ -1,10 +1,17 @@
-#!/usr/bin/env nu
+#!/usr/bin/env elvish
+use flag
+use ./run provider
 
-use ./run.nu
-
-def main [command?: string, --model: string = "current", --tools: string = "all"] {
-  open --raw /dev/stdin | from json
-  | run ($command | default "") --model $model --tools $tools
-  | to json --indent 2
-  | print
+var command = ''
+var rest = []
+if (> (count $args) 0) {
+  set command = $args[0]
+  set rest = $args[1..]
 }
+
+fn invoke {|&model=current &tools=all|
+  var input = (from-json)
+  provider:main $input $command &model=$model &tools=$tools | to-json
+}
+
+flag:call $invoke~ $rest &on-parse-error={|_| fail 'Usage: strap provider anthropic <compile|call|complete> [args]' }

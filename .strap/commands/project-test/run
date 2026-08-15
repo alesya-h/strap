@@ -2,5 +2,12 @@
 
 let strap = ($env.STRAP_BIN? | default ($env.STRAP_ROOT | path join bin strap))
 
-run-external $strap project-check
-run-external $strap project-smoke
+def checked [command: string] {
+  let result = (run-external $strap $command | complete)
+  if $result.stdout != "" { print --no-newline $result.stdout }
+  if $result.stderr != "" { print -e --no-newline $result.stderr }
+  if $result.exit_code != 0 { exit $result.exit_code }
+}
+
+checked project-check
+checked project-smoke

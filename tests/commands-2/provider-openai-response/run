@@ -1,21 +1,65 @@
 #!/usr/bin/env nu
 use ../../lib/test.nu *
-use ../../../commands/provider-openai/lib/compile.nu *
 
-let chat_event = (response-event {
-  id: "chat_fixture"
-  model: "openai-chat-fixture"
-  choices: [{ message: { content: "", tool_calls: [{ id: "call_oa_chat", type: "function", function: { name: "json_echo__echo", arguments: '{"value":"openai-chat-fixture"}' } }] } }]
-  usage: {}
-} "chat")
-ok ($chat_event.calls.0.input.value == "openai-chat-fixture") "openai chat parser decodes tool arguments"
+let tmp = (case-tmp)
+let fake_bin = ($tmp | path join bin)
+mkdir $fake_bin
+let fake_curl = ($fake_bin | path join curl)
+'#!/usr/bin/env bash
+cat >/dev/null
+case "$FIXTURE_RESPONSE" in
+  chat)
+    cat <<JSON
+{"id":"chat_fixture","model":"openai-chat-fixture","choices":[{"message":{"content":"","tool_calls":[{"id":"call_oa_chat","type":"function","function":{"name":"json_echo__echo","arguments":"{\\"value\\":\\"openai-chat-fixture\\"}"}}]}}],"usage":{}}
+JSON
+    ;;
+  *)
+    cat <<JSON
+{"id":"resp_fixture","model":"openai-responses-fixture","output_text":"","output":[{"type":"function_call","id":"fc_1","call_id":"call_oa_resp","name":"json_echo__echo","arguments":"{\\"value\\":\\"openai-responses-fixture\\"}"}],"usage":{}}
+JSON
+    ;;
+esac
+' | save -f $fake_curl
+chmod +x $fake_curl
 
-let responses_event = (response-event {
-  id: "resp_fixture"
-  model: "openai-responses-fixture"
-  output_text: ""
-  output: [{ type: "function_call", id: "fc_1", call_id: "call_oa_resp", name: "json_echo__echo", arguments: '{"value":"openai-responses-fixture"}' }]
-  usage: {}
-} "responses")
-ok ($responses_event.calls.0.tool == "json_echo.echo") "openai responses parser decodes provider-safe tool name"
-ok ($responses_event.calls.0.input.value == "openai-responses-fixture") "openai responses parser decodes tool arguments"
+let chat_model = ($tmp | path join openai-chat.json)
+{
+  name: fixture-openai-chat
+  provider: openai
+  api: chat
+  model_id: openai-chat-fixture
+  base_url: "https://fixture.invalid/chat"
+  auth: {type: api_key, env: OPENAI_API_KEY}
+  parameters: {}
+} | to json | save -f $chat_model
+let responses_model = ($tmp | path join openai-responses.json)
+{
+  name: fixture-openai-responses
+  provider: openai
+  api: responses
+  model_id: openai-responses-fixture
+  base_url: "https://fixture.invalid/responses"
+  auth: {type: api_key, env: OPENAI_API_KEY}
+  parameters: {}
+} | to json | save -f $responses_model
+
+let state = (state-with-user "Use the echo tool.")
+let chat = with-env {
+  PATH: ($env.PATH | prepend $fake_bin)
+  OPENAI_API_KEY: fixture
+  FIXTURE_RESPONSE: chat
+} {
+  $state | pipe-json [provider-openai complete --model $chat_model --tools none]
+}
+ok (($chat.history | last).calls.0.input.value == "openai-chat-fixture") "openai chat parser decodes tool arguments"
+
+let responses = with-env {
+  PATH: ($env.PATH | prepend $fake_bin)
+  OPENAI_API_KEY: fixture
+  FIXTURE_RESPONSE: responses
+} {
+  $state | pipe-json [provider-openai complete --model $responses_model --tools none]
+}
+let event = ($responses.history | last)
+ok ($event.calls.0.tool == "json_echo.echo") "openai responses parser decodes provider-safe tool name"
+ok ($event.calls.0.input.value == "openai-responses-fixture") "openai responses parser decodes tool arguments"

@@ -58,7 +58,7 @@ Completed slices:
 - `zk` is now a self-contained Babashka capsule over markdown notes, with a command-private Babashka SQLite/FTS/vector helper at `strap inner zk index`.
 - `embed` exists as a public embedding facade. Local hash embeddings are implemented in the command; provider-backed embeddings route to `strap provider <name> embed`.
 - `provider` now dispatches to hidden `provider-*` implementation commands, preserving a clean public surface while allowing provider-local command identity.
-- Hidden provider commands now have provider-owned implementations: `provider-openai`, `provider-openrouter`, and `provider-anthropic` are Nushell REST capsules; `provider-chatgpt` is a Babashka capsule. The old provider and llm JS entrypoints, the provider-command library, and the bad intermediate shared runner have been removed.
+- Hidden provider commands now have provider-owned implementations: `provider-openai`, `provider-openrouter`, and `provider-anthropic` are Elvish REST capsules with native data surfaces; `provider-chatgpt` is a Babashka capsule. The old provider and llm JS entrypoints, the provider-command library, and the bad intermediate shared runner have been removed.
 
 Remaining slices:
 
@@ -80,7 +80,7 @@ Course corrections from this refactor:
 - Moving a monolith into a command directory is not enough. A capsule must have command-local ownership and readable internals, not a hidden shared runner by another name.
 - `inner/` is for helpers that are private to one conceptually self-contained command. It fits `zk` because the index is an implementation detail of the zettelkasten. It does not fit providers, because each provider is its own capability with its own command identity.
 - Hidden commands are the right tool for implementation commands that should remain callable through the command boundary but not appear in the normal user command surface. `provider-chatgpt` is hidden; `strap provider chatgpt ...` is public.
-- REST-only providers should be implemented in Nushell by default. A provider should become a provider-local Node package only when it needs SDKs or package dependencies. ChatGPT uses Babashka because OAuth/token handling is richer local logic but still does not need a Node package.
+- REST-only providers should be implemented in Elvish by default, with JSON serialization restricted to executable wrappers. A provider should become a provider-local Node package only when it needs SDKs or package dependencies. ChatGPT uses Babashka because OAuth/token handling is richer local logic but still does not need a Node package.
 - The command directory is the module boundary. If code needs helper files, put them under that command directory and use language-local modules. Keep code readable; capsule isolation is not an excuse for cramped scripts.
 - Public facades such as `strap provider` and `strap embed` should route to provider-owned commands. They should not accumulate provider implementation logic.
 
